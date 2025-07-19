@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import Toast from './Toast';
 
 const Register = ({ onRegister, onSwitchToLogin }) => {
   const [username, setUsername] = useState('');
@@ -6,6 +7,12 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showToast, setShowToast] = useState(false);
+  const inputRef = useRef(null);
+
+  useEffect(() => {
+    if (inputRef.current) inputRef.current.focus();
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -22,9 +29,15 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || 'Registration failed');
       setSuccess('Registration successful! You can now login.');
-      if (onRegister) onRegister();
+      setShowToast(true);
+      setTimeout(() => {
+        setShowToast(false);
+        if (onRegister) onRegister();
+      }, 2000);
     } catch (err) {
       setError(err.message);
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 2000);
     }
     setLoading(false);
   };
@@ -34,17 +47,21 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
       <form
         className="w-full max-w-sm bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-blue-900 p-8 flex flex-col gap-4 animate-fadein"
         onSubmit={handleSubmit}
+        aria-label="Register Form"
       >
         <h2 className="text-3xl font-extrabold text-white mb-2 text-center drop-shadow">Register</h2>
         <div className="mb-2">
           <label className="block text-gray-300 mb-1 font-semibold">Username</label>
           <input
+            ref={inputRef}
             type="text"
             className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
             autoFocus
+            aria-label="Username"
+            disabled={loading}
           />
         </div>
         <div className="mb-2">
@@ -55,10 +72,12 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
+            aria-label="Password"
+            disabled={loading}
           />
         </div>
-        {error && <div className="text-red-500 mb-2 text-center animate-shake">{error}</div>}
-        {success && <div className="text-green-500 mb-2 text-center animate-fadein">{success}</div>}
+        {error && showToast && <Toast message={error} type="error" onClose={() => setShowToast(false)} />}
+        {success && showToast && <Toast message={success} type="success" onClose={() => setShowToast(false)} />}
         <button
           type="submit"
           className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg font-bold shadow transition-all duration-200 disabled:opacity-50"
@@ -70,6 +89,7 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
           type="button"
           className="w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-blue-400 py-2 rounded-lg font-bold shadow transition-all duration-200"
           onClick={onSwitchToLogin}
+          disabled={loading}
         >
           Already have an account? <span className="underline">Login</span>
         </button>

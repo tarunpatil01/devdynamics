@@ -133,3 +133,16 @@ devdynamics/
 ## License
 
 This project is licensed under the ISC License. 
+
+## Code Formatting
+
+This project uses [Prettier](https://prettier.io/) for code formatting. To format all code, run:
+
+```bash
+npm run format
+```
+
+## Monitoring & Alerts
+
+- Monitor your Render logs for any runtime errors.
+- Set up alerts for backend crashes or high error rates in your hosting provider. 

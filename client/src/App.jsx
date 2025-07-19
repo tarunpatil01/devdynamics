@@ -11,6 +11,7 @@ import Register from './components/Register';
 import Sidebar from './components/Sidebar';
 import Groups from './components/Groups';
 import { socket } from './socket';
+import ErrorBoundary from './components/ErrorBoundary';
 
 function App() {
   // Hamburger sidebar state
@@ -40,6 +41,8 @@ function App() {
   const [groupPeople, setGroupPeople] = useState([]);
   const [groupMessages, setGroupMessages] = useState([]);
   const [showRegister, setShowRegister] = useState(false);
+  // Add a global error state for unhandled errors
+  const [globalError, setGlobalError] = useState('');
 
   // Socket.io setup
   useEffect(() => {
@@ -229,63 +232,71 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-blue-950 flex flex-col relative">
-      {/* Hamburger always visible */}
-      <button
-        className="fixed top-4 left-4 z-40 bg-blue-700 hover:bg-blue-800 text-white p-2 rounded-lg shadow-lg focus:outline-none"
-        onClick={() => setSidebarOpen(true)}
-        aria-label="Open sidebar"
-      >
-        <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><rect y="5" width="24" height="2" rx="1" fill="currentColor"/><rect y="11" width="24" height="2" rx="1" fill="currentColor"/><rect y="17" width="24" height="2" rx="1" fill="currentColor"/></svg>
-      </button>
-      {/* Sidebar overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/60 z-30" onClick={() => setSidebarOpen(false)}></div>
+    <ErrorBoundary>
+      {globalError && <Toast message={globalError} type="error" onClose={() => setGlobalError('')} />}
+      {loading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        </div>
       )}
-      {/* Sidebar */}
-      <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-      {/* Main content - add margin for sidebar */}
-      <div className="flex-1 flex flex-col items-center justify-center px-4" style={{ marginLeft: '18rem' }}>
-        <div className="w-full max-w-2xl bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-blue-900 p-6 md:p-10 flex flex-col gap-6 animate-fadein mt-12 mb-12">
-          <header className="mb-8 text-center">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <h1 className="text-5xl font-extrabold text-white mb-2 drop-shadow">Split App</h1>
-              <button className="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-xl shadow ml-0 md:ml-4 transition-all duration-200 text-lg" onClick={handleLogout}>Logout</button>
-            </div>
-            <p className="text-xl text-gray-300">Track group expenses, balances, and settlements easily.</p>
-          </header>
-          <main className="flex flex-col gap-6">
-            {showGroups ? (
-              <Groups
-                group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
-                people={groupPeople}
-                onAddPerson={handleAddPersonToGroup}
-                messages={groupMessages}
-                onSendMessage={handleSendGroupMessage}
-              />
-            ) : (
-              <>
-                <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
-                <ExpenseForm
-                  onAdd={addExpense}
-                  people={people}
-                  group={selectedGroup}
-                  editExpense={editExpense}
-                  setEditExpense={setEditExpense}
+      <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-blue-950 flex flex-col relative">
+        {/* Hamburger always visible */}
+        <button
+          className="fixed top-4 left-4 z-40 bg-blue-700 hover:bg-blue-800 text-white p-2 rounded-lg shadow-lg focus:outline-none"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open sidebar"
+        >
+          <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><rect y="5" width="24" height="2" rx="1" fill="currentColor"/><rect y="11" width="24" height="2" rx="1" fill="currentColor"/><rect y="17" width="24" height="2" rx="1" fill="currentColor"/></svg>
+        </button>
+        {/* Sidebar overlay */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 bg-black/60 z-30" onClick={() => setSidebarOpen(false)}></div>
+        )}
+        {/* Sidebar */}
+        <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        {/* Main content - add margin for sidebar */}
+        <div className="flex-1 flex flex-col items-center justify-center px-4" style={{ marginLeft: '18rem' }}>
+          <div className="w-full max-w-2xl bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-blue-900 p-6 md:p-10 flex flex-col gap-6 animate-fadein mt-12 mb-12">
+            <header className="mb-8 text-center">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <h1 className="text-5xl font-extrabold text-white mb-2 drop-shadow">Split App</h1>
+                <button className="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-xl shadow ml-0 md:ml-4 transition-all duration-200 text-lg" onClick={handleLogout}>Logout</button>
+              </div>
+              <p className="text-xl text-gray-300">Track group expenses, balances, and settlements easily.</p>
+            </header>
+            <main className="flex flex-col gap-6">
+              {showGroups ? (
+                <Groups
+                  group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
+                  people={groupPeople}
+                  onAddPerson={handleAddPersonToGroup}
+                  messages={groupMessages}
+                  onSendMessage={handleSendGroupMessage}
                 />
-                <ExpensesList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
-                <Balances balances={balances} loading={loading} />
-                <Settlements settlements={settlements} loading={loading} />
-              </>
-            )}
-          </main>
-          <footer className="mt-8 text-center text-xs text-pink-400">
-            <p>Made with <span className="text-blue-200 font-bold">Vite</span> + <span className="text-purple-200 font-bold">React</span> + <span className="text-pink-200 font-bold">Tailwind CSS</span></p>
-          </footer>
-          <Toast message={toast.message} type={toast.type} onClose={closeToast} />
+              ) : (
+                <>
+                  <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
+                  <ExpenseForm
+                    onAdd={addExpense}
+                    people={people}
+                    group={selectedGroup}
+                    editExpense={editExpense}
+                    setEditExpense={setEditExpense}
+                  />
+                  <ExpensesList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
+                  <Balances balances={balances} loading={loading} />
+                  <Settlements settlements={settlements} loading={loading} />
+                </>
+              )}
+            </main>
+            <footer className="mt-8 text-center text-xs text-pink-400">
+              <p>Made with <span className="text-blue-200 font-bold">Vite</span> + <span className="text-purple-200 font-bold">React</span> + <span className="text-pink-200 font-bold">Tailwind CSS</span></p>
+            </footer>
+            <Toast message={toast.message} type={toast.type} onClose={closeToast} />
+          </div>
         </div>
       </div>
-    </div>
+    </ErrorBoundary>
   );
 // End of App component
 

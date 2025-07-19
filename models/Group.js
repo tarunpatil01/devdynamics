@@ -1,15 +1,24 @@
 const mongoose = require('mongoose');
 
-const GroupSchema = new mongoose.Schema({
-  name: { type: String, required: true },
-  owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+// Group schema with validation and unique index
+const groupSchema = new mongoose.Schema({
+  name: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    minlength: 2,
+    maxlength: 64
+  },
+  owner: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
+  },
   members: [{
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    name: String,
-    avatar: String, // URL or base64
-    initials: String
-  }],
-  created_at: { type: Date, default: Date.now },
+    type: mongoose.Schema.Types.Mixed, // can be ObjectId or string for demo
+    required: true
+  }]
 });
 
-module.exports = mongoose.model('Group', GroupSchema);
+module.exports = mongoose.model('Group', groupSchema);

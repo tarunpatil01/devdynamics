@@ -1,16 +1,7 @@
 const mongoose = require('mongoose');
 
-const ExpenseSchema = new mongoose.Schema({
-  user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  },
-  group: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Group',
-    required: false,
-  },
+// Expense schema with validation
+const expenseSchema = new mongoose.Schema({
   amount: {
     type: Number,
     required: true,
@@ -18,7 +9,9 @@ const ExpenseSchema = new mongoose.Schema({
   },
   description: {
     type: String,
-    required: true
+    required: true,
+    trim: true,
+    maxlength: 256
   },
   paid_by: {
     type: String,
@@ -27,45 +20,30 @@ const ExpenseSchema = new mongoose.Schema({
   },
   split_type: {
     type: String,
-    enum: ['equal', 'percentage', 'exact'],
-    default: 'equal'
+    required: true,
+    enum: ['equal', 'percentage', 'exact', 'shares']
   },
   split_details: {
     type: Object,
-    default: {},
-    validate: {
-      validator: function (v) {
-        if (this.split_type === 'equal') {
-          return v && typeof v === 'object' && Object.keys(v).length > 0;
-        } else if (this.split_type === 'percentage') {
-          let total = 0;
-          for (const k in v) {
-            const val = v[k];
-            if (typeof val !== 'number' || val < 0) return false;
-            total += val;
-          }
-          return Math.abs(total - 100) < 0.01;
-        } else if (this.split_type === 'exact') {
-          for (const k in v) {
-            const val = v[k];
-            if (typeof val !== 'number' || val < 0) return false;
-          }
-          return true;
-        }
-        return false;
-      },
-      message: 'Invalid split_details structure.'
-    }
+    required: true
+  },
+  group: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Group',
+    required: false
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true
   },
   created_at: {
     type: Date,
     default: Date.now
   },
   updated_at: {
-    type: Date,
-    default: Date.now
+    type: Date
   }
 });
 
-ExpenseSchema.index({ paid_by: 1 });
-module.exports = mongoose.model('Expense', ExpenseSchema);
+module.exports = mongoose.model('Expense', expenseSchema);
