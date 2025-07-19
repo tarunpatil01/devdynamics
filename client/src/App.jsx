@@ -250,7 +250,7 @@ function App() {
           <SkeletonCard />
         </div>
       )}
-      <div className="min-h-screen flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
+      <div className="min-h-screen w-full overflow-x-hidden flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
         {/* Hamburger button for mobile only */}
         <button
           className="fixed top-4 left-4 z-40 bg-blue-700 hover:bg-blue-800 text-white p-2 rounded-lg shadow-lg focus:outline-none md:hidden"

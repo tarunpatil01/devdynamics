@@ -30,7 +30,7 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
 
   return (
     <div className="mb-6">
-      <h2 className="text-lg font-bold mb-2">Groups</h2>
+      <h2 className="text-lg font-bold mb-2 text-white">Groups</h2>
       <div className="flex flex-col sm:flex-row gap-2 mb-2">
         <input
           type="text"
