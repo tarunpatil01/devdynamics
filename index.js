@@ -11,7 +11,7 @@ const app = express();
 const allowedOrigins = [
   "http://localhost:5173", 
   "https://devdynamics-split-app.vercel.app",
-  "https://devdynamics-yw9g.onrender.com"
+  "https://devynamics-yw9g.onrender.com"
 ];
 app.use(cors({
   origin: function (origin, callback) {
@@ -61,8 +61,21 @@ app.delete('/auth/unregister', async (req, res) => {
   }
   try {
     const User = require('./models/User');
-    await User.findByIdAndDelete(userId);
-    res.json({ success: true, message: 'User account deleted' });
+    const Group = require('./models/Group');
+    const Expense = require('./models/Expense');
+    // Remove user from all groups
+    await Group.updateMany(
+      { members: userId },
+      { $pull: { members: userId } }
+    );
+    // Optionally: Delete all expenses created by this user
+    await Expense.deleteMany({ user: userId });
+    // Delete the user
+    const result = await User.findByIdAndDelete(userId);
+    if (!result) {
+      return res.status(404).json({ success: false, message: 'User not found' });
+    }
+    res.json({ success: true, message: 'User account and related data deleted' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

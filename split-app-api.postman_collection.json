@@ -1,0 +1,207 @@
+{
+    "info": {
+      "name": "Split App API",
+      "description": "Postman collection for Split App API (devdynamics) with sample data and all main endpoints.",
+      "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "variable": [
+      { "key": "baseUrl", "value": "https://devdynamics-yw9g.onrender.com" },
+      { "key": "frontendUrl", "value": "https://devdynamics-split-app.vercel.app" },
+      { "key": "token", "value": "" },
+      { "key": "groupId", "value": "" },
+      { "key": "expenseId", "value": "" }
+    ],
+    "item": [
+      {
+        "name": "Authentication",
+        "item": [
+          {
+            "name": "Register",
+            "request": {
+              "method": "POST",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "url": { "raw": "{{baseUrl}}/auth/register", "host": ["{{baseUrl}}"], "path": ["auth", "register"] },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"Password@123\"\n}"
+              }
+            }
+          },
+          {
+            "name": "Login",
+            "request": {
+              "method": "POST",
+              "header": [{ "key": "Content-Type", "value": "application/json" }],
+              "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"username\": \"alice\",\n  \"password\": \"Password@123\"\n}"
+              }
+            },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "if (pm.response.code === 200) {",
+                    "  var json = pm.response.json();",
+                    "  pm.collectionVariables.set('token', json.token);",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Unregister (Delete User)",
+            "request": {
+              "method": "DELETE",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" }
+              ],
+              "url": { "raw": "{{baseUrl}}/auth/unregister", "host": ["{{baseUrl}}"], "path": ["auth", "unregister"] }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Groups",
+        "item": [
+          {
+            "name": "Create Group",
+            "request": {
+              "method": "POST",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" },
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "url": { "raw": "{{baseUrl}}/groups", "host": ["{{baseUrl}}"], "path": ["groups"] },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"name\": \"Roomies\",\n  \"members\": [\"alice\", \"bob\"]\n}"
+              }
+            },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "if (pm.response.code === 200) {",
+                    "  var json = pm.response.json();",
+                    "  pm.collectionVariables.set('groupId', json.data._id);",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Get All Groups",
+            "request": {
+              "method": "GET",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" }
+              ],
+              "url": { "raw": "{{baseUrl}}/groups", "host": ["{{baseUrl}}"], "path": ["groups"] }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Expenses",
+        "item": [
+          {
+            "name": "Add Expense",
+            "request": {
+              "method": "POST",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" },
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "url": { "raw": "{{baseUrl}}/expenses", "host": ["{{baseUrl}}"], "path": ["expenses"] },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"amount\": 120,\n  \"description\": \"Dinner at Italian Bistro\",\n  \"paid_by\": \"alice\",\n  \"split_type\": \"equal\",\n  \"split_details\": { \"alice\": 1, \"bob\": 1 },\n  \"split_with\": [\"alice\", \"bob\"],\n  \"group\": \"{{groupId}}\",\n  \"category\": \"Food\",\n  \"recurring\": { \"type\": \"none\" }\n}"
+              }
+            },
+            "event": [
+              {
+                "listen": "test",
+                "script": {
+                  "exec": [
+                    "if (pm.response.code === 200) {",
+                    "  var json = pm.response.json();",
+                    "  pm.collectionVariables.set('expenseId', json.data._id);",
+                    "}"
+                  ],
+                  "type": "text/javascript"
+                }
+              }
+            ]
+          },
+          {
+            "name": "Get All Expenses",
+            "request": {
+              "method": "GET",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" }
+              ],
+              "url": { "raw": "{{baseUrl}}/expenses?group={{groupId}}", "host": ["{{baseUrl}}"], "path": ["expenses"], "query": [{ "key": "group", "value": "{{groupId}}" }] }
+            }
+          },
+          {
+            "name": "Update Expense",
+            "request": {
+              "method": "PUT",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" },
+                { "key": "Content-Type", "value": "application/json" }
+              ],
+              "url": { "raw": "{{baseUrl}}/expenses/{{expenseId}}", "host": ["{{baseUrl}}"], "path": ["expenses", "{{expenseId}}"] },
+              "body": {
+                "mode": "raw",
+                "raw": "{\n  \"amount\": 150,\n  \"description\": \"Dinner at Italian Bistro (updated)\",\n  \"paid_by\": \"alice\",\n  \"split_type\": \"equal\",\n  \"split_details\": { \"alice\": 1, \"bob\": 1 },\n  \"split_with\": [\"alice\", \"bob\"],\n  \"group\": \"{{groupId}}\",\n  \"category\": \"Food\",\n  \"recurring\": { \"type\": \"none\" }\n}"
+              }
+            }
+          },
+          {
+            "name": "Delete Expense",
+            "request": {
+              "method": "DELETE",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" }
+              ],
+              "url": { "raw": "{{baseUrl}}/expenses/{{expenseId}}", "host": ["{{baseUrl}}"], "path": ["expenses", "{{expenseId}}"] }
+            }
+          }
+        ]
+      },
+      {
+        "name": "Balances & Settlements",
+        "item": [
+          {
+            "name": "Get Balances",
+            "request": {
+              "method": "GET",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" }
+              ],
+              "url": { "raw": "{{baseUrl}}/balances?group={{groupId}}", "host": ["{{baseUrl}}"], "path": ["balances"], "query": [{ "key": "group", "value": "{{groupId}}" }] }
+            }
+          },
+          {
+            "name": "Get Settlements",
+            "request": {
+              "method": "GET",
+              "header": [
+                { "key": "Authorization", "value": "Bearer {{token}}" }
+              ],
+              "url": { "raw": "{{baseUrl}}/settlements?group={{groupId}}", "host": ["{{baseUrl}}"], "path": ["settlements"], "query": [{ "key": "group", "value": "{{groupId}}" }] }
+            }
+          }
+        ]
+      }
+    ]
+  }

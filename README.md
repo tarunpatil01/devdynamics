@@ -55,7 +55,7 @@ A modern expense splitting application built with React, Node.js, and MongoDB. T
    cd ..
    ```
 
-4. **Set up environment variables**
+4. **Set up environment variables** {NOT REAL LINKS & SECRET}
    Create a `.env` file in the root directory:
    ```env
    MONGODB_URI=mongodb://localhost:27017/splitapp
@@ -78,33 +78,8 @@ A modern expense splitting application built with React, Node.js, and MongoDB. T
    ```
 
 6. **Open your browser**
-   - Frontend: http://localhost:5173
-   - Backend API: http://localhost:5000
-
-## API Endpoints
-
-### Authentication
-- `POST /auth/register` - Register a new user
-- `POST /auth/login` - Login user
-- `DELETE /auth/unregister` - Delete user account
-
-### Expenses
-- `GET /expenses` - Get all expenses
-- `POST /expenses` - Create new expense
-- `PUT /expenses/:id` - Update expense
-- `DELETE /expenses/:id` - Delete expense
-
-### Groups
-- `GET /groups` - Get all groups
-- `POST /groups` - Create new group
-- `GET /groups/:id/messages` - Get group messages
-- `POST /groups/:id/messages` - Send message to group
-- `POST /groups/:id/add-person` - Add person to group
-
-### Balances & Settlements
-- `GET /balances` - Get user balances
-- `GET /settlements` - Get settlement suggestions
-- `GET /people` - Get all people
+   - Frontend: https://devdynamics-split-app.vercel.app
+   - Backend API: https://devdynamics-yw9g.onrender.com
 
 ## API Documentation
 

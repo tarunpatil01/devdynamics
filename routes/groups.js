@@ -40,6 +40,9 @@ router.get('/', auth, async (req, res) => {
     const userId = req.userId;
     const User = require('../models/User');
     const user = await User.findById(userId);
+    if (!user) {
+      return res.status(401).json({ success: false, message: 'User not found or deleted' });
+    }
     const username = user.username;
     const groups = await Group.find({
       $or: [
