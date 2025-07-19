@@ -45,19 +45,19 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black px-2 sm:px-4 responsive-container">
+    <div className="min-h-screen flex items-center justify-center bg-black px-2">
       <form
-        className="w-full max-w-sm bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-blue-900 p-4 sm:p-6 md:p-8 flex flex-col gap-3 sm:gap-4 animate-fadein"
+        className="w-full max-w-sm bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-blue-900 p-8 flex flex-col gap-4 animate-fadein"
         onSubmit={handleSubmit}
         aria-label="Register Form"
       >
-        <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 text-center drop-shadow">Register</h2>
+        <h2 className="text-3xl font-extrabold text-white mb-2 text-center drop-shadow">Register</h2>
         <div className="mb-2">
-          <label className="block font-semibold mb-1 text-blue-200 text-sm sm:text-base">Username</label>
+          <label className="block font-semibold mb-1 text-blue-200">Username</label>
           <input
             ref={inputRef}
             type="text"
-            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2 touch-target"
+            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
@@ -67,10 +67,10 @@ const Register = () => {
           />
         </div>
         <div className="mb-2">
-          <label className="block font-semibold mb-1 text-blue-200 text-sm sm:text-base">Password</label>
+          <label className="block font-semibold mb-1 text-blue-200">Password</label>
           <input
             type="password"
-            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2 touch-target"
+            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -82,14 +82,14 @@ const Register = () => {
         {success && showToast && <Toast message={success} type="success" onClose={() => setShowToast(false)} />}
         <button
           type="submit"
-          className="w-full bg-blue-700 hover:bg-blue-800 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2 touch-target"
+          className="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2"
           disabled={loading}
         >
           {loading ? 'Registering...' : 'Register'}
         </button>
         <button
           type="button"
-          className="w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-blue-400 py-2 rounded-lg font-bold shadow transition-all duration-200 touch-target"
+          className="w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-blue-400 py-2 rounded-lg font-bold shadow transition-all duration-200"
           onClick={() => navigate('/login')}
           disabled={loading}
         >

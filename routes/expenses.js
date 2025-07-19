@@ -304,9 +304,16 @@ router.put('/:id', auth, async (req, res) => {
         return res.status(400).json({ success: false, message: 'Recurring type must be one of none, weekly, monthly.' });
       }
     }
+    
+    // Derive split_with from split_details if not provided
     if (!Array.isArray(split_with) || split_with.length === 0) {
-      return res.status(400).json({ success: false, message: 'split_with must be a non-empty array of people.' });
+      if (split_details && typeof split_details === 'object') {
+        split_with = Object.keys(split_details);
+      } else {
+        return res.status(400).json({ success: false, message: 'split_with must be a non-empty array of people.' });
+      }
     }
+    
     const splitPeople = Object.keys(split_details);
     if (splitPeople.some(p => !split_with.includes(p))) {
       return res.status(400).json({ success: false, message: 'split_details must only contain selected people.' });

@@ -105,51 +105,51 @@ const Analytics = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-blue-950 p-2 sm:p-4 md:p-6 responsive-container">
+    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-blue-950 p-4 md:p-6">
       <div className="max-w-6xl mx-auto">
-        <h1 className="text-2xl sm:text-3xl font-bold text-white mb-4 md:mb-6 text-center">Analytics & Reports</h1>
+        <h1 className="text-3xl font-bold text-white mb-6 text-center">Analytics & Reports</h1>
         
         {/* Summary Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-4 md:mb-6">
-          <div className="bg-zinc-900/80 rounded-xl p-3 sm:p-4 border border-blue-800">
-            <h3 className="text-blue-400 font-semibold mb-1 text-xs sm:text-sm">Total Expenses</h3>
-            <p className="text-lg sm:text-2xl font-bold text-white">{data.summary?.totalExpenses || 0}</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+          <div className="bg-zinc-900/80 rounded-xl p-4 border border-blue-800">
+            <h3 className="text-blue-400 font-semibold mb-1 text-sm">Total Expenses</h3>
+            <p className="text-2xl font-bold text-white">{data.summary?.totalExpenses || 0}</p>
           </div>
-          <div className="bg-zinc-900/80 rounded-xl p-3 sm:p-4 border border-blue-800">
-            <h3 className="text-green-400 font-semibold mb-1 text-xs sm:text-sm">Total Amount</h3>
-            <p className="text-lg sm:text-2xl font-bold text-white">₹{data.summary?.totalAmount?.toLocaleString() || 0}</p>
+          <div className="bg-zinc-900/80 rounded-xl p-4 border border-blue-800">
+            <h3 className="text-green-400 font-semibold mb-1 text-sm">Total Amount</h3>
+            <p className="text-2xl font-bold text-white">₹{data.summary?.totalAmount?.toLocaleString() || 0}</p>
           </div>
-          <div className="bg-zinc-900/80 rounded-xl p-3 sm:p-4 border border-blue-800">
-            <h3 className="text-purple-400 font-semibold mb-1 text-xs sm:text-sm">Average Amount</h3>
-            <p className="text-lg sm:text-2xl font-bold text-white">₹{data.summary?.averageAmount?.toLocaleString() || 0}</p>
+          <div className="bg-zinc-900/80 rounded-xl p-4 border border-blue-800">
+            <h3 className="text-purple-400 font-semibold mb-1 text-sm">Average Amount</h3>
+            <p className="text-2xl font-bold text-white">₹{data.summary?.averageAmount?.toLocaleString() || 0}</p>
           </div>
-          <div className="bg-zinc-900/80 rounded-xl p-3 sm:p-4 border border-blue-800">
-            <h3 className="text-pink-400 font-semibold mb-1 text-xs sm:text-sm">Top Category</h3>
-            <p className="text-lg sm:text-2xl font-bold text-white">{data.categoryBreakdown?.[0]?.category || 'N/A'}</p>
+          <div className="bg-zinc-900/80 rounded-xl p-4 border border-blue-800">
+            <h3 className="text-pink-400 font-semibold mb-1 text-sm">Top Category</h3>
+            <p className="text-2xl font-bold text-white">{data.categoryBreakdown?.[0]?.category || 'N/A'}</p>
           </div>
         </div>
 
         {/* Spending Patterns */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-4 md:mb-6">
-          <div className="bg-zinc-900/80 rounded-xl p-3 sm:p-4 border border-blue-800">
-            <h3 className="text-purple-400 font-bold mb-3 text-base sm:text-lg">Individual vs Group Spending</h3>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+          <div className="bg-zinc-900/80 rounded-xl p-4 border border-blue-800">
+            <h3 className="text-purple-400 font-bold mb-3 text-lg">Individual vs Group Spending</h3>
             <div className="h-48">
               <Doughnut data={spendingPatternsData} options={{ maintainAspectRatio: false }} />
             </div>
             <div className="mt-3 space-y-1">
-              <div className="flex justify-between text-xs sm:text-sm">
+              <div className="flex justify-between text-sm">
                 <span className="text-green-400">Individual: ₹{data.spendingPatterns?.individual?.total?.toLocaleString() || 0}</span>
                 <span className="text-white">{data.spendingPatterns?.individual?.percentage || 0}%</span>
               </div>
-              <div className="flex justify-between text-xs sm:text-sm">
+              <div className="flex justify-between text-sm">
                 <span className="text-pink-400">Group: ₹{data.spendingPatterns?.group?.total?.toLocaleString() || 0}</span>
                 <span className="text-white">{data.spendingPatterns?.group?.percentage || 0}%</span>
               </div>
             </div>
           </div>
 
-          <div className="bg-zinc-900/80 rounded-xl p-3 sm:p-4 border border-blue-800">
-            <h3 className="text-green-400 font-bold mb-3 text-base sm:text-lg">Category-wise Totals</h3>
+          <div className="bg-zinc-900/80 rounded-xl p-4 border border-blue-800">
+            <h3 className="text-green-400 font-bold mb-3 text-lg">Category-wise Totals</h3>
             <div className="h-48">
               <Pie data={pieData} options={{ maintainAspectRatio: false }} />
             </div>
@@ -157,33 +157,33 @@ const Analytics = () => {
         </div>
 
         {/* Monthly Spending */}
-        <div className="bg-zinc-900/80 rounded-xl p-3 sm:p-4 border border-blue-800 mb-4 md:mb-6">
-          <h3 className="text-purple-400 font-bold mb-3 text-base sm:text-lg">Monthly Spending Summaries</h3>
+        <div className="bg-zinc-900/80 rounded-xl p-4 border border-blue-800 mb-6">
+          <h3 className="text-purple-400 font-bold mb-3 text-lg">Monthly Spending Summaries</h3>
           <div className="h-48">
             <Bar data={barData} options={{ maintainAspectRatio: false }} />
           </div>
         </div>
 
         {/* Category Breakdown Table */}
-        <div className="bg-zinc-900/80 rounded-xl p-3 sm:p-4 border border-blue-800 mb-4 md:mb-6">
-          <h3 className="text-yellow-400 font-bold mb-3 text-base sm:text-lg">Category Breakdown</h3>
-          <div className="responsive-table">
-            <table className="w-full text-white text-xs sm:text-sm">
+        <div className="bg-zinc-900/80 rounded-xl p-4 border border-blue-800 mb-6">
+          <h3 className="text-yellow-400 font-bold mb-3 text-lg">Category Breakdown</h3>
+          <div className="overflow-x-auto">
+            <table className="w-full text-white text-sm">
               <thead>
                 <tr className="border-b border-blue-800">
-                  <th className="text-left py-2 px-1 sm:px-2">Category</th>
-                  <th className="text-right py-2 px-1 sm:px-2">Amount</th>
-                  <th className="text-right py-2 px-1 sm:px-2 mobile-hidden">Count</th>
-                  <th className="text-right py-2 px-1 sm:px-2 mobile-hidden">Percentage</th>
+                  <th className="text-left py-2">Category</th>
+                  <th className="text-right py-2">Amount</th>
+                  <th className="text-right py-2">Count</th>
+                  <th className="text-right py-2">Percentage</th>
                 </tr>
               </thead>
               <tbody>
                 {data.categoryBreakdown?.map((item, index) => (
                   <tr key={index} className="border-b border-zinc-800">
-                    <td className="py-2 px-1 sm:px-2">{item.category}</td>
-                    <td className="text-right py-2 px-1 sm:px-2">₹{item.total.toLocaleString()}</td>
-                    <td className="text-right py-2 px-1 sm:px-2 mobile-hidden">{item.count}</td>
-                    <td className="text-right py-2 px-1 sm:px-2 mobile-hidden">{item.percentage}%</td>
+                    <td className="py-2">{item.category}</td>
+                    <td className="text-right py-2">₹{item.total.toLocaleString()}</td>
+                    <td className="text-right py-2">{item.count}</td>
+                    <td className="text-right py-2">{item.percentage}%</td>
                   </tr>
                 ))}
               </tbody>
@@ -193,18 +193,22 @@ const Analytics = () => {
 
         {/* Group Analytics */}
         {data.groupAnalytics && data.groupAnalytics.length > 0 && (
-          <div className="bg-zinc-900/80 rounded-xl p-3 sm:p-4 border border-blue-800 mb-4 md:mb-6">
-            <h3 className="text-blue-400 font-bold mb-3 text-base sm:text-lg">Group-wise Analytics</h3>
+          <div className="bg-zinc-900/80 rounded-xl p-4 border border-blue-800 mb-6">
+            <h3 className="text-blue-400 font-bold mb-3 text-lg">Group-wise Analytics</h3>
             <div className="space-y-3">
               {data.groupAnalytics.map((group, index) => (
                 <div key={index} className="bg-zinc-800/50 rounded-lg p-3">
-                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
-                    <h4 className="text-white font-semibold text-sm sm:text-base">{group.name}</h4>
-                    <div className="flex flex-col sm:flex-row gap-2 text-xs sm:text-sm">
-                      <span className="text-green-400">Total: ₹{group.total?.toLocaleString() || 0}</span>
-                      <span className="text-blue-400 mobile-hidden">Count: {group.count || 0}</span>
-                      <span className="text-purple-400 mobile-hidden">{group.percentage || 0}%</span>
-                    </div>
+                  <div className="flex justify-between items-center mb-2">
+                    <h4 className="text-white font-semibold text-sm">{group.group}</h4>
+                    <span className="text-green-400 font-bold text-sm">₹{group.total.toLocaleString()}</span>
+                  </div>
+                  <div className="text-xs text-gray-400 mb-2">{group.count} expenses</div>
+                  <div className="flex flex-wrap gap-1">
+                    {group.categories.map((cat, catIndex) => (
+                      <span key={catIndex} className="bg-blue-900/50 text-blue-200 px-2 py-1 rounded text-xs">
+                        {cat.category}: ₹{cat.amount.toLocaleString()}
+                      </span>
+                    ))}
                   </div>
                 </div>
               ))}

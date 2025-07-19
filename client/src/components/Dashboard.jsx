@@ -197,6 +197,11 @@ function Dashboard() {
         split_details: (expense.split_details && typeof expense.split_details === 'object') ? expense.split_details : {},
         group: expense.group || selectedGroup,
       };
+      
+      console.log('Sending expense payload:', payload);
+      console.log('Method:', method);
+      console.log('URL:', url);
+      
       const res = await fetch(url, {
         method,
         headers: {
@@ -205,13 +210,16 @@ function Dashboard() {
         },
         body: JSON.stringify(payload)
       });
+      
       if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('Error response:', errorData);
         if (res.status === 404) {
           showToast('Expense not found. It may have been deleted.', 'error');
           setError('Expense not found. It may have been deleted.');
         } else {
-          showToast('Failed to save expense.', 'error');
-          setError('Failed to save expense.');
+          showToast(`Failed to save expense: ${errorData.message || 'Unknown error'}`, 'error');
+          setError(`Failed to save expense: ${errorData.message || 'Unknown error'}`);
         }
         setEditExpense(null);
         await fetchAll();
@@ -221,6 +229,7 @@ function Dashboard() {
       await fetchAll();
       if (!isEdit) showToast('Expense added!', 'success');
     } catch (err) {
+      console.error('Error in addExpense:', err);
       setError('Failed to save expense.');
       showToast('Failed to save expense.', 'error');
       throw err;
@@ -228,24 +237,20 @@ function Dashboard() {
   };
 
   const handleEdit = (expense) => {
-    // Prompt user for which field to edit and the new value
-    const field = window.prompt('Which field do you want to edit? (amount, description, category)', 'amount');
-    if (!field || !['amount', 'description', 'category'].includes(field)) {
-      return;
-    }
-    const newValue = window.prompt(`Enter new value for ${field}:`, String(expense[field]));
-    if (newValue === null) return;
-    // Prepare updated expense
-    let updatedExpense = { ...expense };
-    if (field === 'amount') {
-      updatedExpense.amount = Number(newValue);
-    } else {
-      updatedExpense[field] = newValue;
-    }
-    // Call addExpense with edit flag
-    setEditExpense(updatedExpense);
-    addExpense(updatedExpense, true);
-    setEditExpense(null);
+    // Set the expense to edit in the form
+    setEditExpense({
+      _id: expense._id,
+      amount: expense.amount,
+      description: expense.description,
+      paid_by: expense.paid_by,
+      split_type: expense.split_type,
+      split_details: expense.split_details || {},
+      split_with: Array.isArray(expense.split_with) ? expense.split_with : 
+                  (expense.split_details && typeof expense.split_details === 'object' ? Object.keys(expense.split_details) : []),
+      group: expense.group,
+      category: expense.category || 'Food',
+      recurring: expense.recurring || { type: 'none' }
+    });
   };
 
   const handleDelete = async (id) => {
@@ -313,73 +318,69 @@ function Dashboard() {
     <ErrorBoundary>
       {globalError && <Toast message={globalError} type="error" onClose={() => setGlobalError('')} />}
       {loading && <Spinner />}
-      <div className="min-h-screen w-full bg-gradient-to-br from-black via-zinc-900 to-blue-950 responsive-container">
+      <div className="min-h-screen w-full bg-gradient-to-br from-black via-zinc-900 to-blue-950">
         {/* Hamburger button for mobile only */}
         <button
-          className="fixed top-4 left-4 z-50 bg-blue-700 hover:bg-blue-800 text-white p-2 rounded-lg shadow-lg focus:outline-none md:hidden touch-target"
+          className="fixed top-4 left-4 z-40 bg-blue-700 hover:bg-blue-800 text-white p-2 rounded-lg shadow-lg focus:outline-none md:hidden"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open sidebar"
+          style={{ display: 'block' }}
         >
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect y="5" width="24" height="2" rx="1" fill="currentColor"/><rect y="11" width="24" height="2" rx="1" fill="currentColor"/><rect y="17" width="24" height="2" rx="1" fill="currentColor"/></svg>
+          <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><rect y="5" width="24" height="2" rx="1" fill="currentColor"/><rect y="11" width="24" height="2" rx="1" fill="currentColor"/><rect y="17" width="24" height="2" rx="1" fill="currentColor"/></svg>
         </button>
-        
-        {/* Sidebar */}
+        {/* Sidebar overlay for mobile only */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={() => setSidebarOpen(false)}></div>
+        )}
+        {/* Sidebar always visible on desktop, overlay on mobile */}
         <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        
-        {/* Main content area */}
-        <main className="w-full md:ml-72 flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 min-h-screen overflow-x-hidden main-mobile md:main-desktop">
-          <div className="w-full max-w-none bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-3 sm:p-4 md:p-6 flex flex-col gap-4 md:gap-6 responsive-container">
-            {/* Header */}
-            <header className="mb-4 md:mb-6 text-center relative">
-              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 md:gap-4">
-                <h1 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 drop-shadow">Split App</h1>
-                <Link to="/analytics" className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded font-bold shadow transition-all duration-200 text-sm touch-target">Analytics</Link>
+        <main className="md:ml-72 flex flex-col items-center justify-center p-4 md:p-8 w-full min-h-screen overflow-x-hidden">
+          <div className="w-full max-w-none bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-6 flex flex-col gap-6">
+            <header className="mb-6 text-center relative">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <h1 className="text-3xl font-extrabold text-white mb-2 drop-shadow">Split App</h1>
+                <Link to="/analytics" className="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded font-bold shadow transition-all duration-200 text-sm">Analytics</Link>
               </div>
-              <p className="text-base md:text-lg text-gray-300">Track group expenses, balances, and settlements easily.</p>
+              <p className="text-lg text-gray-300">Track group expenses, balances, and settlements easily.</p>
             </header>
-            
             {showGroups ? (
-              <div className="mb-4 md:mb-6 w-full responsive-container">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-3 md:mb-4 gap-2">
-                  <h3 className="text-lg md:text-xl font-bold text-blue-400">Your Groups</h3>
+              <div className="mb-6 w-full">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-xl font-bold text-blue-400">Your Groups</h3>
                   <button
-                    className="bg-green-700 hover:bg-green-800 text-white px-3 py-2 rounded font-bold shadow transition-all duration-200 text-sm touch-target"
+                    className="bg-green-700 hover:bg-green-800 text-white px-3 py-2 rounded font-bold shadow transition-all duration-200 text-sm"
                     onClick={() => setShowGroupManager(v => !v)}
                   >
                     {showGroupManager ? 'Close' : 'Create Group'}
                   </button>
                 </div>
-                
                 {showGroupManager && (
                   <div className="mb-4 w-full">
                     <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
                   </div>
                 )}
-                
-                {/* Group selection grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 md:gap-3 mb-4 w-full">
+                <div className="flex flex-wrap gap-3 mb-4 w-full">
                   {groups.length === 0 ? (
-                    <div className="col-span-full text-gray-400 text-center py-4">No groups found.</div>
+                    <div className="text-gray-400">No groups found.</div>
                   ) : (
                     groups.map(group => (
                       <button
                         key={group._id}
-                        className={`flex flex-col items-center px-2 py-3 rounded-lg shadow font-bold transition-all duration-200 w-full h-20 sm:h-24 justify-center gap-1 touch-target ${selectedGroup === group._id ? 'bg-blue-700 text-white' : 'bg-zinc-800 text-blue-300 hover:bg-blue-900'}`}
+                        className={`flex flex-col items-center px-3 py-2 rounded-lg shadow font-bold transition-all duration-200 w-24 h-24 justify-center gap-1 ${selectedGroup === group._id ? 'bg-blue-700 text-white' : 'bg-zinc-800 text-blue-300 hover:bg-blue-900'}`}
                         onClick={() => {
                           setSelectedGroup(group._id);
                           localStorage.setItem('selectedGroup', group._id);
                         }}
                       >
-                        <span className="w-6 h-6 sm:w-8 sm:h-8 flex items-center justify-center rounded-full bg-blue-500 text-white text-sm sm:text-lg font-extrabold mb-1">
+                        <span className="w-8 h-8 flex items-center justify-center rounded-full bg-blue-500 text-white text-lg font-extrabold mb-1">
                           {group.name?.charAt(0).toUpperCase() || '?'}
                         </span>
                         <span className="truncate w-full text-center text-xs">{group.name}</span>
-                        <span className="text-xs text-blue-200 mobile-hidden">{Array.isArray(group.members) ? group.members.length : 0} members</span>
+                        <span className="text-xs text-blue-200">{Array.isArray(group.members) ? group.members.length : 0} members</span>
                       </button>
                     ))
                   )}
                 </div>
-                
                 {selectedGroup ? (
                   <div className="w-full">
                     <Groups
@@ -392,18 +393,15 @@ function Dashboard() {
                     />
                   </div>
                 ) : (
-                  <div className="text-center text-lg md:text-xl text-white font-bold">Select a group</div>
+                  <div className="text-center text-xl text-white font-bold">Select a group</div>
                 )}
               </div>
             ) : (
               <>
-                {/* Group Manager */}
-                <div className="w-full responsive-container">
+                <div className="w-full">
                   <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
                 </div>
-                
-                {/* Expense Form */}
-                <div className="bg-zinc-900/80 rounded-2xl p-3 sm:p-4 mb-4 w-full responsive-container">
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4 w-full">
                   <ExpenseForm
                     onAdd={addExpense}
                     group={selectedGroup}
@@ -412,9 +410,7 @@ function Dashboard() {
                     setEditExpense={setEditExpense}
                   />
                 </div>
-                
-                {/* Expenses List */}
-                <div className="bg-zinc-900/80 rounded-2xl p-3 sm:p-4 mb-4 w-full responsive-container">
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4 w-full">
                   {Array.isArray(expenses) && (!expenses || expenses.length === 0) ? (
                     <div className="text-gray-500 text-center py-6">
                       <span className="block text-xl mb-2">🧾</span>
@@ -424,9 +420,7 @@ function Dashboard() {
                     <ExpensesList expenses={Array.isArray(expenses) ? expenses : []} onEdit={handleEdit} onDelete={handleDelete} />
                   )}
                 </div>
-                
-                {/* Balances */}
-                <div className="bg-zinc-900/80 rounded-2xl p-3 sm:p-4 mb-4 w-full responsive-container">
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4 w-full">
                   {!balances || Object.keys(balances || {}).length === 0 ? (
                     <div className="text-gray-500 text-center py-6">
                       <span className="block text-xl mb-2">💰</span>
@@ -436,19 +430,14 @@ function Dashboard() {
                     <Balances balances={balances} loading={loading} />
                   )}
                 </div>
-                
-                {/* Settlements */}
-                <div className="bg-zinc-900/80 rounded-2xl p-3 sm:p-4 mb-4 w-full responsive-container">
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4 w-full">
                   <Settlements settlements={settlements} loading={loading} />
                 </div>
               </>
             )}
-            
-            {/* Footer */}
-            <footer className="mt-4 md:mt-6 text-center text-xs text-pink-400">
+            <footer className="mt-6 text-center text-xs text-pink-400">
               <p>Made with <span className="text-blue-200 font-bold">Vite</span> + <span className="text-purple-200 font-bold">React</span> + <span className="text-pink-200 font-bold">Tailwind CSS</span></p>
             </footer>
-            
             <Toast message={toast.message} type={toast.type} onClose={closeToast} />
           </div>
         </main>
