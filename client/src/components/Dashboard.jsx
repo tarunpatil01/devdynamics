@@ -17,7 +17,7 @@ import ErrorMessage from './ErrorMessage';
 function Dashboard() {
   // Hamburger sidebar state
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [token, setToken] = useState(sessionStorage.getItem('token') || '');
+  const [token, setToken] = useState(localStorage.getItem('token') || '');
   const [expenses, setExpenses] = useState([]);
   const [editExpense, setEditExpense] = useState(null);
   const [balances, setBalances] = useState({});

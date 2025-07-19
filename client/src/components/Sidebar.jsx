@@ -1,7 +1,7 @@
 import React from 'react';
 
 const Sidebar = ({ showGroups, setShowGroups, sidebarOpen, setSidebarOpen }) => {
-  const username = sessionStorage.getItem('username');
+  const username = localStorage.getItem('username');
   return (
     <aside
       className={`fixed top-0 left-0 z-40 h-full w-72 bg-zinc-900/95 backdrop-blur-lg shadow-2xl border-r-2 border-blue-900 rounded-r-2xl flex flex-col transition-transform duration-300 overflow-y-auto
@@ -38,7 +38,7 @@ const Sidebar = ({ showGroups, setShowGroups, sidebarOpen, setSidebarOpen }) => 
         </div>
         <button
           className="bg-red-700 hover:bg-red-800 text-white px-4 py-4 rounded-2xl shadow-lg transition-all duration-200 text-lg font-bold w-full"
-          onClick={() => { sessionStorage.clear(); window.location.replace('/login'); }}
+          onClick={() => { localStorage.clear(); window.location.replace('/login'); }}
           aria-label="Logout"
         >
           Logout

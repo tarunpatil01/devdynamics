@@ -133,8 +133,8 @@ const Login = () => {
         setLoading(false);
         return;
       }
-      sessionStorage.setItem('token', data.token);
-      sessionStorage.setItem('username', data.user.username);
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('username', data.user.username);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
