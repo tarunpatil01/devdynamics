@@ -86,4 +86,61 @@ router.get('/', auth, async (req, res) => {
   }
 });
 
+// POST /settlements/settle - Settle up between two users
+router.post('/settle', auth, async (req, res) => {
+  try {
+    const { user, counterparty, direction } = req.body;
+    if (!user || !counterparty || !['pay', 'receive'].includes(direction)) {
+      return res.status(400).json({ success: false, message: 'Invalid request' });
+    }
+    // Find all expenses for this user
+    const balances = await calculateBalances(req.userId);
+    const userKey = user.trim().toLowerCase();
+    const counterpartyKey = counterparty.trim().toLowerCase();
+    let amount = 0;
+    if (direction === 'pay') {
+      // You pay counterparty: you owe them
+      amount = Math.abs(balances[userKey] || 0) < 0.01 ? 0 : -(balances[userKey] || 0);
+      // Find how much you owe this counterparty
+      // But we want to settle only the amount owed to this counterparty
+      // So, recalculate settlements and find the right amount
+      const settlements = getSettlements(balances);
+      const s = settlements.find(s => s.from === user && s.to === counterparty);
+      if (!s) return res.status(400).json({ success: false, message: 'No outstanding settlement found' });
+      amount = s.amount;
+      // Create a settlement expense
+      const Expense = require('../models/Expense');
+      await Expense.create({
+        amount,
+        description: `Settlement between ${user} and ${counterparty}`,
+        paid_by: user,
+        split_type: 'exact',
+        split_details: { [counterparty]: amount },
+        split_with: [counterparty],
+        user: req.userId
+      });
+    } else if (direction === 'receive') {
+      // Counterparty pays you: they owe you
+      amount = Math.abs(balances[counterpartyKey] || 0) < 0.01 ? 0 : -(balances[counterpartyKey] || 0);
+      const settlements = getSettlements(balances);
+      const s = settlements.find(s => s.from === counterparty && s.to === user);
+      if (!s) return res.status(400).json({ success: false, message: 'No outstanding settlement found' });
+      amount = s.amount;
+      const Expense = require('../models/Expense');
+      await Expense.create({
+        amount,
+        description: `Settlement between ${counterparty} and ${user}`,
+        paid_by: counterparty,
+        split_type: 'exact',
+        split_details: { [user]: amount },
+        split_with: [user],
+        user: req.userId
+      });
+    }
+    res.json({ success: true, message: 'Settlement recorded' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
+  }
+});
+
 module.exports = router;
