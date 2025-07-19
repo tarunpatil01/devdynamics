@@ -2,6 +2,7 @@ import React from 'react';
 
 const ExpensesList = ({ expenses, onEdit, onDelete }) => {
   // Extra safety: fallback to empty array if expenses is null/undefined
+  console.log('ExpensesList props:', { expenses });
   const safeExpenses = Array.isArray(expenses) ? expenses : (expenses ? [expenses] : []);
   return (
     <div className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein">
