@@ -123,8 +123,8 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
         </div>
       </div>
       <div>
-        <label className="block font-semibold mb-2">Split Type</label>
-        <div className="flex gap-4">
+        <label className="block font-semibold mb-2 text-blue-200">Split Type</label>
+        <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
           <label className="flex items-center gap-2">
             <input type="radio" name="splitType" value="equal" checked={splitType === 'equal'} onChange={() => handleSplitTypeChange('equal')} className="accent-blue-500" />
             <span>Evenly</span>
