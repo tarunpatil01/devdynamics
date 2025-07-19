@@ -1,37 +1,32 @@
 import React from 'react';
 
-const Sidebar = ({ groups, selectedGroup, setSelectedGroup, onShowGroups }) => {
+const Sidebar = ({ showGroups, setShowGroups, sidebarOpen, setSidebarOpen }) => {
   return (
-    <aside className="w-full md:w-64 h-20 md:h-full bg-zinc-900/80 backdrop-blur-lg shadow-2xl flex flex-row md:flex-col p-2 md:p-4 border-b md:border-b-0 md:border-r border-blue-900 rounded-2xl animate-fadein">
-      <h2 className="text-2xl font-bold text-white mb-4 md:mb-6 drop-shadow">Split App</h2>
-      <nav className="flex-1">
-        <button
-          className={`w-full text-left px-4 py-2 rounded-lg mb-2 font-semibold transition-all duration-200 ${selectedGroup ? 'bg-blue-900 text-white' : 'bg-zinc-800 text-gray-300'} hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-          onClick={onShowGroups}
-        >
-          Groups
+    <aside
+      className={`fixed top-0 left-0 z-40 h-full w-72 bg-zinc-900/95 backdrop-blur-lg shadow-2xl border-r-2 border-blue-900 rounded-r-2xl flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
+      style={{ minHeight: '100vh' }}
+    >
+      <div className="flex items-center justify-between p-6 border-b border-blue-900">
+        <h2 className="text-3xl font-extrabold text-white drop-shadow">Split App</h2>
+        <button className="text-white" onClick={() => setSidebarOpen(false)} aria-label="Close sidebar">
+          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+            <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M6 18L18 6"/>
+          </svg>
         </button>
-        {groups && groups.length > 0 && (
-          <ul className="mt-2">
-            {groups.map(group => (
-              <li key={group._id} className="flex items-center gap-2 mb-1">
-                {group.avatar ? (
-                  <img src={group.avatar} alt={group.name} className="w-6 h-6 rounded-full" />
-                ) : (
-                  <span className="w-6 h-6 flex items-center justify-center rounded-full bg-blue-900 text-white font-bold text-xs">
-                    {group.initials || (group.name ? group.name.slice(0,2).toUpperCase() : '?')}
-                  </span>
-                )}
-                <button
-                  className={`flex-1 text-left px-2 py-2 rounded-lg transition-all duration-200 ${selectedGroup === group._id ? 'bg-blue-900 text-white' : 'bg-zinc-800 text-gray-300'} hover:bg-blue-800 focus:outline-none focus:ring-2 focus:ring-blue-500`}
-                  onClick={() => setSelectedGroup(group._id)}
-                >
-                  {group.name}
-                </button>
-              </li>
-            ))}
-          </ul>
-        )}
+      </div>
+      <nav className="flex-1 flex flex-col gap-4 p-6">
+        <button
+          className={`w-full text-left px-6 py-4 rounded-xl font-semibold transition-all duration-200 ${!showGroups ? 'bg-blue-800 text-white' : 'bg-zinc-800 text-blue-300'} hover:bg-blue-700 mb-2 text-lg flex items-center gap-2`}
+          onClick={() => { setShowGroups(false); setSidebarOpen(false); }}
+        >
+          <span role="img" aria-label="split">💸</span> Split
+        </button>
+        <button
+          className={`w-full text-left px-6 py-4 rounded-xl font-semibold transition-all duration-200 ${showGroups ? 'bg-blue-800 text-white' : 'bg-zinc-800 text-blue-300'} hover:bg-blue-900 mb-2 text-lg flex items-center gap-2`}
+          onClick={() => { setShowGroups(true); setSidebarOpen(false); }}
+        >
+          <span role="img" aria-label="groups">👥</span> Groups
+        </button>
       </nav>
     </aside>
   );

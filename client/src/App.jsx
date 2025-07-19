@@ -244,34 +244,8 @@ function App() {
       {sidebarOpen && (
         <div className="fixed inset-0 bg-black/60 z-30" onClick={() => setSidebarOpen(false)}></div>
       )}
-      {/* Sidebar - slides on all screens */}
-      <aside
-        className={`fixed top-0 left-0 z-40 h-full w-72 bg-zinc-900/95 backdrop-blur-lg shadow-2xl border-r-2 border-blue-900 rounded-r-2xl flex flex-col transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
-        style={{ minHeight: '100vh' }}
-      >
-        <div className="flex items-center justify-between p-6 border-b border-blue-900">
-          <h2 className="text-3xl font-extrabold text-white drop-shadow">Split App</h2>
-          <button className="text-white" onClick={() => setSidebarOpen(false)} aria-label="Close sidebar">
-            <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-              <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M6 18L18 6"/>
-            </svg>
-          </button>
-        </div>
-        <nav className="flex-1 flex flex-col gap-4 p-6">
-          <button
-            className="w-full text-left px-6 py-4 rounded-xl font-semibold transition-all duration-200 bg-blue-800 text-white hover:bg-blue-700 mb-2 text-lg"
-            onClick={() => { setShowGroups(false); setSidebarOpen(false); }}
-          >
-            Split
-          </button>
-          <button
-            className="w-full text-left px-6 py-4 rounded-xl font-semibold transition-all duration-200 bg-zinc-800 text-blue-300 hover:bg-blue-900 mb-2 text-lg"
-            onClick={() => { setShowGroups(true); setSidebarOpen(false); }}
-          >
-            Groups
-          </button>
-        </nav>
-      </aside>
+      {/* Sidebar */}
+      <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       {/* Main content - add margin for sidebar */}
       <div className="flex-1 flex flex-col items-center justify-center px-4" style={{ marginLeft: '18rem' }}>
         <div className="w-full max-w-2xl bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-blue-900 p-6 md:p-10 flex flex-col gap-6 animate-fadein mt-12 mb-12">
