@@ -55,12 +55,16 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpe
         <div className="flex-1 min-w-[200px]">
           <h3 className="text-lg font-semibold text-gray-200 mb-3">People in Group</h3>
           <ul className="mb-4 flex flex-col gap-3">
-            {safePeople.length > 0 ? safePeople.map((person, idx) => (
-              <li key={person._id || person.name || idx} className="flex items-center gap-3 py-2 px-3 bg-zinc-900 rounded-xl shadow text-white">
-                <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg ${getAvatarColor(person.name || person)}`}>{(person.name || person).charAt(0).toUpperCase()}</span>
-                <span className="font-semibold text-blue-200 text-base">{person.name || person}</span>
-              </li>
-            )) : <li className="text-gray-500">No people in group.</li>}
+            {safePeople.length > 0 ? safePeople.map((person, idx) => {
+              const key = typeof person === 'string' ? person : (person._id || person.name || idx);
+              const displayName = typeof person === 'string' ? person : (person.name || '');
+              return (
+                <li key={key} className="flex items-center gap-3 py-2 px-3 bg-zinc-900 rounded-xl shadow text-white">
+                  <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg ${getAvatarColor(displayName)}`}>{displayName.charAt(0).toUpperCase()}</span>
+                  <span className="font-semibold text-blue-200 text-base">{displayName}</span>
+                </li>
+              );
+            }) : <li className="text-gray-500">No people in group.</li>}
           </ul>
           <form onSubmit={handleAddPerson} className="flex gap-2 mt-2">
             <input
