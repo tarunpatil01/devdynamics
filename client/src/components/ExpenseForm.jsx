@@ -90,7 +90,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
     try {
       // For 'equal' split, build split_details as { person: 1, ... }
       const splitDetailsToSend = splitType === 'equal'
-        ? Object.fromEntries(splitWith.map(person => [person, 1]))
+        ? Object.fromEntries((Array.isArray(splitWith) ? splitWith : []).map(person => [person, 1]))
         : splitDetails;
       await onAdd({
         amount: Number(amount),

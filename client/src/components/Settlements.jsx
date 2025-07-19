@@ -32,8 +32,8 @@ const Settlements = ({ group, people, loading }) => {
 
   // Get all unique people for avatars (from settlements)
   const allPeople = Array.from(new Set([
-    ...owedByYou.map(s => s.to),
-    ...owedToYou.map(s => s.from),
+    ...(Array.isArray(owedByYou) ? owedByYou.map(s => s.to) : []),
+    ...(Array.isArray(owedToYou) ? owedToYou.map(s => s.from) : []),
     username
   ]));
 
@@ -69,7 +69,7 @@ const Settlements = ({ group, people, loading }) => {
         {/* Card summary with avatars and group name */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
-            {allPeople.map((person, idx) => (
+            {(Array.isArray(allPeople) ? allPeople : []).map((person, idx) => (
               <span key={person} className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-lg text-white border-2 border-blue-800 ${getAvatarColor(person)}`}>{person.charAt(0).toUpperCase()}</span>
             ))}
           </div>
