@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
 const router = express.Router();
 const User = require('../models/User');
+const Group = require('../models/Group');
 
 function auth(req, res, next) {
   const header = req.headers['authorization'];
@@ -46,6 +47,28 @@ router.get('/', auth, async (req, res) => {
   try {
     const people = await getAllPeople(req.userId);
     res.json({ success: true, data: people });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+// GET /people/group/:groupId - List all members of a group
+router.get('/group/:groupId', auth, async (req, res) => {
+  try {
+    const group = await Group.findById(req.params.groupId);
+    if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
+    // Members can be ObjectIds or usernames, so normalize to usernames
+    const User = require('../models/User');
+    const usernames = [];
+    for (const member of group.members) {
+      if (typeof member === 'string') {
+        usernames.push(member);
+      } else {
+        const user = await User.findById(member);
+        if (user) usernames.push(user.username);
+      }
+    }
+    res.json({ success: true, data: usernames });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

@@ -49,6 +49,31 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
     if (group) setSelectedGroup(group);
   }, [group]);
 
+  // Fetch group members for selected group
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setUsersLoading(true);
+      try {
+        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+        const token = sessionStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        let url;
+        if (selectedGroup) {
+          url = `${baseURL}/people/group/${selectedGroup}`;
+        } else {
+          url = `${baseURL}/people/users`;
+        }
+        const res = await fetch(url, { headers });
+        const data = await res.json();
+        setUsers(Array.isArray(data?.data) ? data.data : []);
+      } catch {
+        setUsers([]);
+      }
+      setUsersLoading(false);
+    };
+    fetchUsers();
+  }, [selectedGroup]);
+
   // Handle checkbox change for splitWith
   const handleSplitWithChange = (person) => {
     setSplitWith(prev => prev.includes(person) ? prev.filter(p => p !== person) : [...prev, person]);

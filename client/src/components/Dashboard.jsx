@@ -218,12 +218,24 @@ function Dashboard() {
   };
 
   const handleEdit = (expense) => {
-    setEditExpense(expense);
-    // Scroll to the form
-    setTimeout(() => {
-      const form = document.querySelector('form');
-      if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }, 100);
+    // Prompt user for which field to edit and the new value
+    const field = window.prompt('Which field do you want to edit? (amount, description, category)', 'amount');
+    if (!field || !['amount', 'description', 'category'].includes(field)) {
+      return;
+    }
+    const newValue = window.prompt(`Enter new value for ${field}:`, String(expense[field]));
+    if (newValue === null) return;
+    // Prepare updated expense
+    let updatedExpense = { ...expense };
+    if (field === 'amount') {
+      updatedExpense.amount = Number(newValue);
+    } else {
+      updatedExpense[field] = newValue;
+    }
+    // Call addExpense with editExpense set
+    setEditExpense(updatedExpense);
+    addExpense(updatedExpense);
+    setEditExpense(null);
   };
 
   const handleDelete = async (id) => {

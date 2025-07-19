@@ -184,3 +184,23 @@ npm run format
 
 - Monitor your Render logs for any runtime errors.
 - Set up alerts for backend crashes or high error rates in your hosting provider. 
+
+## Local Development & Code Quality
+
+### Clean, Commented Code
+- All backend and frontend code is written to be readable and maintainable.
+- Functions, routes, and components include comments explaining their purpose and logic.
+- Follow best practices for naming, structure, and error handling.
+- Use Prettier for consistent code formatting (`npm run format`).
+
+### Database Schema & Setup Scripts
+- MongoDB is used for data storage. Mongoose models define the schema for each collection:
+  - `models/User.js` — User accounts (username, password hash, etc.)
+  - `models/Group.js` — Groups with name, owner, and members
+  - `models/Expense.js` — Expenses with amount, description, split details, group, etc.
+  - `models/People.js` — People in groups
+  - `models/GroupMessage.js` — Group chat messages
+  - `models/SplitType.js` — Enum for split types
+- No manual SQL scripts are needed; collections are created automatically by Mongoose when the app runs.
+- To seed the database with test data, you can use the Postman collection provided (`split-app-api.postman_collection.json`).
+- For a fresh start, drop the database in MongoDB and restart the server. 
