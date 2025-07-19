@@ -55,6 +55,27 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
     if (group) setSelectedGroup(group);
   }, [group]);
 
+  // Populate form when editing an expense
+  useEffect(() => {
+    if (editExpense) {
+      setAmount(String(editExpense.amount || ''));
+      setDescription(editExpense.description || '');
+      setPaidBy(editExpense.paid_by || '');
+      setSplitType(editExpense.split_type || 'equal');
+      setSplitDetails(editExpense.split_details || {});
+      setSplitWith(Array.isArray(editExpense.split_with) ? editExpense.split_with : []);
+      setCategory(editExpense.category || 'Food');
+      setSelectedGroup(editExpense.group || group || '');
+      if (editExpense.recurring && editExpense.recurring.type) {
+        setRecurringType(editExpense.recurring.type);
+        setNextDue(editExpense.recurring.next_due || '');
+      } else {
+        setRecurringType('none');
+        setNextDue('');
+      }
+    }
+  }, [editExpense, group]);
+
   // Handle checkbox change for splitWith
   const handleSplitWithChange = (person) => {
     setSplitWith(prev => prev.includes(person) ? prev.filter(p => p !== person) : [...prev, person]);
@@ -131,6 +152,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
         ? Object.fromEntries((Array.isArray(splitWith) ? splitWith : []).map(person => [person, 1]))
         : splitDetails;
       await onAdd({
+        ...(editExpense && editExpense._id ? { _id: editExpense._id } : {}),
         amount: Number(amount),
         description,
         paid_by: paidBy,

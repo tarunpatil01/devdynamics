@@ -195,7 +195,7 @@ function Dashboard() {
         amount: Number(expense.amount),
         split_with: Array.isArray(expense.split_with) ? expense.split_with : [],
         split_details: (expense.split_details && typeof expense.split_details === 'object') ? expense.split_details : {},
-        group: expense.group || selectedGroup,
+        group: (expense.group && expense.group !== '{{groupId}}' && expense.group !== '') ? expense.group : selectedGroup,
       };
       const res = await fetch(url, {
         method,
