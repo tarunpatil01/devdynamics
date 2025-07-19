@@ -54,17 +54,18 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
 
   // Validate split details
   const validateSplitDetails = () => {
-    if (splitWith.length === 0) return 'Select at least one person to split with.';
+    const safeSplitWith = Array.isArray(splitWith) ? splitWith : [];
+    if (safeSplitWith.length === 0) return 'Select at least one person to split with.';
     if (splitType === 'percentage') {
-      const total = splitWith.reduce((sum, p) => sum + Number(splitDetails[p] || 0), 0);
+      const total = safeSplitWith.reduce((sum, p) => sum + Number(splitDetails[p] || 0), 0);
       if (total !== 100) return 'Percentages must add up to 100.';
     }
     if (splitType === 'exact') {
-      const total = splitWith.reduce((sum, p) => sum + Number(splitDetails[p] || 0), 0);
+      const total = safeSplitWith.reduce((sum, p) => sum + Number(splitDetails[p] || 0), 0);
       if (Number(amount) !== total) return 'Amounts must add up to total.';
     }
     if (splitType === 'shares') {
-      const totalShares = splitWith.reduce((sum, p) => sum + Number(splitDetails[p] || 0), 0);
+      const totalShares = safeSplitWith.reduce((sum, p) => sum + Number(splitDetails[p] || 0), 0);
       if (totalShares === 0) return 'Total shares must be greater than 0.';
     }
     return '';
