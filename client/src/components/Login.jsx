@@ -1,5 +1,38 @@
 import React, { useState, useRef, useEffect } from 'react';
 
+const PasswordInput = ({ value, onChange, ...props }) => {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative w-full">
+      <input
+        type={show ? 'text' : 'password'}
+        value={value}
+        onChange={onChange}
+        className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2 pr-10"
+        {...props}
+      />
+      <button
+        type="button"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-white focus:outline-none"
+        tabIndex={-1}
+        onClick={() => setShow((s) => !s)}
+        aria-label={show ? 'Hide password' : 'Show password'}
+      >
+        {show ? (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-white">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.98 8.223A10.477 10.477 0 0 0 2.25 12c1.885 4.21 6.07 7.5 9.75 7.5 1.7 0 3.37-.44 4.82-1.277M21.75 12c-.512-1.145-1.24-2.217-2.13-3.152m-3.12-2.348A9.956 9.956 0 0 0 12 4.5c-1.7 0-3.37.44-4.82 1.277M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+          </svg>
+        ) : (
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5 text-white">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 12S5.25 6.75 12 6.75 21.75 12 21.75 12 18.75 17.25 12 17.25 2.25 12 2.25 12Z" />
+            <circle cx="12" cy="12" r="3" fill="white" />
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+};
+
 const ResetPassword = () => {
   const [newPassword, setNewPassword] = useState('');
   const [message, setMessage] = useState('');
@@ -153,9 +186,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
         </div>
         <div className="mb-2">
           <label className="block text-gray-300 mb-1 font-semibold">Password</label>
-          <input
-            type="password"
-            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
+          <PasswordInput
             value={password}
             onChange={e => setPassword(e.target.value)}
             required

@@ -108,7 +108,21 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
       <div className="flex flex-col md:flex-row gap-4 items-center">
         <div className="flex-1">
           <label className="block font-semibold mb-1 text-blue-200">Paid By</label>
-          <input type="text" value={paidBy} readOnly className="border border-pink-300 rounded px-3 py-2 bg-gray-100 text-pink-700 w-full" />
+          <select
+            value={paidBy}
+            onChange={e => setPaidBy(e.target.value)}
+            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
+          >
+            {usersLoading ? (
+              <option>Loading users...</option>
+            ) : users.length > 0 ? (
+              users.map(user => (
+                <option key={user} value={user}>{user}</option>
+              ))
+            ) : (
+              <option disabled>No users found</option>
+            )}
+          </select>
         </div>
         <div className="flex-1">
           <label className="block font-semibold mb-1 text-blue-200">Split With</label>
