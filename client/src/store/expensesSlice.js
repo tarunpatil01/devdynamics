@@ -1,7 +1,7 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchExpenses = createAsyncThunk('expenses/fetchExpenses', async () => {
-  const token = sessionStorage.getItem('token');
+  const token = localStorage.getItem('token');
   const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const res = await fetch(`${baseURL}/expenses`, { headers });

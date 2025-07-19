@@ -373,6 +373,7 @@ function Dashboard() {
                     onAddPerson={handleAddPersonToGroup}
                     messages={groupMessages}
                     onSendMessage={handleSendGroupMessage}
+                    onAddExpense={addExpense}
                   />
                 ) : (
                   <div className="text-center text-2xl text-white font-bold">Select a group</div>

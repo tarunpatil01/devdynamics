@@ -57,7 +57,7 @@ router.post('/forgot-password', async (req, res) => {
     user.resetPasswordExpires = Date.now() + 1000 * 60 * 15; // 15 minutes
     await user.save();
     // For demo, return the reset link in the response
-    const resetLink = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password?token=${token}&username=${encodeURIComponent(username)}`;
+    const resetLink = `${process.env.CLIENT_URL || 'https://devdynamics-split-app.vercel.app'}/reset-password?token=${token}&username=${encodeURIComponent(username)}`;
     res.json({ success: true, message: 'Password reset link generated', resetLink });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });

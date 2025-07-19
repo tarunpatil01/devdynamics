@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import ExpenseForm from './ExpenseForm';
 
 const avatarColors = [
   'bg-blue-700', 'bg-pink-700', 'bg-green-700', 'bg-yellow-700', 'bg-purple-700', 'bg-red-700', 'bg-indigo-700', 'bg-teal-700'
@@ -9,7 +10,7 @@ function getAvatarColor(name) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-const Groups = ({ group, people, onAddPerson, messages, onSendMessage }) => {
+const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpense }) => {
   const [newPerson, setNewPerson] = useState('');
   const [message, setMessage] = useState('');
   const chatRef = useRef(null);
@@ -43,6 +44,12 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage }) => {
   return (
     <div className="flex flex-col h-full w-full max-w-3xl mx-auto p-2 md:p-6 bg-black text-white rounded-2xl shadow-2xl border-2 border-blue-900 animate-fadein">
       <h2 className="text-3xl font-bold text-white mb-6 text-center drop-shadow">{group?.name ? `Group: ${group.name}` : 'Select a group'}</h2>
+      {/* Add Expense Form for this group */}
+      {group?._id && (
+        <div className="mb-8">
+          <ExpenseForm group={group._id} onAdd={onAddExpense} />
+        </div>
+      )}
       <div className="flex flex-col md:flex-row gap-8 mb-4">
         {/* People in Group */}
         <div className="flex-1 min-w-[200px]">

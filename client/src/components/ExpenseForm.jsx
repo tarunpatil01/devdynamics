@@ -26,7 +26,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
       setUsersLoading(true);
       try {
         const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${baseURL}/people/users`, { headers });
         const data = await res.json();
@@ -41,7 +41,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
 
   // Default paidBy to logged-in user
   useEffect(() => {
-    const user = sessionStorage.getItem('username');
+    const user = localStorage.getItem('username');
     if (user) setPaidBy(user);
   }, []);
 
@@ -49,13 +49,13 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
     if (group) setSelectedGroup(group);
   }, [group]);
 
-  // Fetch group members for selected group
+  // Fetch group members for selected group, or all users if no group is selected
   useEffect(() => {
     const fetchUsers = async () => {
       setUsersLoading(true);
       try {
         const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-        const token = sessionStorage.getItem('token');
+        const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         let url;
         if (selectedGroup) {

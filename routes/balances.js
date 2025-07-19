@@ -68,21 +68,6 @@ async function calculateBalances(userId) {
   return balances;
 }
 
-// PUT /balances - update balances manually
-router.put('/', auth, async (req, res) => {
-  try {
-    const { balances } = req.body;
-    if (!balances || typeof balances !== 'object') {
-      return res.status(400).json({ success: false, message: 'Invalid balances data.' });
-    }
-    // Here you would update balances in your DB. For demo, just return success.
-    // You may want to persist this in a separate collection/model.
-    res.json({ success: true, message: 'Balances updated successfully.' });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error', error: err.message });
-  }
-});
-
 // GET /balances - Show each person's balance for user
 router.get('/', auth, async (req, res) => {
   try {

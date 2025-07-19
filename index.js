@@ -9,7 +9,6 @@ dotenv.config();
 
 const app = express();
 const allowedOrigins = [
-  "http://localhost:5173", 
   "https://devdynamics-split-app.vercel.app",
   "https://devynamics-yw9g.onrender.com"
 ];
