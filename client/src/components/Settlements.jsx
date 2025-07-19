@@ -24,22 +24,11 @@ const Settlements = ({ group, people, loading }) => {
   }, [dispatch, username]);
 
   // Aggregate owed by you and owed to you
-  const owedByYou = [];
-  const owedToYou = [];
-  let totalOwedByYou = 0;
-  let totalOwedToYou = 0;
-  if (settlements && Array.isArray(settlements)) {
-    settlements.forEach(s => {
-      if (s.from === username) {
-        owedByYou.push(s);
-        totalOwedByYou += s.amount;
-      }
-      if (s.to === username) {
-        owedToYou.push(s);
-        totalOwedToYou += s.amount;
-      }
-    });
-  }
+  const safeSettlements = Array.isArray(settlements) ? settlements : [];
+  const owedByYou = safeSettlements.filter(s => s.from === username);
+  const owedToYou = safeSettlements.filter(s => s.to === username);
+  const totalOwedByYou = owedByYou.reduce((sum, s) => sum + s.amount, 0);
+  const totalOwedToYou = owedToYou.reduce((sum, s) => sum + s.amount, 0);
 
   // Get all unique people for avatars (from settlements)
   const allPeople = Array.from(new Set([
