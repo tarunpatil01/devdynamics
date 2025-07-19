@@ -158,7 +158,7 @@ router.post('/', auth, expenseValidation, async (req, res) => {
         await People.create({ name: personName, group });
       }
     }
-    const expense = new Expense({ amount, description, paid_by, split_type, split_details, group, user: req.userId, category, recurring });
+    const expense = new Expense({ amount, description, paid_by, split_type, split_details, split_with, group, user: req.userId, category, recurring });
     await expense.save();
     // Emit socket event for new expense to the group room
     if (req.app.get('io') && group) {
@@ -222,7 +222,7 @@ router.put('/:id', auth, expenseValidation, async (req, res) => {
     }
     const expense = await Expense.findOneAndUpdate(
       { _id: req.params.id, user: req.userId },
-      { amount, description, paid_by, split_type, split_details, group, updated_at: Date.now(), category, recurring },
+      { amount, description, paid_by, split_type, split_details, split_with, group, updated_at: Date.now(), category, recurring },
       { new: true }
     );
     if (!expense) return res.status(404).json({ success: false, message: 'Expense not found' });

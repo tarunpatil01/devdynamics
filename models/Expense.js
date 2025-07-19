@@ -27,6 +27,16 @@ const expenseSchema = new mongoose.Schema({
     type: Object,
     required: true
   },
+  split_with: {
+    type: [String],
+    required: true,
+    validate: {
+      validator: function(v) {
+        return Array.isArray(v) && v.length > 0;
+      },
+      message: 'split_with must be a non-empty array of people'
+    }
+  },
   group: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Group',
