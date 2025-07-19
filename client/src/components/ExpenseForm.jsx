@@ -159,15 +159,17 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
   ) : [];
 
   return (
-    <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-4 w-full overflow-hidden">
-      <h2 className="text-2xl font-bold text-blue-700 mb-2">Add Expense</h2>
+    <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-3 sm:p-4 md:p-6 mb-4 md:mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-3 md:gap-4 w-full responsive-form">
+      <h2 className="text-xl md:text-2xl font-bold text-blue-700 mb-2">{editExpense ? 'Edit Expense' : 'Add Expense'}</h2>
+      
+      {/* Group Selection */}
       {Array.isArray(groups) && groups.length > 1 && (
         <div className="mb-2 w-full">
-          <label className="block font-semibold mb-1 text-blue-200">Group</label>
+          <label className="block font-semibold mb-1 text-blue-200 text-sm md:text-base">Group</label>
           <select
             value={selectedGroup}
             onChange={e => setSelectedGroup(e.target.value)}
-            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
+            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2 touch-target"
             required
           >
             <option value="" disabled>Select group</option>
@@ -177,10 +179,32 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
           </select>
         </div>
       )}
-      <div className="flex flex-col lg:flex-row gap-4 w-full">
-        <input type="number" step="0.01" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full" />
-        <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} required className="border border-purple-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-purple-700 placeholder-purple-300 w-full" />
-        <select value={category} onChange={e => setCategory(e.target.value)} required className="border border-green-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 w-full">
+      
+      {/* Amount, Description, Category */}
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full">
+        <input 
+          type="number" 
+          step="0.01" 
+          placeholder="Amount" 
+          value={amount} 
+          onChange={e => setAmount(e.target.value)} 
+          required 
+          className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full touch-target" 
+        />
+        <input 
+          type="text" 
+          placeholder="Description" 
+          value={description} 
+          onChange={e => setDescription(e.target.value)} 
+          required 
+          className="border border-purple-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-purple-700 placeholder-purple-300 w-full touch-target" 
+        />
+        <select 
+          value={category} 
+          onChange={e => setCategory(e.target.value)} 
+          required 
+          className="border border-green-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 w-full touch-target"
+        >
           <option value="Food">Food</option>
           <option value="Travel">Travel</option>
           <option value="Utilities">Utilities</option>
@@ -188,13 +212,15 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
           <option value="Other">Other</option>
         </select>
       </div>
-      <div className="flex flex-col lg:flex-row gap-4 items-start w-full">
-        <div className="flex-1 min-w-0">
-          <label className="block font-semibold mb-1 text-blue-200">Paid By</label>
+      
+      {/* Paid By and Split Type */}
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 items-start w-full">
+        <div className="flex-1 min-w-0 w-full">
+          <label className="block font-semibold mb-1 text-blue-200 text-sm md:text-base">Paid By</label>
           <select
             value={paidBy}
             onChange={e => setPaidBy(e.target.value)}
-            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full"
+            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full touch-target"
           >
             {usersLoading ? (
               <option>Loading users...</option>
@@ -206,12 +232,12 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
           </select>
           {paidByError && <div className="text-red-400 text-sm mt-1">{paidByError}</div>}
         </div>
-        <div className="flex-1 min-w-0">
-          <label className="block font-semibold mb-1 text-blue-200">Split Type</label>
+        <div className="flex-1 min-w-0 w-full">
+          <label className="block font-semibold mb-1 text-blue-200 text-sm md:text-base">Split Type</label>
           <select
             value={splitType}
             onChange={e => handleSplitTypeChange(e.target.value)}
-            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full"
+            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full touch-target"
           >
             <option value="equal">Equal</option>
             <option value="percentage">Percentage</option>
@@ -220,26 +246,30 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
           </select>
         </div>
       </div>
+      
+      {/* Split With */}
       <div className="w-full">
-        <label className="block font-semibold mb-2 text-blue-200">Split With</label>
-        <div className="flex flex-wrap gap-2 mb-4 max-w-full">
+        <label className="block font-semibold mb-2 text-blue-200 text-sm md:text-base">Split With</label>
+        <div className="flex flex-wrap gap-2 mb-4 max-w-full responsive-flex">
           {safeUsers.map(user => (
-            <label key={user} className="flex items-center gap-2 bg-zinc-800 rounded-lg px-3 py-2 cursor-pointer hover:bg-zinc-700 transition-all duration-200">
+            <label key={user} className="flex items-center gap-2 bg-zinc-800 rounded-lg px-2 py-2 cursor-pointer hover:bg-zinc-700 transition-all duration-200 touch-target">
               <input
                 type="checkbox"
                 checked={safeSplitWith.includes(user)}
                 onChange={() => handleSplitWithChange(user)}
                 className="rounded border-blue-500 text-blue-600 focus:ring-blue-500"
               />
-              <span className="text-white truncate">{user}</span>
+              <span className="text-white truncate text-sm">{user}</span>
             </label>
           ))}
         </div>
       </div>
+      
+      {/* Split Details */}
       {safeSplitWith.length > 0 && (
         <div className="w-full">
-          <label className="block font-semibold mb-2 text-blue-200">Split Details</label>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <label className="block font-semibold mb-2 text-blue-200 text-sm md:text-base">Split Details</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
             {safeSplitWith.map(person => (
               <div key={person} className="flex flex-col gap-2">
                 <label className="text-sm text-gray-300 truncate">{person}</label>
@@ -249,20 +279,22 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
                   placeholder={splitType === 'percentage' ? 'Percentage' : splitType === 'exact' ? 'Amount' : 'Shares'}
                   value={splitDetails[person] || ''}
                   onChange={e => setSplitDetails(prev => ({ ...prev, [person]: e.target.value }))}
-                  className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full"
+                  className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full touch-target"
                 />
               </div>
             ))}
           </div>
         </div>
       )}
-      <div className="flex flex-col lg:flex-row gap-4 w-full">
-        <div className="flex-1 min-w-0">
-          <label className="block font-semibold mb-1 text-blue-200">Recurring</label>
+      
+      {/* Recurring and Next Due */}
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 w-full">
+        <div className="flex-1 min-w-0 w-full">
+          <label className="block font-semibold mb-1 text-blue-200 text-sm md:text-base">Recurring</label>
           <select
             value={recurringType}
             onChange={e => setRecurringType(e.target.value)}
-            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full"
+            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full touch-target"
           >
             <option value="none">None</option>
             <option value="weekly">Weekly</option>
@@ -270,24 +302,28 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
           </select>
         </div>
         {recurringType !== 'none' && (
-          <div className="flex-1 min-w-0">
-            <label className="block font-semibold mb-1 text-blue-200">Next Due</label>
+          <div className="flex-1 min-w-0 w-full">
+            <label className="block font-semibold mb-1 text-blue-200 text-sm md:text-base">Next Due</label>
             <input
               type="date"
               value={nextDue}
               onChange={e => setNextDue(e.target.value)}
-              className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full"
+              className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full touch-target"
             />
           </div>
         )}
       </div>
-      {error && <div className="text-red-400 text-center">{error}</div>}
-      <div className="flex gap-4 justify-end">
+      
+      {/* Error Message */}
+      {error && <div className="text-red-400 text-center text-sm">{error}</div>}
+      
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 md:gap-4 justify-end">
         {editExpense && (
           <button
             type="button"
             onClick={() => setEditExpense(null)}
-            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-bold shadow transition-all duration-200"
+            className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded font-bold shadow transition-all duration-200 touch-target w-full sm:w-auto"
           >
             Cancel
           </button>
@@ -295,11 +331,12 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
         <button
           type="submit"
           disabled={loading}
-          className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded font-bold shadow transition-all duration-200 disabled:opacity-50"
+          className="bg-blue-700 hover:bg-blue-800 text-white px-6 py-2 rounded font-bold shadow transition-all duration-200 disabled:opacity-50 touch-target w-full sm:w-auto"
         >
           {loading ? 'Adding...' : (editExpense ? 'Update Expense' : 'Add Expense')}
         </button>
       </div>
+      
       <Toast message={toast.message} type={toast.type} onClose={closeToast} />
     </form>
   );

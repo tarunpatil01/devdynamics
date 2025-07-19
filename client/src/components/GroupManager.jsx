@@ -55,58 +55,74 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
   };
 
   return (
-    <div className="mb-6">
-      <h2 className="text-lg font-bold mb-2 text-white">Groups</h2>
-      <div className="flex flex-col sm:flex-row gap-2 mb-2">
+    <div className="mb-4 md:mb-6 responsive-container">
+      <h2 className="text-base sm:text-lg font-bold mb-2 text-white">Groups</h2>
+      
+      {/* Group Name Input */}
+      <div className="flex flex-col sm:flex-row gap-2 mb-3">
         <input
           type="text"
           value={groupName}
           onChange={e => setGroupName(e.target.value)}
           placeholder="New group name"
-          className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 flex-1 min-w-0"
+          className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 flex-1 min-w-0 touch-target"
         />
       </div>
-      <div className="mb-2">
-        <label className="block text-blue-200 font-semibold mb-1">Add Members</label>
-        <div className="flex flex-wrap gap-2">
-          {usersLoading ? <span className="text-gray-400">Loading users...</span> : (Array.isArray(users) && users.length > 0) ? users.map(user => (
+      
+      {/* Add Members */}
+      <div className="mb-3">
+        <label className="block text-blue-200 font-semibold mb-2 text-sm sm:text-base">Add Members</label>
+        <div className="flex flex-wrap gap-2 responsive-flex">
+          {usersLoading ? (
+            <span className="text-gray-400 text-sm">Loading users...</span>
+          ) : (Array.isArray(users) && users.length > 0) ? users.map(user => (
             <button
               key={user}
               type="button"
-              className={`flex items-center gap-2 px-3 py-1 rounded-full border transition-all duration-200 font-semibold shadow ${selectedUsers.includes(user) ? 'bg-blue-700 text-white border-blue-500' : 'bg-zinc-800 text-blue-300 border-blue-300'}`}
+              className={`flex items-center gap-2 px-2 sm:px-3 py-1 rounded-full border transition-all duration-200 font-semibold shadow touch-target text-sm ${selectedUsers.includes(user) ? 'bg-blue-700 text-white border-blue-500' : 'bg-zinc-800 text-blue-300 border-blue-300'}`}
               onClick={() => handleUserSelect(user)}
             >
-              <span className="w-6 h-6 flex items-center justify-center rounded-full bg-blue-500 text-white font-bold text-sm">
+              <span className="w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center rounded-full bg-blue-500 text-white font-bold text-xs sm:text-sm">
                 {user.charAt(0).toUpperCase()}
               </span>
-              {user}
+              <span className="truncate max-w-20 sm:max-w-none">{user}</span>
             </button>
-          )) : <span className="text-gray-400">No users found.</span>}
+          )) : (
+            <span className="text-gray-400 text-sm">No users found.</span>
+          )}
         </div>
       </div>
+      
+      {/* Create Button */}
       <button
         onClick={handleCreate}
-        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-all duration-200 font-semibold shadow mt-2"
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-all duration-200 font-semibold shadow mt-2 touch-target w-full sm:w-auto"
       >
-        Create
+        Create Group
       </button>
+      
+      {/* Groups List */}
       {status === 'loading' ? (
-        <div>Loading groups...</div>
+        <div className="text-gray-400 text-sm mt-3">Loading groups...</div>
       ) : error ? (
-        <div className="text-red-500">{error}</div>
+        <div className="text-red-500 text-sm mt-3">{error}</div>
       ) : (
-        <ul className="flex gap-2 flex-wrap mt-4">
-          {(Array.isArray(groups) && groups.length > 0) ? groups.map(group => (
-            <li key={group._id}>
+        <div className="mt-4">
+          <h3 className="text-sm sm:text-base font-semibold text-gray-200 mb-2">Your Groups</h3>
+          <div className="flex flex-wrap gap-2 responsive-flex">
+            {(Array.isArray(groups) && groups.length > 0) ? groups.map(group => (
               <button
-                className={`px-3 py-1 rounded border ${selectedGroup === group._id ? 'bg-blue-200 border-blue-500' : 'bg-gray-100 border-gray-300'}`}
+                key={group._id}
+                className={`px-3 py-2 rounded border transition-all duration-200 touch-target text-sm ${selectedGroup === group._id ? 'bg-blue-700 text-white border-blue-500' : 'bg-zinc-800 text-gray-300 border-gray-600 hover:bg-zinc-700'}`}
                 onClick={() => setSelectedGroup(group._id)}
               >
                 {group.name}
               </button>
-            </li>
-          )) : null}
-        </ul>
+            )) : (
+              <span className="text-gray-400 text-sm">No groups created yet.</span>
+            )}
+          </div>
+        </div>
       )}
     </div>
   );

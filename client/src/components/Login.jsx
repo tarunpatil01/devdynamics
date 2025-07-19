@@ -169,18 +169,18 @@ const Login = () => {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-black px-2">
+    <div className="min-h-screen flex items-center justify-center bg-black px-2 sm:px-4 responsive-container">
       <form
-        className="w-full max-w-sm bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-blue-900 p-8 flex flex-col gap-4 animate-fadein"
+        className="w-full max-w-sm bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl border-2 border-blue-900 p-4 sm:p-6 md:p-8 flex flex-col gap-3 sm:gap-4 animate-fadein"
         onSubmit={handleSubmit}
         aria-label="Login Form"
       >
-        <h2 className="text-3xl font-extrabold text-white mb-2 text-center drop-shadow">Login</h2>
+        <h2 className="text-2xl sm:text-3xl font-extrabold text-white mb-2 text-center drop-shadow">Login</h2>
         <div className="mb-2">
-          <label className="block text-gray-300 mb-1 font-semibold">Username</label>
+          <label className="block text-gray-300 mb-1 font-semibold text-sm sm:text-base">Username</label>
           <input
             type="text"
-            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
+            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2 touch-target"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
@@ -190,7 +190,7 @@ const Login = () => {
           />
         </div>
         <div className="mb-2">
-          <label className="block text-gray-300 mb-1 font-semibold">Password</label>
+          <label className="block text-gray-300 mb-1 font-semibold text-sm sm:text-base">Password</label>
           <PasswordInput
             value={password}
             onChange={e => setPassword(e.target.value)}
@@ -199,32 +199,32 @@ const Login = () => {
             disabled={loading}
           />
         </div>
-        {error && <div className="text-red-500 mb-2 text-center animate-shake" role="alert">{error}</div>}
+        {error && <div className="text-red-500 mb-2 text-center animate-shake text-sm" role="alert">{error}</div>}
         <button
           type="submit"
-          className="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2"
+          className="w-full bg-blue-700 hover:bg-blue-800 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2 touch-target"
           disabled={loading}
         >
           {loading ? 'Logging in...' : 'Login'}
         </button>
         <button
           type="button"
-          className="w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-blue-400 py-2 rounded-lg font-bold shadow transition-all duration-200"
+          className="w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-blue-400 py-2 rounded-lg font-bold shadow transition-all duration-200 touch-target"
           onClick={() => navigate('/register')}
           disabled={loading}
         >
           Don't have an account? <span className="underline">Register</span>
         </button>
         <div className="mt-2 text-center">
-          <button type="button" className="text-blue-400 hover:underline text-sm" onClick={() => setShowForgot(true)} disabled={loading}>
+          <button type="button" className="text-blue-400 hover:underline text-sm touch-target" onClick={() => setShowForgot(true)} disabled={loading}>
             Forgot password?
           </button>
         </div>
       </form>
       {showForgot && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 animate-fadein" role="dialog" aria-modal="true">
-          <form className="bg-zinc-900/90 p-8 rounded-2xl shadow-2xl border-2 border-blue-900 flex flex-col gap-4 w-full max-w-xs animate-fadein" onSubmit={handleForgot} aria-label="Forgot Password Form">
-            <h3 className="text-xl font-bold text-white mb-2 text-center">Forgot Password</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60 animate-fadein p-2 sm:p-4" role="dialog" aria-modal="true">
+          <form className="bg-zinc-900/90 p-4 sm:p-6 md:p-8 rounded-2xl shadow-2xl border-2 border-blue-900 flex flex-col gap-3 sm:gap-4 w-full max-w-xs animate-fadein" onSubmit={handleForgot} aria-label="Forgot Password Form">
+            <h3 className="text-lg sm:text-xl font-bold text-white mb-2 text-center">Forgot Password</h3>
             <input
               ref={forgotInputRef}
               type="text"
@@ -232,16 +232,16 @@ const Login = () => {
               value={forgotUser}
               onChange={e => setForgotUser(e.target.value)}
               required
-              className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+              className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200 touch-target"
               aria-label="Username for password reset"
               disabled={!!resetLink}
             />
-            <button type="submit" className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg font-bold shadow transition-all duration-200" disabled={!!resetLink}>
+            <button type="submit" className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg font-bold shadow transition-all duration-200 touch-target" disabled={!!resetLink}>
               Send Reset Link
             </button>
-            {forgotMsg && <div className="text-blue-400 text-center">{forgotMsg}</div>}
+            {forgotMsg && <div className="text-blue-400 text-center text-sm">{forgotMsg}</div>}
             {resetLink && <div className="text-xs text-green-400 break-all text-center mt-2">Reset Link: <a href={resetLink} className="underline" target="_blank" rel="noopener noreferrer">{resetLink}</a></div>}
-            <button type="button" className="mt-2 text-gray-400 hover:underline text-xs" onClick={() => setShowForgot(false)}>
+            <button type="button" className="mt-2 text-gray-400 hover:underline text-xs touch-target" onClick={() => setShowForgot(false)}>
               Close
             </button>
           </form>
