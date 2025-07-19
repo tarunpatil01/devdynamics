@@ -20,25 +20,6 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
   const [nextDue, setNextDue] = useState('');
   const [selectedGroup, setSelectedGroup] = useState(group || (Array.isArray(groups) && groups.length === 1 ? groups[0]._id : ''));
 
-  // Fetch all users from backend 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setUsersLoading(true);
-      try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-        const token = localStorage.getItem('token');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${baseURL}/people/users`, { headers });
-        const data = await res.json();
-        setUsers(Array.isArray(data?.data) ? data.data : []);
-      } catch {
-        setUsers([]);
-      }
-      setUsersLoading(false);
-    };
-    fetchUsers();
-  }, []);
-
   // Default paidBy to logged-in user
   useEffect(() => {
     const user = localStorage.getItem('username');
@@ -129,6 +110,11 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
       showToast('Category is required.', 'error');
       return;
     }
+    if (!selectedGroup) {
+      setError('Please select a group before adding an expense.');
+      showToast('Please select a group before adding an expense.', 'error');
+      return;
+    }
     const splitErr = validateSplitDetails();
     if (splitErr) {
       setError(splitErr);
@@ -166,7 +152,11 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
   };
 
   const safeSplitWith = Array.isArray(splitWith) ? splitWith : [];
-  const safeUsers = Array.isArray(users) ? users : [];
+  const safeUsers = Array.isArray(users) ? users.filter(user => 
+    typeof user === 'string' && 
+    user.trim().length > 0 && 
+    !user.match(/^[0-9a-fA-F]{24}$/) // Filter out ObjectId strings
+  ) : [];
 
   return (
     <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-4">

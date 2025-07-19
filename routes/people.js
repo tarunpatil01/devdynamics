@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const Expense = require('../models/Expense');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
@@ -57,19 +58,32 @@ router.get('/group/:groupId', auth, async (req, res) => {
   try {
     const group = await Group.findById(req.params.groupId);
     if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
+    
     // Members can be ObjectIds or usernames, so normalize to usernames
-    const User = require('../models/User');
     const usernames = [];
     for (const member of group.members) {
-      if (typeof member === 'string') {
-        usernames.push(member);
-      } else {
+      if (typeof member === 'string' && member.length > 0) {
+        // Check if it's a valid ObjectId string
+        if (mongoose.Types.ObjectId.isValid(member)) {
+          const user = await User.findById(member);
+          if (user) usernames.push(user.username);
+        } else {
+          // It's a username string
+          usernames.push(member);
+        }
+      } else if (member && member.toString) {
+        // It's an ObjectId object
         const user = await User.findById(member);
         if (user) usernames.push(user.username);
       }
     }
-    res.json({ success: true, data: usernames });
+    
+    // Filter out any empty or invalid usernames
+    const validUsernames = usernames.filter(username => username && typeof username === 'string' && username.trim().length > 0);
+    
+    res.json({ success: true, data: validUsernames });
   } catch (err) {
+    console.error('Error fetching group members:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

@@ -123,8 +123,15 @@ const GroupMessage = require('../models/GroupMessage');
 // Get group messages (persistent)
 router.get('/:id/messages', auth, async (req, res) => {
   try {
-    const msgs = await GroupMessage.find({ group: req.params.id }).populate('sender', 'name').sort({ created_at: 1 });
-    res.json({ success: true, data: msgs });
+    const msgs = await GroupMessage.find({ group: req.params.id })
+      .populate('sender', 'username')
+      .sort({ created_at: 1 });
+    // Map sender to always return a string username
+    const messagesWithSenderName = msgs.map(msg => ({
+      ...msg.toObject(),
+      sender: (msg.sender && typeof msg.sender.username === 'string') ? msg.sender.username : 'Unknown',
+    }));
+    res.json({ success: true, data: messagesWithSenderName });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

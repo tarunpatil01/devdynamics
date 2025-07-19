@@ -4,9 +4,8 @@ const Sidebar = ({ showGroups, setShowGroups, sidebarOpen, setSidebarOpen }) => 
   const username = localStorage.getItem('username');
   return (
     <aside
-      className={`fixed top-0 left-0 z-40 h-full w-72 bg-zinc-900/95 backdrop-blur-lg shadow-2xl border-r-2 border-blue-900 rounded-r-2xl flex flex-col transition-transform duration-300 overflow-y-auto
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:static md:block`}
-      style={{ minHeight: '100vh', maxHeight: '100vh' }}
+      className={`fixed top-0 left-0 z-40 h-screen w-72 bg-zinc-900/95 backdrop-blur-lg shadow-2xl border-r-2 border-blue-900 rounded-r-2xl flex flex-col transition-transform duration-300
+        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0 md:block`}
       aria-label="Sidebar"
     >
       <div className="flex items-center justify-between p-6 border-b border-blue-900">
@@ -17,7 +16,7 @@ const Sidebar = ({ showGroups, setShowGroups, sidebarOpen, setSidebarOpen }) => 
           </svg>
         </button>
       </div>
-      <nav className="flex-1 flex flex-col gap-4 p-6">
+      <nav className="flex-1 flex flex-col gap-4 p-6 overflow-y-auto">
         <button
           className={`w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg ${!showGroups ? 'bg-blue-700 text-white' : 'bg-zinc-800 text-blue-300'}`}
           onClick={() => { setShowGroups(false); setSidebarOpen(false); }}

@@ -133,7 +133,7 @@ function Dashboard() {
   // Add person to group
   const handleAddPersonToGroup = async (personName) => {
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devynamics-yw9g.onrender.com';
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
       const res = await fetch(`${baseURL}/groups/${selectedGroup}/add-person`, {
         method: 'POST',
@@ -160,9 +160,11 @@ function Dashboard() {
       });
       if (!res.ok) throw new Error('Failed to send message');
       const { data: msg } = await res.json();
+      // Use username from localStorage for sender name
+      const username = localStorage.getItem('username') || 'Unknown';
       socket.emit('groupMessage', {
         groupId: selectedGroup,
-        sender: user,
+        sender: username,
         text: msg.text,
         created_at: msg.created_at
       });
@@ -187,13 +189,21 @@ function Dashboard() {
       const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const method = isEdit ? 'PUT' : 'POST';
       const url = isEdit ? `${baseURL}/expenses/${expense._id}` : `${baseURL}/expenses`;
+      // Defensive: ensure split_with is array, split_details is object, group is present, amount is number
+      const payload = {
+        ...expense,
+        amount: Number(expense.amount),
+        split_with: Array.isArray(expense.split_with) ? expense.split_with : [],
+        split_details: (expense.split_details && typeof expense.split_details === 'object') ? expense.split_details : {},
+        group: expense.group || selectedGroup,
+      };
       const res = await fetch(url, {
         method,
         headers: {
           'Content-Type': 'application/json',
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
-        body: JSON.stringify({ ...expense, group: selectedGroup })
+        body: JSON.stringify(payload)
       });
       if (!res.ok) {
         if (res.status === 404) {
@@ -303,7 +313,7 @@ function Dashboard() {
     <ErrorBoundary>
       {globalError && <Toast message={globalError} type="error" onClose={() => setGlobalError('')} />}
       {loading && <Spinner />}
-      <div className="min-h-screen w-full overflow-x-hidden flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
+      <div className="min-h-screen w-full bg-gradient-to-br from-black via-zinc-900 to-blue-950">
         {/* Hamburger button for mobile only */}
         <button
           className="fixed top-4 left-4 z-40 bg-blue-700 hover:bg-blue-800 text-white p-2 rounded-lg shadow-lg focus:outline-none md:hidden"
@@ -319,7 +329,7 @@ function Dashboard() {
         )}
         {/* Sidebar always visible on desktop, overlay on mobile */}
         <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-12 w-full">
+        <main className="md:ml-72 flex flex-col items-center justify-center p-4 md:p-12 w-full min-h-screen">
           <div className="w-full max-w-6xl bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-8 flex flex-col gap-8">
             <header className="mb-8 text-center relative">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
