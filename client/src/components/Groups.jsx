@@ -57,11 +57,11 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpe
           <ul className="mb-4 flex flex-col gap-3">
             {safePeople.length > 0 ? safePeople.map((person, idx) => {
               const key = typeof person === 'string' ? person : (person._id || person.name || idx);
-              const displayName = typeof person === 'string' ? person : (person.name || '');
+              const displayName = typeof person === 'string' ? person : (typeof person.name === 'string' ? person.name : '');
               return (
                 <li key={key} className="flex items-center gap-3 py-2 px-3 bg-zinc-900 rounded-xl shadow text-white">
                   <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg ${getAvatarColor(displayName)}`}>{displayName.charAt(0).toUpperCase()}</span>
-                  <span className="font-semibold text-blue-200 text-base">{displayName}</span>
+                  <span className="font-semibold text-blue-200 text-base">{typeof displayName === 'string' ? displayName : ''}</span>
                 </li>
               );
             }) : <li className="text-gray-500">No people in group.</li>}
