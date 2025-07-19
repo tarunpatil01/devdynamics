@@ -20,11 +20,11 @@ function App() {
   const handleLogout = () => {
     setToken('');
     setUser(null);
-    localStorage.removeItem('token');
+    sessionStorage.removeItem('token');
     window.location.replace('/login');
   };
   // State declarations (move token above useEffect)
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [token, setToken] = useState(sessionStorage.getItem('token') || '');
   const [expenses, setExpenses] = useState([]);
   const [editExpense, setEditExpense] = useState(null);
   const [balances, setBalances] = useState({});
@@ -60,7 +60,7 @@ function App() {
   const handleLogin = (jwt, userInfo) => {
     setToken(jwt);
     setUser(userInfo);
-    localStorage.setItem('token', jwt);
+    sessionStorage.setItem('token', jwt);
     setShowRegister(false);
   };
   const handleShowRegister = () => setShowRegister(true);

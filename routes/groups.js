@@ -33,10 +33,11 @@ router.post('/', auth, async (req, res) => {
 // List groups for user
 router.get('/', auth, async (req, res) => {
   try {
-    const groups = await Group.find({ members: req.userId });
-    res.json({ success: true, data: groups });
+    const groups = await Group.find({ members: req.userId }) || [];
+    res.json({ success: true, data: Array.isArray(groups) ? groups : [] });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
+    console.error('Error in GET /groups:', err);
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 });
 
