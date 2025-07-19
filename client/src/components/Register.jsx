@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import Toast from './Toast';
+import { useNavigate } from 'react-router-dom';
 
 const Register = ({ onRegister, onSwitchToLogin }) => {
   const [username, setUsername] = useState('');
@@ -9,6 +10,7 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
   const [loading, setLoading] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const inputRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (inputRef.current) inputRef.current.focus();
@@ -33,6 +35,7 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
       setTimeout(() => {
         setShowToast(false);
         if (onRegister) onRegister();
+        navigate('/login');
       }, 2000);
     } catch (err) {
       setError(err.message);

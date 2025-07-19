@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const PasswordInput = ({ value, onChange, ...props }) => {
   const [show, setShow] = useState(false);
@@ -105,6 +106,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
   const [resetLink, setResetLink] = useState('');
   const [forgotMsg, setForgotMsg] = useState('');
   const forgotInputRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (showForgot && forgotInputRef.current) forgotInputRef.current.focus();
@@ -132,6 +134,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
         return;
       }
       onLogin(data.token, data.user);
+      navigate('/dashboard');
     } catch (err) {
       setError(err.message);
     }
