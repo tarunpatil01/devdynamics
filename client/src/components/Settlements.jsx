@@ -94,11 +94,11 @@ const Settlements = ({ group, people, loading }) => {
           {/* You owe */}
           <div className="flex-1">
             <div className="text-lg font-bold text-red-400 mb-2">You owe</div>
-            {owedByYou.length === 0 ? (
+            {Array.isArray(owedByYou) && owedByYou.length === 0 ? (
               <div className="text-gray-400">You owe nothing.</div>
             ) : (
               <ul className="flex flex-col gap-3">
-                {owedByYou.map((s, idx) => (
+                {Array.isArray(owedByYou) ? owedByYou.map((s, idx) => (
                   <li key={idx} className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 shadow">
                     <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg text-white ${getAvatarColor(s.to)}`}>{s.to.charAt(0).toUpperCase()}</span>
                     <span className="flex-1 text-blue-200 font-semibold">{s.to}</span>
@@ -111,18 +111,18 @@ const Settlements = ({ group, people, loading }) => {
                       {settling === s.to ? 'Settling...' : 'Settle up'}
                     </button>
                   </li>
-                ))}
+                )) : null}
               </ul>
             )}
           </div>
           {/* Owes you */}
           <div className="flex-1">
             <div className="text-lg font-bold text-green-400 mb-2">Owes you</div>
-            {owedToYou.length === 0 ? (
+            {Array.isArray(owedToYou) && owedToYou.length === 0 ? (
               <div className="text-gray-400">No one owes you.</div>
             ) : (
               <ul className="flex flex-col gap-3">
-                {owedToYou.map((s, idx) => (
+                {Array.isArray(owedToYou) ? owedToYou.map((s, idx) => (
                   <li key={idx} className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 shadow">
                     <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg text-white ${getAvatarColor(s.from)}`}>{s.from.charAt(0).toUpperCase()}</span>
                     <span className="flex-1 text-blue-200 font-semibold">{s.from}</span>
@@ -135,7 +135,7 @@ const Settlements = ({ group, people, loading }) => {
                       {settling === s.from ? 'Settling...' : 'Settle up'}
                     </button>
                   </li>
-                ))}
+                )) : null}
               </ul>
             )}
           </div>

@@ -68,16 +68,16 @@ function Dashboard() {
       const setData = await setRes.json();
       const pplData = await pplRes.json();
       const grpData = await grpRes.json();
-      setExpenses(expData.data || []);
-      setBalances(balData.data || {});
-      setSettlements(setData.data || []);
-      setPeople(pplData.data || []);
-      setGroups(grpData.data || []);
+      setExpenses(Array.isArray(expData.data) ? expData.data : []);
+      setBalances(balData.data && typeof balData.data === 'object' ? balData.data : {});
+      setSettlements(Array.isArray(setData.data) ? setData.data : []);
+      setPeople(Array.isArray(pplData.data) ? pplData.data : []);
+      setGroups(Array.isArray(grpData.data) ? grpData.data : []);
       if (selectedGroup) {
-        setGroupPeople(pplData.data || []);
+        setGroupPeople(Array.isArray(pplData.data) ? pplData.data : []);
         const msgRes = await fetch(`${baseURL}/groups/${selectedGroup}/messages`, { headers });
         const msgData = msgRes.ok ? await msgRes.json() : { data: [] };
-        setGroupMessages(msgData.data || []);
+        setGroupMessages(Array.isArray(msgData.data) ? msgData.data : []);
       }
     } catch (err) {
       setError('Failed to load data.');
@@ -169,7 +169,7 @@ function Dashboard() {
   const handleDelete = async (id) => {
     setError('');
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devynamics-yw9g.onrender.com';
       const res = await fetch(`${baseURL}/expenses/${id}`, {
         method: 'DELETE',
         headers: {
@@ -262,7 +262,7 @@ function Dashboard() {
                     />
                   </div>
                   <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                    {expenses.length === 0 ? (
+                    {Array.isArray(expenses) && expenses.length === 0 ? (
                       <div className="text-gray-500 text-center py-8">
                         <span className="block text-2xl mb-2">🧾</span>
                         No expenses found.
