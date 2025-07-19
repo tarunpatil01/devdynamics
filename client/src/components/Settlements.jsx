@@ -25,10 +25,10 @@ const Settlements = ({ group, people, loading }) => {
 
   // Aggregate owed by you and owed to you
   const safeSettlements = Array.isArray(settlements) ? settlements : [];
-  const owedByYou = safeSettlements.filter(s => s.from === username);
-  const owedToYou = safeSettlements.filter(s => s.to === username);
-  const totalOwedByYou = owedByYou.reduce((sum, s) => sum + s.amount, 0);
-  const totalOwedToYou = owedToYou.reduce((sum, s) => sum + s.amount, 0);
+  const owedByYou = Array.isArray(safeSettlements) ? safeSettlements.filter(s => s.from === username) : [];
+  const owedToYou = Array.isArray(safeSettlements) ? safeSettlements.filter(s => s.to === username) : [];
+  const totalOwedByYou = Array.isArray(owedByYou) ? owedByYou.reduce((sum, s) => sum + s.amount, 0) : 0;
+  const totalOwedToYou = Array.isArray(owedToYou) ? owedToYou.reduce((sum, s) => sum + s.amount, 0) : 0;
 
   // Get all unique people for avatars (from settlements)
   const allPeople = Array.from(new Set([
@@ -87,7 +87,7 @@ const Settlements = ({ group, people, loading }) => {
               <div className="text-gray-400">You owe nothing.</div>
             ) : (
               <ul className="flex flex-col gap-3">
-                {owedByYou.map((s, idx) => (
+                {(Array.isArray(owedByYou) ? owedByYou : []).map((s, idx) => (
                   <li key={idx} className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 shadow">
                     <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg text-white ${getAvatarColor(s.to)}`}>{s.to.charAt(0).toUpperCase()}</span>
                     <span className="flex-1 text-blue-200 font-semibold">{s.to}</span>
@@ -111,7 +111,7 @@ const Settlements = ({ group, people, loading }) => {
               <div className="text-gray-400">No one owes you.</div>
             ) : (
               <ul className="flex flex-col gap-3">
-                {owedToYou.map((s, idx) => (
+                {(Array.isArray(owedToYou) ? owedToYou : []).map((s, idx) => (
                   <li key={idx} className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 shadow">
                     <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg text-white ${getAvatarColor(s.from)}`}>{s.from.charAt(0).toUpperCase()}</span>
                     <span className="flex-1 text-blue-200 font-semibold">{s.from}</span>

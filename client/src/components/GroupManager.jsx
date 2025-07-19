@@ -69,7 +69,7 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
       <div className="mb-2">
         <label className="block text-blue-200 font-semibold mb-1">Add Members</label>
         <div className="flex flex-wrap gap-2">
-          {usersLoading ? <span className="text-gray-400">Loading users...</span> : Array.isArray(users) && users.length > 0 ? users.map(user => (
+          {usersLoading ? <span className="text-gray-400">Loading users...</span> : (Array.isArray(users) && users.length > 0) ? users.map(user => (
             <button
               key={user}
               type="button"
@@ -96,7 +96,7 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
         <div className="text-red-500">{error}</div>
       ) : (
         <ul className="flex gap-2 flex-wrap mt-4">
-          {Array.isArray(groups) && groups.length > 0 ? groups.map(group => (
+          {(Array.isArray(groups) && groups.length > 0) ? groups.map(group => (
             <li key={group._id}>
               <button
                 className={`px-3 py-1 rounded border ${selectedGroup === group._id ? 'bg-blue-200 border-blue-500' : 'bg-gray-100 border-gray-300'}`}
