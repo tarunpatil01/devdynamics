@@ -18,8 +18,8 @@ const ExpensesList = ({ expenses, onEdit, onDelete }) => {
         <div className="text-gray-500">No expenses found.</div>
       ) : (
         <ul className="flex flex-col gap-2">
-          {safeExpenses.map(exp => (
-            <li key={exp._id} className="flex flex-col md:flex-row justify-between items-center py-2 border-b border-blue-900 last:border-b-0 gap-2 transition-all duration-200 hover:bg-zinc-800/60 rounded-xl">
+          {safeExpenses.map((exp, idx) => (
+            <li key={exp._id && exp._id.toString ? exp._id.toString() : idx} className="flex flex-col md:flex-row justify-between items-center py-2 border-b border-blue-900 last:border-b-0 gap-2 transition-all duration-200 hover:bg-zinc-800/60 rounded-xl">
               <div className="flex flex-col md:flex-row gap-2 items-center w-full">
                 <span className="font-bold text-blue-200 text-lg">{exp.description}</span>
                 <span className="ml-2 text-white">₹{exp.amount}</span>
