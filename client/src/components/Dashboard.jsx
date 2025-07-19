@@ -260,17 +260,17 @@ function Dashboard() {
                     />
                   </div>
                   <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                    {Array.isArray(expenses) && expenses.length === 0 ? (
+                    {Array.isArray(expenses) && (!expenses || expenses.length === 0) ? (
                       <div className="text-gray-500 text-center py-8">
                         <span className="block text-2xl mb-2">🧾</span>
                         No expenses found.
                       </div>
                     ) : (
-                      <ExpensesList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
+                      <ExpensesList expenses={Array.isArray(expenses) ? expenses : []} onEdit={handleEdit} onDelete={handleDelete} />
                     )}
                   </div>
                   <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                    {Object.keys(balances).length === 0 ? (
+                    {!balances || Object.keys(balances || {}).length === 0 ? (
                       <div className="text-gray-500 text-center py-8">
                         <span className="block text-2xl mb-2">💰</span>
                         No balances found.
