@@ -101,28 +101,33 @@ router.get('/analytics', auth, async (req, res) => {
         group: exp.group
       }));
     
-    // Group-based analytics
+    // Group-based analytics - with error handling
     const groupAnalytics = {};
-    const groupExpenses = await Expense.find({ user: req.userId }).populate('group', 'name');
-    
-    groupExpenses.forEach(exp => {
-      const groupName = exp.group ? exp.group.name : 'No Group';
-      if (!groupAnalytics[groupName]) {
-        groupAnalytics[groupName] = {
-          total: 0,
-          count: 0,
-          categories: {}
-        };
-      }
-      groupAnalytics[groupName].total += exp.amount;
-      groupAnalytics[groupName].count++;
+    try {
+      const groupExpenses = await Expense.find({ user: req.userId }).populate('group', 'name');
       
-      const cat = exp.category || 'Other';
-      if (!groupAnalytics[groupName].categories[cat]) {
-        groupAnalytics[groupName].categories[cat] = 0;
-      }
-      groupAnalytics[groupName].categories[cat] += exp.amount;
-    });
+      groupExpenses.forEach(exp => {
+        const groupName = exp.group ? exp.group.name : 'No Group';
+        if (!groupAnalytics[groupName]) {
+          groupAnalytics[groupName] = {
+            total: 0,
+            count: 0,
+            categories: {}
+          };
+        }
+        groupAnalytics[groupName].total += exp.amount;
+        groupAnalytics[groupName].count++;
+        
+        const cat = exp.category || 'Other';
+        if (!groupAnalytics[groupName].categories[cat]) {
+          groupAnalytics[groupName].categories[cat] = 0;
+        }
+        groupAnalytics[groupName].categories[cat] += exp.amount;
+      });
+    } catch (groupError) {
+      console.error('Error in group analytics:', groupError);
+      // Continue without group analytics if there's an error
+    }
     
     // Convert group analytics to array format
     const groupAnalyticsArray = Object.entries(groupAnalytics)
@@ -174,6 +179,7 @@ router.get('/analytics', auth, async (req, res) => {
       }
     });
   } catch (err) {
+    console.error('Analytics error:', err);
     res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 });
