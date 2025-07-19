@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
 
-const ExpenseForm = ({ onAdd, people, group, editExpense, setEditExpense }) => {
+const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [paidBy, setPaidBy] = useState('');
@@ -11,11 +11,32 @@ const ExpenseForm = ({ onAdd, people, group, editExpense, setEditExpense }) => {
   const [splitWith, setSplitWith] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [users, setUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(true);
   const { toast, showToast, closeToast } = useToast();
+
+  // Fetch all users from backend
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setUsersLoading(true);
+      try {
+        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+        const token = sessionStorage.getItem('token');
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`${baseURL}/people`, { headers });
+        const data = await res.json();
+        setUsers(Array.isArray(data.data) ? data.data : []);
+      } catch {
+        setUsers([]);
+      }
+      setUsersLoading(false);
+    };
+    fetchUsers();
+  }, []);
 
   // Default paidBy to logged-in user
   useEffect(() => {
-    const user = localStorage.getItem('username');
+    const user = sessionStorage.getItem('username');
     if (user) setPaidBy(user);
   }, []);
 
@@ -92,17 +113,12 @@ const ExpenseForm = ({ onAdd, people, group, editExpense, setEditExpense }) => {
         <div className="flex-1">
           <label className="block font-semibold mb-1">Split With</label>
           <div className="flex flex-wrap gap-2">
-            {people && people.length > 0 ? people.map(person => (
-              <label key={person} className="flex items-center gap-1">
-                <input
-                  type="checkbox"
-                  checked={splitWith.includes(person)}
-                  onChange={() => handleSplitWithChange(person)}
-                  className="accent-blue-500"
-                />
-                <span className="text-blue-200">{person}</span>
+            {usersLoading ? <div>Loading users...</div> : users.length > 0 ? users.map(user => (
+              <label key={user} className="flex items-center gap-1">
+                <input type="checkbox" checked={splitWith.includes(user)} onChange={() => handleSplitWithChange(user)} className="accent-blue-500" />
+                <span className="text-blue-200">{user}</span>
               </label>
-            )) : <span className="text-gray-400">No people found.</span>}
+            )) : <span className="text-gray-400">No users found.</span>}
           </div>
         </div>
       </div>

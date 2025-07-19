@@ -251,7 +251,19 @@ function App() {
         </div>
       )}
       <div className="min-h-screen flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
-        {/* Sidebar always visible on desktop, collapsible on mobile */}
+        {/* Hamburger button for mobile */}
+        <button
+          className="fixed top-4 left-4 z-40 bg-blue-700 hover:bg-blue-800 text-white p-2 rounded-lg shadow-lg focus:outline-none md:hidden"
+          onClick={() => setSidebarOpen(true)}
+          aria-label="Open sidebar"
+        >
+          <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><rect y="5" width="24" height="2" rx="1" fill="currentColor"/><rect y="11" width="24" height="2" rx="1" fill="currentColor"/><rect y="17" width="24" height="2" rx="1" fill="currentColor"/></svg>
+        </button>
+        {/* Sidebar overlay for mobile */}
+        {sidebarOpen && (
+          <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={() => setSidebarOpen(false)}></div>
+        )}
+        {/* Sidebar always visible on desktop, overlay on mobile */}
         <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-12 w-full">
           <div className="w-full max-w-6xl bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-8 flex flex-col gap-8">

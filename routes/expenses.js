@@ -5,6 +5,8 @@ const { validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
 const router = express.Router();
+const Group = require('../models/Group');
+const crypto = require('crypto');
 
 // GET /expenses - List all expenses with pagination
 router.get('/', async (req, res) => {
@@ -70,19 +72,28 @@ router.post('/', auth, expenseValidation, async (req, res) => {
   }
   try {
     let { amount, description, paid_by, split_type, split_details, group, split_with } = req.body;
-    // Default paid_by to logged-in user if not provided
     if (!paid_by) paid_by = req.userId;
-    // Validate split_with
     if (!Array.isArray(split_with) || split_with.length === 0) {
       return res.status(400).json({ success: false, message: 'split_with must be a non-empty array of people.' });
     }
-    // Validate split_details only contains selected people
     const splitPeople = Object.keys(split_details);
     if (splitPeople.some(p => !split_with.includes(p))) {
       return res.status(400).json({ success: false, message: 'split_details must only contain selected people.' });
     }
     if (!validateSplitDetails(split_type, split_details)) {
       return res.status(400).json({ success: false, message: 'Invalid split_details' });
+    }
+    // Auto-create group if not provided
+    if (!group) {
+      // Generate a unique group name based on sorted usernames
+      const groupUsers = [...split_with].sort();
+      const groupName = 'Group_' + crypto.createHash('md5').update(groupUsers.join('_')).digest('hex');
+      let groupDoc = await Group.findOne({ name: groupName });
+      if (!groupDoc) {
+        groupDoc = new Group({ name: groupName, owner: req.userId, members: groupUsers });
+        await groupDoc.save();
+      }
+      group = groupDoc._id;
     }
     // Auto-add people from split_details if missing
     const People = require('../models/People');

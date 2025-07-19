@@ -10,6 +10,14 @@ const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
 router.post('/register', async (req, res) => {
   const { username, password } = req.body;
   if (!username || !password) return res.status(400).json({ success: false, message: 'Missing credentials' });
+  // Password complexity check
+  const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{6,}$/;
+  if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+      success: false,
+      message: 'Password must be at least 6 characters and include an uppercase letter, a lowercase letter, a number, and a symbol.'
+    });
+  }
   try {
     const user = new User({ username, password });
     await user.save();
