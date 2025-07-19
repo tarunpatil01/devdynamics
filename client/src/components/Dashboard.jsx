@@ -329,8 +329,8 @@ function Dashboard() {
         )}
         {/* Sidebar always visible on desktop, overlay on mobile */}
         <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="md:ml-72 flex flex-col items-center justify-center p-4 md:p-8 w-full min-h-screen">
-          <div className="w-full max-w-4xl bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-6 flex flex-col gap-6">
+        <main className="md:ml-72 flex flex-col items-center justify-center p-4 md:p-8 w-full min-h-screen overflow-x-hidden">
+          <div className="w-full max-w-none bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-6 flex flex-col gap-6">
             <header className="mb-6 text-center relative">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <h1 className="text-3xl font-extrabold text-white mb-2 drop-shadow">Split App</h1>
@@ -339,7 +339,7 @@ function Dashboard() {
               <p className="text-lg text-gray-300">Track group expenses, balances, and settlements easily.</p>
             </header>
             {showGroups ? (
-              <div className="mb-6">
+              <div className="mb-6 w-full">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl font-bold text-blue-400">Your Groups</h3>
                   <button
@@ -350,11 +350,11 @@ function Dashboard() {
                   </button>
                 </div>
                 {showGroupManager && (
-                  <div className="mb-4">
+                  <div className="mb-4 w-full">
                     <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
                   </div>
                 )}
-                <div className="flex flex-wrap gap-3 mb-4">
+                <div className="flex flex-wrap gap-3 mb-4 w-full">
                   {groups.length === 0 ? (
                     <div className="text-gray-400">No groups found.</div>
                   ) : (
@@ -377,22 +377,26 @@ function Dashboard() {
                   )}
                 </div>
                 {selectedGroup ? (
-                  <Groups
-                    group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
-                    people={groupPeople}
-                    onAddPerson={handleAddPersonToGroup}
-                    messages={groupMessages}
-                    onSendMessage={handleSendGroupMessage}
-                    onAddExpense={addExpense}
-                  />
+                  <div className="w-full">
+                    <Groups
+                      group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
+                      people={groupPeople}
+                      onAddPerson={handleAddPersonToGroup}
+                      messages={groupMessages}
+                      onSendMessage={handleSendGroupMessage}
+                      onAddExpense={addExpense}
+                    />
+                  </div>
                 ) : (
                   <div className="text-center text-xl text-white font-bold">Select a group</div>
                 )}
               </div>
             ) : (
               <>
-                <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                <div className="w-full">
+                  <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
+                </div>
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4 w-full">
                   <ExpenseForm
                     onAdd={addExpense}
                     group={selectedGroup}
@@ -401,7 +405,7 @@ function Dashboard() {
                     setEditExpense={setEditExpense}
                   />
                 </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4 w-full">
                   {Array.isArray(expenses) && (!expenses || expenses.length === 0) ? (
                     <div className="text-gray-500 text-center py-6">
                       <span className="block text-xl mb-2">🧾</span>
@@ -411,7 +415,7 @@ function Dashboard() {
                     <ExpensesList expenses={Array.isArray(expenses) ? expenses : []} onEdit={handleEdit} onDelete={handleDelete} />
                   )}
                 </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4 w-full">
                   {!balances || Object.keys(balances || {}).length === 0 ? (
                     <div className="text-gray-500 text-center py-6">
                       <span className="block text-xl mb-2">💰</span>
@@ -421,7 +425,7 @@ function Dashboard() {
                     <Balances balances={balances} loading={loading} />
                   )}
                 </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4 w-full">
                   <Settlements settlements={settlements} loading={loading} />
                 </div>
               </>
