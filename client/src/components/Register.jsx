@@ -51,11 +51,11 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
       >
         <h2 className="text-3xl font-extrabold text-white mb-2 text-center drop-shadow">Register</h2>
         <div className="mb-2">
-          <label className="block text-gray-300 mb-1 font-semibold">Username</label>
+          <label className="block font-semibold mb-1 text-blue-200">Username</label>
           <input
             ref={inputRef}
             type="text"
-            className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
@@ -65,10 +65,10 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
           />
         </div>
         <div className="mb-2">
-          <label className="block text-gray-300 mb-1 font-semibold">Password</label>
+          <label className="block font-semibold mb-1 text-blue-200">Password</label>
           <input
             type="password"
-            className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -80,7 +80,7 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
         {success && showToast && <Toast message={success} type="success" onClose={() => setShowToast(false)} />}
         <button
           type="submit"
-          className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg font-bold shadow transition-all duration-200 disabled:opacity-50"
+          className="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2"
           disabled={loading}
         >
           {loading ? 'Registering...' : 'Register'}

@@ -142,7 +142,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
           <label className="block text-gray-300 mb-1 font-semibold">Username</label>
           <input
             type="text"
-            className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
             value={username}
             onChange={e => setUsername(e.target.value)}
             required
@@ -155,7 +155,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
           <label className="block text-gray-300 mb-1 font-semibold">Password</label>
           <input
             type="password"
-            className="w-full px-4 py-2 rounded-lg bg-zinc-800 text-white border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all duration-200"
+            className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
             value={password}
             onChange={e => setPassword(e.target.value)}
             required
@@ -166,7 +166,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
         {error && <div className="text-red-500 mb-2 text-center animate-shake" role="alert">{error}</div>}
         <button
           type="submit"
-          className="w-full bg-blue-700 hover:bg-blue-800 text-white py-2 rounded-lg font-bold shadow transition-all duration-200 disabled:opacity-50"
+          className="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2"
           disabled={loading}
         >
           {loading ? 'Logging in...' : 'Login'}

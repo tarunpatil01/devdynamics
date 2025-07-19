@@ -102,16 +102,16 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
     <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-4">
       <h2 className="text-2xl font-bold text-blue-700 mb-2">Add Expense</h2>
       <div className="flex flex-col md:flex-row gap-4">
-        <input type="number" step="0.01" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className="border border-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-white text-blue-700 placeholder-blue-300 flex-1" />
+        <input type="number" step="0.01" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2" />
         <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} required className="border border-purple-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-purple-700 placeholder-purple-300 flex-1" />
       </div>
       <div className="flex flex-col md:flex-row gap-4 items-center">
         <div className="flex-1">
-          <label className="block font-semibold mb-1">Paid By</label>
+          <label className="block font-semibold mb-1 text-blue-200">Paid By</label>
           <input type="text" value={paidBy} readOnly className="border border-pink-300 rounded px-3 py-2 bg-gray-100 text-pink-700 w-full" />
         </div>
         <div className="flex-1">
-          <label className="block font-semibold mb-1">Split With</label>
+          <label className="block font-semibold mb-1 text-blue-200">Split With</label>
           <div className="flex flex-wrap gap-2">
             {usersLoading ? <div>Loading users...</div> : users.length > 0 ? users.map(user => (
               <label key={user} className="flex items-center gap-1">
@@ -174,7 +174,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
         ))}
       </div>
       {error && <div className="text-red-500 text-sm">{error}</div>}
-      <button type="submit" className="bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 text-white rounded px-4 py-2 font-bold hover:from-blue-600 hover:to-pink-600 transition" disabled={loading}>
+      <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2" disabled={loading}>
         {loading ? 'Adding...' : editExpense ? 'Update Expense' : 'Add Expense'}
       </button>
       <Toast message={toast.message} type={toast.type} onClose={closeToast} />
