@@ -22,159 +22,38 @@ router.get('/', async (req, res) => {
   }
 });
 
-// GET /expenses/test - Simple test endpoint
-router.get('/test', auth, async (req, res) => {
-  try {
-    res.json({ 
-      success: true, 
-      message: 'Analytics endpoint is working',
-      userId: req.userId,
-      timestamp: new Date().toISOString()
-    });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Test failed', error: err.message });
-  }
-});
-
 // GET /expenses/analytics - Category-wise totals, monthly summaries, most expensive categories/transactions
 router.get('/analytics', auth, async (req, res) => {
   try {
-    console.log('Analytics endpoint called for user:', req.userId);
-    
-    // Simple query first
     const expenses = await Expense.find({ user: req.userId });
-    console.log('Found expenses:', expenses.length);
-    
-    if (expenses.length === 0) {
-      // Return empty analytics for users with no expenses
-      return res.json({
-        success: true,
-        data: {
-          categoryTotals: {},
-          categoryBreakdown: [],
-          monthly: {},
-          monthlyCounts: {},
-          mostExpensiveCategories: [],
-          topTransactions: [],
-          groupAnalytics: [],
-          spendingPatterns: {
-            individual: { total: 0, count: 0, percentage: 0 },
-            group: { total: 0, count: 0, percentage: 0 }
-          },
-          summary: {
-            totalExpenses: 0,
-            totalAmount: 0,
-            averageAmount: 0
-          }
-        }
-      });
-    }
-    
-    // Category-wise totals with better categorization
+    // Category-wise totals
     const categoryTotals = {};
-    const categoryCounts = {};
     expenses.forEach(exp => {
-      let cat = exp.category || 'Other';
-      
-      // Auto-categorize based on description if category is 'Other'
-      if (cat === 'Other') {
-        const desc = exp.description.toLowerCase();
-        if (desc.includes('food') || desc.includes('dinner') || desc.includes('lunch') || desc.includes('breakfast') || desc.includes('pizza') || desc.includes('restaurant')) {
-          cat = 'Food';
-        } else if (desc.includes('travel') || desc.includes('petrol') || desc.includes('fuel') || desc.includes('uber') || desc.includes('taxi') || desc.includes('bus') || desc.includes('train')) {
-          cat = 'Travel';
-        } else if (desc.includes('movie') || desc.includes('entertainment') || desc.includes('game') || desc.includes('concert') || desc.includes('show')) {
-          cat = 'Entertainment';
-        } else if (desc.includes('electricity') || desc.includes('water') || desc.includes('gas') || desc.includes('internet') || desc.includes('wifi') || desc.includes('utility')) {
-          cat = 'Utilities';
-        }
-      }
-      
-      if (!categoryTotals[cat]) {
-        categoryTotals[cat] = 0;
-        categoryCounts[cat] = 0;
-      }
+      const cat = exp.category || 'Other';
+      if (!categoryTotals[cat]) categoryTotals[cat] = 0;
       categoryTotals[cat] += exp.amount;
-      categoryCounts[cat]++;
     });
-    
     // Monthly summaries
     const monthly = {};
-    const monthlyCounts = {};
     expenses.forEach(exp => {
       const month = exp.created_at.toISOString().slice(0, 7); // YYYY-MM
-      if (!monthly[month]) {
-        monthly[month] = 0;
-        monthlyCounts[month] = 0;
-      }
+      if (!monthly[month]) monthly[month] = 0;
       monthly[month] += exp.amount;
-      monthlyCounts[month]++;
     });
-    
     // Most expensive categories
-    const sortedCategories = Object.entries(categoryTotals)
-      .sort((a, b) => b[1] - a[1])
-      .map(([category, total]) => ({
-        category,
-        total: parseFloat(total.toFixed(2)),
-        count: categoryCounts[category],
-        percentage: parseFloat(((total / Object.values(categoryTotals).reduce((a, b) => a + b, 0)) * 100).toFixed(1))
-      }));
-    
+    const sortedCategories = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
     // Most expensive transactions
-    const topTransactions = expenses
-      .sort((a, b) => b.amount - a.amount)
-      .slice(0, 5)
-      .map(exp => ({
-        description: exp.description,
-        amount: exp.amount,
-        category: exp.category || 'Other',
-        paid_by: exp.paid_by,
-        created_at: exp.created_at,
-        group: exp.group
-      }));
-    
-    // Individual vs Group spending - simplified
-    const individualExpenses = expenses.filter(exp => !exp.group);
-    const groupExpensesOnly = expenses.filter(exp => exp.group);
-    
-    const individualTotal = individualExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-    const groupTotal = groupExpensesOnly.reduce((sum, exp) => sum + exp.amount, 0);
-    const totalSpending = individualTotal + groupTotal;
-    
-    console.log('Analytics calculation completed successfully');
-    
+    const topTransactions = expenses.sort((a, b) => b.amount - a.amount).slice(0, 5);
     res.json({
       success: true,
       data: {
         categoryTotals,
-        categoryBreakdown: sortedCategories,
         monthly,
-        monthlyCounts,
-        mostExpensiveCategories: sortedCategories.slice(0, 5),
-        topTransactions,
-        groupAnalytics: [], // Simplified - no group analytics for now
-        spendingPatterns: {
-          individual: {
-            total: parseFloat(individualTotal.toFixed(2)),
-            count: individualExpenses.length,
-            percentage: totalSpending > 0 ? parseFloat(((individualTotal / totalSpending) * 100).toFixed(1)) : 0
-          },
-          group: {
-            total: parseFloat(groupTotal.toFixed(2)),
-            count: groupExpensesOnly.length,
-            percentage: totalSpending > 0 ? parseFloat(((groupTotal / totalSpending) * 100).toFixed(1)) : 0
-          }
-        },
-        summary: {
-          totalExpenses: expenses.length,
-          totalAmount: parseFloat(expenses.reduce((sum, exp) => sum + exp.amount, 0).toFixed(2)),
-          averageAmount: expenses.length > 0 ? parseFloat((expenses.reduce((sum, exp) => sum + exp.amount, 0) / expenses.length).toFixed(2)) : 0
-        }
+        mostExpensiveCategories: sortedCategories.slice(0, 3),
+        topTransactions
       }
     });
   } catch (err) {
-    console.error('Analytics error:', err);
     res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 });
@@ -304,16 +183,9 @@ router.put('/:id', auth, async (req, res) => {
         return res.status(400).json({ success: false, message: 'Recurring type must be one of none, weekly, monthly.' });
       }
     }
-    
-    // Derive split_with from split_details if not provided
     if (!Array.isArray(split_with) || split_with.length === 0) {
-      if (split_details && typeof split_details === 'object') {
-        split_with = Object.keys(split_details);
-      } else {
-        return res.status(400).json({ success: false, message: 'split_with must be a non-empty array of people.' });
-      }
+      return res.status(400).json({ success: false, message: 'split_with must be a non-empty array of people.' });
     }
-    
     const splitPeople = Object.keys(split_details);
     if (splitPeople.some(p => !split_with.includes(p))) {
       return res.status(400).json({ success: false, message: 'split_details must only contain selected people.' });
