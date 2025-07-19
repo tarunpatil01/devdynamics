@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import ExpenseForm from './ExpenseForm';
 import ExpensesList from './ExpensesList';
 import Balances from './Balances';
@@ -34,6 +34,7 @@ function Dashboard() {
   const [groupMessages, setGroupMessages] = useState([]);
   const [globalError, setGlobalError] = useState('');
   const navigate = useNavigate();
+  const [recurringExpenses, setRecurringExpenses] = useState([]);
 
   useEffect(() => {
     if (!token) {
@@ -116,7 +117,7 @@ function Dashboard() {
   // Send message in group
   const handleSendGroupMessage = async (message) => {
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devynamics-yw9g.onrender.com';
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
       const res = await fetch(`${baseURL}/groups/${selectedGroup}/messages`, {
         method: 'POST',
@@ -174,7 +175,7 @@ function Dashboard() {
       }
       setEditExpense(null);
       await fetchAll();
-      showToast(editExpense ? 'Expense updated!' : 'Expense added!', 'success');
+      if (!editExpense) showToast('Expense added!', 'success');
     } catch (err) {
       setError('Failed to save expense.');
       showToast('Failed to save expense.', 'error');
@@ -184,6 +185,11 @@ function Dashboard() {
 
   const handleEdit = (expense) => {
     setEditExpense(expense);
+    // Scroll to the form
+    setTimeout(() => {
+      const form = document.querySelector('form');
+      if (form) form.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
   };
 
   const handleDelete = async (id) => {
@@ -214,6 +220,19 @@ function Dashboard() {
       showToast('Failed to delete expense.', 'error');
     }
   };
+
+  // Fetch recurring expenses
+  const fetchRecurring = async () => {
+    try {
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+      const token = localStorage.getItem('token');
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${baseURL}/expenses?recurringOnly=true`, { headers });
+      const data = await res.json();
+      if (data.success) setRecurringExpenses(Array.isArray(data.data) ? data.data : []);
+    } catch {}
+  };
+  useEffect(() => { fetchRecurring(); }, []);
 
   const SkeletonCard = () => (
     <div className="w-full bg-zinc-900/80 rounded-2xl shadow-2xl border-2 border-blue-900 p-6 md:p-10 flex flex-col gap-6 animate-pulse min-h-[400px]">
@@ -258,9 +277,32 @@ function Dashboard() {
             <header className="mb-8 text-center relative">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <h1 className="text-5xl font-extrabold text-white mb-2 drop-shadow">Split App</h1>
+                <Link to="/analytics" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold shadow transition-all duration-200">Analytics</Link>
               </div>
               <p className="text-xl text-gray-300">Track group expenses, balances, and settlements easily.</p>
             </header>
+            {/* Recurring Expenses Section */}
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-yellow-400 mb-2">Recurring Expenses</h3>
+              {recurringExpenses.length === 0 ? (
+                <div className="text-gray-400">No recurring expenses set up.</div>
+              ) : (
+                <ul className="flex flex-col gap-2">
+                  {recurringExpenses.map(exp => (
+                    <li key={exp._id} className="flex flex-col md:flex-row justify-between items-center py-2 border-b border-yellow-900 last:border-b-0 gap-2 transition-all duration-200 hover:bg-yellow-900/20 rounded-xl">
+                      <div className="flex flex-col md:flex-row gap-2 items-center w-full">
+                        <span className="font-bold text-yellow-200 text-lg">{exp.description}</span>
+                        <span className="ml-2 text-white">₹{exp.amount}</span>
+                        <span className="ml-2 text-pink-400">Paid by: {exp.paid_by}</span>
+                        <span className="ml-2 text-gray-400">Category: {exp.category}</span>
+                        <span className="ml-2 text-blue-400">{exp.recurring?.type?.charAt(0).toUpperCase() + exp.recurring?.type?.slice(1)}</span>
+                        {exp.recurring?.next_due && <span className="ml-2 text-green-400">Next: {new Date(exp.recurring.next_due).toLocaleDateString()}</span>}
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
             <main className="flex flex-col gap-6" aria-live="polite">
               {showGroups ? (
                 <Groups

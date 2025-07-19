@@ -2,6 +2,8 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const cron = require('node-cron');
+const Expense = require('./models/Expense');
 
 dotenv.config();
 
@@ -74,6 +76,54 @@ app.use('/people', peopleRouter);
 app.use('/balances', balancesRouter);
 app.use('/settlements', settlementsRouter);
 app.use('/groups', groupsRouter);
+
+// Cron job: every day at midnight, check for due recurring expenses
+cron.schedule('0 0 * * *', async () => {
+  try {
+    const now = new Date();
+    // Find all recurring expenses that are due
+    const recExp = await Expense.find({
+      'recurring.type': { $in: ['weekly', 'monthly'] },
+      'recurring.next_due': { $lte: now }
+    });
+    for (const exp of recExp) {
+      // Create a new expense with the same details but new date
+      const newExp = new Expense({
+        amount: exp.amount,
+        description: exp.description + ' (recurring)',
+        paid_by: exp.paid_by,
+        split_type: exp.split_type,
+        split_details: exp.split_details,
+        group: exp.group,
+        user: exp.user,
+        category: exp.category,
+        recurring: {
+          type: exp.recurring.type,
+          next_due: getNextDue(exp.recurring.type, exp.recurring.next_due)
+        }
+      });
+      await newExp.save();
+      // Update the original expense's next_due
+      exp.recurring.next_due = getNextDue(exp.recurring.type, exp.recurring.next_due);
+      await exp.save();
+    }
+    if (recExp.length > 0) {
+      console.log(`Recurring expenses processed: ${recExp.length}`);
+    }
+  } catch (err) {
+    console.error('Error processing recurring expenses:', err);
+  }
+});
+
+function getNextDue(type, lastDue) {
+  const date = new Date(lastDue);
+  if (type === 'weekly') {
+    date.setDate(date.getDate() + 7);
+  } else if (type === 'monthly') {
+    date.setMonth(date.getMonth() + 1);
+  }
+  return date;
+}
 
 // Global error handler
 app.use((err, req, res, next) => {

@@ -15,6 +15,9 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
   const [usersLoading, setUsersLoading] = useState(true);
   const { toast, showToast, closeToast } = useToast();
   const [paidByError, setPaidByError] = useState('');
+  const [category, setCategory] = useState('Food');
+  const [recurringType, setRecurringType] = useState('none');
+  const [nextDue, setNextDue] = useState('');
 
   // Fetch all users from backend 
   useEffect(() => {
@@ -91,6 +94,11 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
       showToast('Please select who paid.', 'error');
       return;
     }
+    if (!category) {
+      setError('Category is required.');
+      showToast('Category is required.', 'error');
+      return;
+    }
     const splitErr = validateSplitDetails();
     if (splitErr) {
       setError(splitErr);
@@ -99,7 +107,10 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
     }
     setLoading(true);
     try {
-      // For 'equal' split, build split_details as { person: 1, ... }
+      const recurring = { type: recurringType };
+      if (recurringType !== 'none' && nextDue) {
+        recurring.next_due = nextDue;
+      }
       const splitDetailsToSend = splitType === 'equal'
         ? Object.fromEntries((Array.isArray(splitWith) ? splitWith : []).map(person => [person, 1]))
         : splitDetails;
@@ -110,9 +121,12 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
         split_type: splitType,
         split_details: splitDetailsToSend,
         split_with: splitWith,
-        group
+        group,
+        category,
+        recurring
       });
       setAmount(''); setDescription(''); setSplitDetails({}); setSplitWith([]); setEditExpense && setEditExpense(null);
+      setCategory('Food'); setRecurringType('none'); setNextDue('');
       showToast('Expense added!', 'success');
     } catch (err) {
       setError('Failed to add expense.');
@@ -130,6 +144,13 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
       <div className="flex flex-col md:flex-row gap-4">
         <input type="number" step="0.01" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2" />
         <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} required className="border border-purple-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-purple-700 placeholder-purple-300 flex-1" />
+        <select value={category} onChange={e => setCategory(e.target.value)} required className="border border-green-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 w-full mb-2">
+          <option value="Food">Food</option>
+          <option value="Travel">Travel</option>
+          <option value="Utilities">Utilities</option>
+          <option value="Entertainment">Entertainment</option>
+          <option value="Other">Other</option>
+        </select>
       </div>
       <div className="flex flex-col md:flex-row gap-4 items-center">
         <div className="flex-1">
@@ -213,6 +234,19 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
             {splitType === 'shares' && <span className="text-gray-500">shares</span>}
           </div>
         )) : null}
+      </div>
+      <div>
+        <label className="block font-semibold mb-2 text-blue-200">Recurring</label>
+        <div className="flex flex-col sm:flex-row gap-4">
+          <select value={recurringType} onChange={e => setRecurringType(e.target.value)} className="border border-yellow-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-200 w-full sm:w-48">
+            <option value="none">None</option>
+            <option value="weekly">Weekly</option>
+            <option value="monthly">Monthly</option>
+          </select>
+          {recurringType !== 'none' && (
+            <input type="date" value={nextDue} onChange={e => setNextDue(e.target.value)} className="border border-yellow-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all duration-200 w-full sm:w-48" required />
+          )}
+        </div>
       </div>
       {error && <div className="text-red-500 text-sm">{error}</div>}
       <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2" disabled={loading}>

@@ -22,6 +22,41 @@ router.get('/', async (req, res) => {
   }
 });
 
+// GET /expenses/analytics - Category-wise totals, monthly summaries, most expensive categories/transactions
+router.get('/analytics', auth, async (req, res) => {
+  try {
+    const expenses = await Expense.find({ user: req.userId });
+    // Category-wise totals
+    const categoryTotals = {};
+    expenses.forEach(exp => {
+      if (!categoryTotals[exp.category]) categoryTotals[exp.category] = 0;
+      categoryTotals[exp.category] += exp.amount;
+    });
+    // Monthly summaries
+    const monthly = {};
+    expenses.forEach(exp => {
+      const month = exp.created_at.toISOString().slice(0, 7); // YYYY-MM
+      if (!monthly[month]) monthly[month] = 0;
+      monthly[month] += exp.amount;
+    });
+    // Most expensive categories
+    const sortedCategories = Object.entries(categoryTotals).sort((a, b) => b[1] - a[1]);
+    // Most expensive transactions
+    const topTransactions = expenses.sort((a, b) => b.amount - a.amount).slice(0, 5);
+    res.json({
+      success: true,
+      data: {
+        categoryTotals,
+        monthly,
+        mostExpensiveCategories: sortedCategories.slice(0, 3),
+        topTransactions
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
+  }
+});
+
 // JWT-based auth middleware (same as other routes)
 function auth(req, res, next) {
   const header = req.headers['authorization'];
@@ -71,7 +106,7 @@ router.post('/', auth, expenseValidation, async (req, res) => {
     return res.status(400).json({ success: false, errors: errors.array() });
   }
   try {
-    let { amount, description, paid_by, split_type, split_details, group, split_with } = req.body;
+    let { amount, description, paid_by, split_type, split_details, group, split_with, category, recurring } = req.body;
     if (!paid_by) paid_by = req.userId;
     if (typeof amount !== 'number' || amount <= 0) {
       return res.status(400).json({ success: false, message: 'Amount must be a positive number.' });
@@ -81,6 +116,14 @@ router.post('/', auth, expenseValidation, async (req, res) => {
     }
     if (!paid_by) {
       return res.status(400).json({ success: false, message: 'Paid by is required.' });
+    }
+    if (!category || !['Food', 'Travel', 'Utilities', 'Entertainment', 'Other'].includes(category)) {
+      return res.status(400).json({ success: false, message: 'Category is required and must be valid.' });
+    }
+    if (recurring && typeof recurring === 'object') {
+      if (!['none', 'weekly', 'monthly'].includes(recurring.type)) {
+        return res.status(400).json({ success: false, message: 'Recurring type must be one of none, weekly, monthly.' });
+      }
     }
     if (!Array.isArray(split_with) || split_with.length === 0) {
       return res.status(400).json({ success: false, message: 'split_with must be a non-empty array of people.' });
@@ -114,7 +157,7 @@ router.post('/', auth, expenseValidation, async (req, res) => {
         await People.create({ name: personName, group });
       }
     }
-    const expense = new Expense({ amount, description, paid_by, split_type, split_details, group, user: req.userId });
+    const expense = new Expense({ amount, description, paid_by, split_type, split_details, group, user: req.userId, category, recurring });
     await expense.save();
     res.json({ success: true, data: expense, message: `Expense added successfully${missingPeople.length ? ", people auto-added: " + missingPeople.join(", ") : ""}` });
   } catch (err) {
@@ -125,7 +168,7 @@ router.post('/', auth, expenseValidation, async (req, res) => {
 // PUT /expenses/:id - Update expense for user
 router.put('/:id', auth, async (req, res) => {
   try {
-    let { amount, description, paid_by, split_type, split_details, group, split_with } = req.body;
+    let { amount, description, paid_by, split_type, split_details, group, split_with, category, recurring } = req.body;
     if (!paid_by) paid_by = req.userId;
     if (typeof amount !== 'number' || amount <= 0) {
       return res.status(400).json({ success: false, message: 'Amount must be a positive number.' });
@@ -135,6 +178,14 @@ router.put('/:id', auth, async (req, res) => {
     }
     if (!paid_by) {
       return res.status(400).json({ success: false, message: 'Paid by is required.' });
+    }
+    if (!category || !['Food', 'Travel', 'Utilities', 'Entertainment', 'Other'].includes(category)) {
+      return res.status(400).json({ success: false, message: 'Category is required and must be valid.' });
+    }
+    if (recurring && typeof recurring === 'object') {
+      if (!['none', 'weekly', 'monthly'].includes(recurring.type)) {
+        return res.status(400).json({ success: false, message: 'Recurring type must be one of none, weekly, monthly.' });
+      }
     }
     if (!Array.isArray(split_with) || split_with.length === 0) {
       return res.status(400).json({ success: false, message: 'split_with must be a non-empty array of people.' });
@@ -157,7 +208,7 @@ router.put('/:id', auth, async (req, res) => {
     }
     const expense = await Expense.findOneAndUpdate(
       { _id: req.params.id, user: req.userId },
-      { amount, description, paid_by, split_type, split_details, group, updated_at: Date.now() },
+      { amount, description, paid_by, split_type, split_details, group, updated_at: Date.now(), category, recurring },
       { new: true }
     );
     if (!expense) return res.status(404).json({ success: false, message: 'Expense not found' });

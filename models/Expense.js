@@ -37,6 +37,20 @@ const expenseSchema = new mongoose.Schema({
     ref: 'User',
     required: true
   },
+  category: {
+    type: String,
+    enum: ['Food', 'Travel', 'Utilities', 'Entertainment', 'Other'],
+    required: true
+  },
+  recurring: {
+    type: {
+      type: String,
+      enum: ['none', 'weekly', 'monthly'],
+      default: 'none',
+      required: true
+    },
+    next_due: { type: Date }
+  },
   created_at: {
     type: Date,
     default: Date.now
