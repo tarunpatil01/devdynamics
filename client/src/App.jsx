@@ -71,14 +71,15 @@ function App() {
     setLoading(true);
     setError('');
     try {
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const groupParam = selectedGroup ? `?group=${selectedGroup}` : '';
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const [expRes, balRes, setRes, pplRes, grpRes] = await Promise.all([
-        fetch(`/expenses${groupParam}`, { headers }),
-        fetch(`/balances${groupParam}`, { headers }),
-        fetch(`/settlements${groupParam}`, { headers }),
-        fetch(`/people${groupParam}`, { headers }),
-        fetch(`/groups`, { headers }),
+        fetch(`${baseURL}/expenses${groupParam}`, { headers }),
+        fetch(`${baseURL}/balances${groupParam}`, { headers }),
+        fetch(`${baseURL}/settlements${groupParam}`, { headers }),
+        fetch(`${baseURL}/people${groupParam}`, { headers }),
+        fetch(`${baseURL}/groups`, { headers }),
       ]);
       if (!expRes.ok || !balRes.ok || !setRes.ok || !pplRes.ok || !grpRes.ok) throw new Error('Failed to fetch data');
       const expData = await expRes.json();
@@ -96,7 +97,7 @@ function App() {
         // Fetch group people
         setGroupPeople(pplData.data || []);
         // Fetch group messages (stub, replace with real API)
-        const msgRes = await fetch(`/groups/${selectedGroup}/messages`, { headers });
+        const msgRes = await fetch(`${baseURL}/groups/${selectedGroup}/messages`, { headers });
         const msgData = msgRes.ok ? await msgRes.json() : { data: [] };
         // Messages now have sender object and created_at
         setGroupMessages(msgData.data || []);
@@ -110,8 +111,9 @@ function App() {
   // Add person to group
   const handleAddPersonToGroup = async (personName) => {
     try {
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
-      const res = await fetch(`/groups/${selectedGroup}/add-person`, {
+      const res = await fetch(`${baseURL}/groups/${selectedGroup}/add-person`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ name: personName })
@@ -128,8 +130,9 @@ function App() {
   const handleSendGroupMessage = async (message) => {
     try {
       // Send to backend for persistence
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
-      const res = await fetch(`/groups/${selectedGroup}/messages`, {
+      const res = await fetch(`${baseURL}/groups/${selectedGroup}/messages`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ text: message })
@@ -161,8 +164,9 @@ function App() {
   const addExpense = async (expense) => {
     setError('');
     try {
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const method = editExpense ? 'PUT' : 'POST';
-      const url = editExpense ? `/expenses/${editExpense._id}` : '/expenses';
+      const url = editExpense ? `${baseURL}/expenses/${editExpense._id}` : `${baseURL}/expenses`;
       const res = await fetch(url, {
         method,
         headers: {

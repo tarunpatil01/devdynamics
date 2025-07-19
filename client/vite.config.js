@@ -6,11 +6,12 @@ export default defineConfig({
   ],
   server: {
     proxy: {
-      '/auth': 'http://localhost:5000',
-      '/expenses': 'http://localhost:5000',
-      '/balances': 'http://localhost:5000',
-      '/settlements': 'http://localhost:5000',
-      '/people': 'http://localhost:5000',
+      '/auth': 'https://devdynamics-yw9g.onrender.com',
+      '/expenses': 'https://devdynamics-yw9g.onrender.com',
+      '/balances': 'https://devdynamics-yw9g.onrender.com',
+      '/settlements': 'https://devdynamics-yw9g.onrender.com',
+      '/people': 'https://devdynamics-yw9g.onrender.com',
+      '/groups': 'https://devdynamics-yw9g.onrender.com',
     },
   },
 });
