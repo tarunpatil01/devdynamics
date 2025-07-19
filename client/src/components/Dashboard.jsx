@@ -21,7 +21,6 @@ function Dashboard() {
   const [editExpense, setEditExpense] = useState(null);
   const [balances, setBalances] = useState({});
   const [settlements, setSettlements] = useState([]);
-  const [people, setPeople] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { toast, showToast, closeToast } = useToast();
@@ -57,25 +56,24 @@ function Dashboard() {
       const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const groupParam = selectedGroup ? `?group=${selectedGroup}` : '';
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const [expRes, balRes, setRes, pplRes, grpRes] = await Promise.all([
+      const [expRes, balRes, setRes, grpRes] = await Promise.all([
         fetch(`${baseURL}/expenses${groupParam}`, { headers }),
         fetch(`${baseURL}/balances${groupParam}`, { headers }),
         fetch(`${baseURL}/settlements${groupParam}`, { headers }),
-        fetch(`${baseURL}/people${groupParam}`, { headers }),
         fetch(`${baseURL}/groups`, { headers }),
       ]);
-      if (!expRes.ok || !balRes.ok || !setRes.ok || !pplRes.ok || !grpRes.ok) throw new Error('Failed to fetch data');
+      if (!expRes.ok || !balRes.ok || !setRes.ok || !grpRes.ok) throw new Error('Failed to fetch data');
       const expData = await expRes.json();
       const balData = await balRes.json();
       const setData = await setRes.json();
-      const pplData = await pplRes.json();
       const grpData = await grpRes.json();
       setExpenses(Array.isArray(expData.data) ? expData.data : []);
       setBalances(balData.data && typeof balData.data === 'object' ? balData.data : {});
       setSettlements(Array.isArray(setData.data) ? setData.data : []);
-      setPeople(Array.isArray(pplData.data) ? pplData.data : []);
       setGroups(Array.isArray(grpData.data) ? grpData.data : []);
       if (selectedGroup) {
+        const pplRes = await fetch(`${baseURL}/people${groupParam}`, { headers });
+        const pplData = pplRes.ok ? await pplRes.json() : { data: [] };
         setGroupPeople(Array.isArray(pplData.data) ? pplData.data : []);
         const msgRes = await fetch(`${baseURL}/groups/${selectedGroup}/messages`, { headers });
         const msgData = msgRes.ok ? await msgRes.json() : { data: [] };
@@ -248,7 +246,6 @@ function Dashboard() {
                   <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
                     <ExpenseForm
                       onAdd={addExpense}
-                      people={people}
                       group={selectedGroup}
                       editExpense={editExpense}
                       setEditExpense={setEditExpense}

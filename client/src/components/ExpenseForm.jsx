@@ -9,8 +9,6 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
   const [splitType, setSplitType] = useState('equal');
   const [splitDetails, setSplitDetails] = useState({});
   const [splitWith, setSplitWith] = useState([]); // Initialize splitWith as an empty array
-  const safePeople = Array.isArray(people) ? people : [];
-  const safeSplitWith = Array.isArray(splitWith) ? splitWith : [];
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [users, setUsers] = useState([]);
