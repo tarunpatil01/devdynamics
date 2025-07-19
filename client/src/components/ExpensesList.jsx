@@ -6,9 +6,7 @@ const ExpensesList = ({ expenses, onEdit, onDelete }) => {
   return (
     <div className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein">
       <h2 className="text-2xl font-extrabold text-white mb-4 drop-shadow">Expenses</h2>
-      {safeExpenses.length === 0 ? (
-        <div className="text-gray-500">No expenses found.</div>
-      ) : (
+      {Array.isArray(safeExpenses) && safeExpenses.length > 0 ? (
         <ul className="flex flex-col gap-2">
           {safeExpenses.map(exp => (
             <li key={exp._id} className="flex flex-col md:flex-row justify-between items-center py-2 border-b border-blue-900 last:border-b-0 gap-2 transition-all duration-200 hover:bg-zinc-800/60 rounded-xl">
@@ -25,6 +23,8 @@ const ExpensesList = ({ expenses, onEdit, onDelete }) => {
             </li>
           ))}
         </ul>
+      ) : (
+        <div className="text-gray-500">No expenses found.</div>
       )}
     </div>
   );

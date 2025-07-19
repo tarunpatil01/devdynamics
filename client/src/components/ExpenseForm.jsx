@@ -195,7 +195,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
               />
             )}
             {splitType === 'percentage' && <span className="text-gray-500">%</span>}
-            {splitType === 'exact' && <span className="text-gray-500">₹</span>}
+            {splitType === 'exact' && <span className="text-gray-500">9</span>}
             {splitType === 'shares' && <span className="text-gray-500">shares</span>}
           </div>
         )) : null}
