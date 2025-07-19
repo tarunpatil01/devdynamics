@@ -197,6 +197,11 @@ function Dashboard() {
         split_details: (expense.split_details && typeof expense.split_details === 'object') ? expense.split_details : {},
         group: expense.group || selectedGroup,
       };
+      
+      console.log('Sending expense payload:', payload);
+      console.log('Method:', method);
+      console.log('URL:', url);
+      
       const res = await fetch(url, {
         method,
         headers: {
@@ -205,13 +210,16 @@ function Dashboard() {
         },
         body: JSON.stringify(payload)
       });
+      
       if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        console.error('Error response:', errorData);
         if (res.status === 404) {
           showToast('Expense not found. It may have been deleted.', 'error');
           setError('Expense not found. It may have been deleted.');
         } else {
-          showToast('Failed to save expense.', 'error');
-          setError('Failed to save expense.');
+          showToast(`Failed to save expense: ${errorData.message || 'Unknown error'}`, 'error');
+          setError(`Failed to save expense: ${errorData.message || 'Unknown error'}`);
         }
         setEditExpense(null);
         await fetchAll();
@@ -221,6 +229,7 @@ function Dashboard() {
       await fetchAll();
       if (!isEdit) showToast('Expense added!', 'success');
     } catch (err) {
+      console.error('Error in addExpense:', err);
       setError('Failed to save expense.');
       showToast('Failed to save expense.', 'error');
       throw err;
@@ -228,24 +237,20 @@ function Dashboard() {
   };
 
   const handleEdit = (expense) => {
-    // Prompt user for which field to edit and the new value
-    const field = window.prompt('Which field do you want to edit? (amount, description, category)', 'amount');
-    if (!field || !['amount', 'description', 'category'].includes(field)) {
-      return;
-    }
-    const newValue = window.prompt(`Enter new value for ${field}:`, String(expense[field]));
-    if (newValue === null) return;
-    // Prepare updated expense
-    let updatedExpense = { ...expense };
-    if (field === 'amount') {
-      updatedExpense.amount = Number(newValue);
-    } else {
-      updatedExpense[field] = newValue;
-    }
-    // Call addExpense with edit flag
-    setEditExpense(updatedExpense);
-    addExpense(updatedExpense, true);
-    setEditExpense(null);
+    // Set the expense to edit in the form
+    setEditExpense({
+      _id: expense._id,
+      amount: expense.amount,
+      description: expense.description,
+      paid_by: expense.paid_by,
+      split_type: expense.split_type,
+      split_details: expense.split_details || {},
+      split_with: Array.isArray(expense.split_with) ? expense.split_with : 
+                  (expense.split_details && typeof expense.split_details === 'object' ? Object.keys(expense.split_details) : []),
+      group: expense.group,
+      category: expense.category || 'Food',
+      recurring: expense.recurring || { type: 'none' }
+    });
   };
 
   const handleDelete = async (id) => {
@@ -329,70 +334,74 @@ function Dashboard() {
         )}
         {/* Sidebar always visible on desktop, overlay on mobile */}
         <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="md:ml-72 flex flex-col items-center justify-center p-4 md:p-12 w-full min-h-screen">
-          <div className="w-full max-w-6xl bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-8 flex flex-col gap-8">
-            <header className="mb-8 text-center relative">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-                <h1 className="text-5xl font-extrabold text-white mb-2 drop-shadow">Split App</h1>
-                <Link to="/analytics" className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded font-bold shadow transition-all duration-200">Analytics</Link>
+        <main className="md:ml-64 lg:ml-72 flex flex-col items-center justify-center p-1 md:p-2 w-full min-h-screen overflow-x-hidden">
+          <div className="w-full max-w-none bg-zinc-900/90 rounded-lg shadow-2xl border border-blue-800 p-2 md:p-3 flex flex-col gap-2 md:gap-3">
+            <header className="mb-2 md:mb-3 text-center relative">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-1 md:gap-2">
+                <h1 className="text-xl md:text-2xl font-extrabold text-white mb-1 drop-shadow">Split App</h1>
+                <Link to="/analytics" className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold shadow transition-all duration-200 text-xs">Analytics</Link>
               </div>
-              <p className="text-xl text-gray-300">Track group expenses, balances, and settlements easily.</p>
+              <p className="text-xs md:text-sm text-gray-300">Track group expenses, balances, and settlements easily.</p>
             </header>
             {showGroups ? (
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-2xl font-bold text-blue-400">Your Groups</h3>
+              <div className="mb-3 md:mb-4 w-full">
+                <div className="flex items-center justify-between mb-1 md:mb-2">
+                  <h3 className="text-sm md:text-lg font-bold text-blue-400">Your Groups</h3>
                   <button
-                    className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded font-bold shadow transition-all duration-200"
+                    className="bg-green-700 hover:bg-green-800 text-white px-2 py-1 rounded font-bold shadow transition-all duration-200 text-xs"
                     onClick={() => setShowGroupManager(v => !v)}
                   >
                     {showGroupManager ? 'Close' : 'Create Group'}
                   </button>
                 </div>
                 {showGroupManager && (
-                  <div className="mb-6">
+                  <div className="mb-2 md:mb-3 w-full">
                     <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
                   </div>
                 )}
-                <div className="flex flex-wrap gap-4 mb-6">
+                <div className="flex flex-wrap gap-1 md:gap-2 mb-2 md:mb-3 w-full">
                   {groups.length === 0 ? (
-                    <div className="text-gray-400">No groups found.</div>
+                    <div className="text-gray-400 text-xs">No groups found.</div>
                   ) : (
                     groups.map(group => (
                       <button
                         key={group._id}
-                        className={`flex flex-col items-center px-4 py-2 rounded-lg shadow font-bold transition-all duration-200 w-32 h-32 justify-center gap-2 ${selectedGroup === group._id ? 'bg-blue-700 text-white' : 'bg-zinc-800 text-blue-300 hover:bg-blue-900'}`}
+                        className={`flex flex-col items-center px-1 py-1 md:px-2 md:py-1 rounded-lg shadow font-bold transition-all duration-200 w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 justify-center gap-1 ${selectedGroup === group._id ? 'bg-blue-700 text-white' : 'bg-zinc-800 text-blue-300 hover:bg-blue-900'}`}
                         onClick={() => {
                           setSelectedGroup(group._id);
                           localStorage.setItem('selectedGroup', group._id);
                         }}
                       >
-                        <span className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-500 text-white text-2xl font-extrabold mb-1">
+                        <span className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 flex items-center justify-center rounded-full bg-blue-500 text-white text-xs md:text-sm font-extrabold mb-1">
                           {group.name?.charAt(0).toUpperCase() || '?'}
                         </span>
-                        <span className="truncate w-full text-center">{group.name}</span>
+                        <span className="truncate w-full text-center text-xs">{group.name}</span>
                         <span className="text-xs text-blue-200">{Array.isArray(group.members) ? group.members.length : 0} members</span>
                       </button>
                     ))
                   )}
                 </div>
                 {selectedGroup ? (
-                  <Groups
-                    group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
-                    people={groupPeople}
-                    onAddPerson={handleAddPersonToGroup}
-                    messages={groupMessages}
-                    onSendMessage={handleSendGroupMessage}
-                    onAddExpense={addExpense}
-                  />
+                  <div className="w-full">
+                    <Groups
+                      group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
+                      people={groupPeople}
+                      onAddPerson={handleAddPersonToGroup}
+                      messages={groupMessages}
+                      onSendMessage={handleSendGroupMessage}
+                      onAddExpense={addExpense}
+                    />
+                  </div>
                 ) : (
-                  <div className="text-center text-2xl text-white font-bold">Select a group</div>
+                  <div className="text-center text-sm md:text-lg text-white font-bold">Select a group</div>
                 )}
               </div>
             ) : (
               <>
-                <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                <div className="w-full">
+                  <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
+                </div>
+                <div className="bg-zinc-900/80 rounded-lg p-2 md:p-3 mb-2 md:mb-3 w-full">
                   <ExpenseForm
                     onAdd={addExpense}
                     group={selectedGroup}
@@ -401,32 +410,32 @@ function Dashboard() {
                     setEditExpense={setEditExpense}
                   />
                 </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                <div className="bg-zinc-900/80 rounded-lg p-2 md:p-3 mb-2 md:mb-3 w-full">
                   {Array.isArray(expenses) && (!expenses || expenses.length === 0) ? (
-                    <div className="text-gray-500 text-center py-8">
-                      <span className="block text-2xl mb-2">🧾</span>
+                    <div className="text-gray-500 text-center py-3 md:py-4">
+                      <span className="block text-lg mb-1">🧾</span>
                       No expenses found.
                     </div>
                   ) : (
                     <ExpensesList expenses={Array.isArray(expenses) ? expenses : []} onEdit={handleEdit} onDelete={handleDelete} />
                   )}
                 </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                <div className="bg-zinc-900/80 rounded-lg p-2 md:p-3 mb-2 md:mb-3 w-full">
                   {!balances || Object.keys(balances || {}).length === 0 ? (
-                    <div className="text-gray-500 text-center py-8">
-                      <span className="block text-2xl mb-2">💰</span>
+                    <div className="text-gray-500 text-center py-3 md:py-4">
+                      <span className="block text-lg mb-1">💰</span>
                       No balances found.
                     </div>
                   ) : (
                     <Balances balances={balances} loading={loading} />
                   )}
                 </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                <div className="bg-zinc-900/80 rounded-lg p-2 md:p-3 mb-2 md:mb-3 w-full">
                   <Settlements settlements={settlements} loading={loading} />
                 </div>
               </>
             )}
-            <footer className="mt-8 text-center text-xs text-pink-400">
+            <footer className="mt-2 md:mt-3 text-center text-xs text-pink-400">
               <p>Made with <span className="text-blue-200 font-bold">Vite</span> + <span className="text-purple-200 font-bold">React</span> + <span className="text-pink-200 font-bold">Tailwind CSS</span></p>
             </footer>
             <Toast message={toast.message} type={toast.type} onClose={closeToast} />
