@@ -96,7 +96,7 @@ const ResetPassword = () => {
   );
 };
 
-const Login = ({ onLogin, onSwitchToRegister }) => {
+const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -133,7 +133,8 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
         setLoading(false);
         return;
       }
-      onLogin(data.token, data.user);
+      sessionStorage.setItem('token', data.token);
+      sessionStorage.setItem('username', data.user.username);
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);
@@ -208,7 +209,7 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
         <button
           type="button"
           className="w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-blue-400 py-2 rounded-lg font-bold shadow transition-all duration-200"
-          onClick={onSwitchToRegister}
+          onClick={() => navigate('/register')}
           disabled={loading}
         >
           Don't have an account? <span className="underline">Register</span>

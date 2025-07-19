@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import Toast from './Toast';
 import { useNavigate } from 'react-router-dom';
 
-const Register = ({ onRegister, onSwitchToLogin }) => {
+const Register = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -34,7 +34,6 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
-        if (onRegister) onRegister();
         navigate('/login');
       }, 2000);
     } catch (err) {
@@ -91,7 +90,7 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
         <button
           type="button"
           className="w-full mt-2 bg-zinc-800 hover:bg-zinc-700 text-blue-400 py-2 rounded-lg font-bold shadow transition-all duration-200"
-          onClick={onSwitchToLogin}
+          onClick={() => navigate('/login')}
           disabled={loading}
         >
           Already have an account? <span className="underline">Login</span>
