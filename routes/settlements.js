@@ -1,10 +1,25 @@
 const express = require('express');
 const Expense = require('../models/Expense');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
 const router = express.Router();
 
-// Helper to calculate balances (same as in balances.js)
-async function calculateBalances() {
-  const expenses = await Expense.find();
+function auth(req, res, next) {
+  const header = req.headers['authorization'];
+  if (!header) return res.status(401).json({ success: false, message: 'No token provided' });
+  const token = header.replace('Bearer ', '');
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+}
+
+// Helper to calculate balances for user
+async function calculateBalances(userId) {
+  const expenses = await Expense.find({ user: userId });
   const balances = {};
   expenses.forEach(exp => {
     const paidBy = exp.paid_by.trim().toLowerCase();
@@ -60,10 +75,10 @@ function getSettlements(balances) {
   return settlements;
 }
 
-// GET /settlements - Get current settlement summary
-router.get('/', async (req, res) => {
+// GET /settlements - Get current settlement summary for user
+router.get('/', auth, async (req, res) => {
   try {
-    const balances = await calculateBalances();
+    const balances = await calculateBalances(req.userId);
     const settlements = getSettlements(balances);
     res.json({ success: true, data: settlements });
   } catch (err) {

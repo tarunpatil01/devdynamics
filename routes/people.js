@@ -1,10 +1,25 @@
 const express = require('express');
 const Expense = require('../models/Expense');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
 const router = express.Router();
 
-// Helper to get all people from expenses
-async function getAllPeople() {
-  const expenses = await Expense.find();
+function auth(req, res, next) {
+  const header = req.headers['authorization'];
+  if (!header) return res.status(401).json({ success: false, message: 'No token provided' });
+  const token = header.replace('Bearer ', '');
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+}
+
+// Helper to get all people from expenses for user
+async function getAllPeople(userId) {
+  const expenses = await Expense.find({ user: userId });
   const peopleSet = new Set();
   expenses.forEach(exp => {
     peopleSet.add(exp.paid_by.trim().toLowerCase());
@@ -15,10 +30,10 @@ async function getAllPeople() {
   return Array.from(peopleSet);
 }
 
-// GET /people - List all people
-router.get('/', async (req, res) => {
+// GET /people - List all people for user
+router.get('/', auth, async (req, res) => {
   try {
-    const people = await getAllPeople();
+    const people = await getAllPeople(req.userId);
     res.json({ success: true, data: people });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });

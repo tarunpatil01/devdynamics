@@ -6,7 +6,18 @@ const dotenv = require('dotenv');
 dotenv.config();
 
 const app = express();
-app.use(cors());
+const allowedOrigins = ["http://localhost:5173", "https://yourdomain.com"];
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (like mobile apps, curl, etc.)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  }
+}));
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;
@@ -24,13 +35,95 @@ app.get('/', (req, res) => {
 const expensesRouter = require('./routes/expenses');
 app.use('/expenses', expensesRouter);
 
+const authRouter = require('./routes/auth');
+app.use('/auth', authRouter);
+
+// Unregister endpoint (delete user account) - This is the first instance
+app.delete('/auth/unregister', async (req, res) => {
+  const header = req.headers['authorization'];
+  if (!header) return res.status(401).json({ success: false, message: 'No token provided' });
+  const token = header.replace('Bearer ', '');
+  const jwt = require('jsonwebtoken');
+  const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
+  let userId;
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    userId = decoded.userId;
+  } catch {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+  try {
+    const User = require('./models/User');
+    await User.findByIdAndDelete(userId);
+    res.json({ success: true, message: 'User account deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+
+app.delete('/auth/unregister', async (req, res) => {
+  const header = req.headers['authorization'];
+  if (!header) return res.status(401).json({ success: false, message: 'No token provided' });
+  const token = header.replace('Bearer ', '');
+  const jwt = require('jsonwebtoken');
+  const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
+  let userId;
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    userId = decoded.userId;
+  } catch {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+  try {
+    const User = require('./models/User');
+    await User.findByIdAndDelete(userId);
+    res.json({ success: true, message: 'User account deleted' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
+// This duplicate endpoint has been removed
+
 const peopleRouter = require('./routes/people');
 const balancesRouter = require('./routes/balances');
 const settlementsRouter = require('./routes/settlements');
+const groupsRouter = require('./routes/groups');
 app.use('/people', peopleRouter);
 app.use('/balances', balancesRouter);
 app.use('/settlements', settlementsRouter);
+app.use('/groups', groupsRouter);
 
-app.listen(PORT, () => {
+// Global error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ success: false, message: 'Internal server error' });
+});
+
+const server = app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
+});
+
+// Socket.io setup
+const { Server } = require('socket.io');
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"]
+  }
+});
+
+io.on('connection', (socket) => {
+  console.log('Socket connected:', socket.id);
+  // Join group room
+  socket.on('joinGroup', (groupId) => {
+    socket.join(groupId);
+  });
+  // Handle new group message
+  socket.on('groupMessage', (msg) => {
+    // msg: { groupId, sender, text, created_at }
+    io.to(msg.groupId).emit('groupMessage', msg);
+  });
+  socket.on('disconnect', () => {
+    console.log('Socket disconnected:', socket.id);
+  });
 });

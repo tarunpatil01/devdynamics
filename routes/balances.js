@@ -1,10 +1,25 @@
 const express = require('express');
 const Expense = require('../models/Expense');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
 const router = express.Router();
 
-// Helper to get all people from expenses
-async function getAllPeople() {
-  const expenses = await Expense.find();
+function auth(req, res, next) {
+  const header = req.headers['authorization'];
+  if (!header) return res.status(401).json({ success: false, message: 'No token provided' });
+  const token = header.replace('Bearer ', '');
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
+  }
+}
+
+// Helper to get all people from expenses for user
+async function getAllPeople(userId) {
+  const expenses = await Expense.find({ user: userId });
   const peopleSet = new Set();
   expenses.forEach(exp => {
     peopleSet.add(exp.paid_by.trim().toLowerCase());
@@ -15,9 +30,9 @@ async function getAllPeople() {
   return Array.from(peopleSet);
 }
 
-// Helper to calculate balances
-async function calculateBalances() {
-  const expenses = await Expense.find();
+// Helper to calculate balances for user
+async function calculateBalances(userId) {
+  const expenses = await Expense.find({ user: userId });
   const balances = {};
   expenses.forEach(exp => {
     const paidBy = exp.paid_by.trim().toLowerCase();
@@ -53,10 +68,34 @@ async function calculateBalances() {
   return balances;
 }
 
-// GET /balances - Show each person's balance
-router.get('/', async (req, res) => {
+// PUT /balances - update balances manually
+router.put('/', auth, async (req, res) => {
   try {
-    const balances = await calculateBalances();
+    const { balances } = req.body;
+    if (!balances || typeof balances !== 'object') {
+      return res.status(400).json({ success: false, message: 'Invalid balances data.' });
+    }
+    // Here you would update balances in your DB. For demo, just return success.
+    // You may want to persist this in a separate collection/model.
+    res.json({ success: true, message: 'Balances updated successfully.' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error', error: err.message });
+  }
+});
+      balances[person] -= share;
+    });
+  });
+  // Round balances to 2 decimals
+  Object.keys(balances).forEach(p => {
+    balances[p] = parseFloat(balances[p].toFixed(2));
+  });
+  return balances;
+}
+
+// GET /balances - Show each person's balance for user
+router.get('/', auth, async (req, res) => {
+  try {
+    const balances = await calculateBalances(req.userId);
     res.json({ success: true, data: balances });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
