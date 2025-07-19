@@ -67,40 +67,40 @@ const Settlements = ({ group, people, loading }) => {
 
   return (
     <div className="w-full flex flex-col items-center">
-      <div className="w-full max-w-2xl mx-auto bg-zinc-900/80 rounded-2xl shadow-2xl border-2 border-blue-900 p-6 mb-8 animate-fadein">
+      <div className="w-full max-w-2xl mx-auto bg-zinc-900/80 rounded-xl shadow-2xl border-2 border-blue-900 p-3 md:p-4 mb-4 md:mb-6 animate-fadein">
         {/* Card summary with avatars and group name */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 md:gap-4 mb-4 md:mb-6">
+          <div className="flex items-center gap-2 md:gap-3">
             {(Array.isArray(allPeople) ? allPeople : []).map((person, idx) => {
               const display = typeof person === 'string' ? person : '';
               return (
-                <span key={display || idx} className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-lg text-white border-2 border-blue-800 ${getAvatarColor(display)}`}>{display.charAt(0).toUpperCase()}</span>
+                <span key={display || idx} className={`w-8 h-8 md:w-10 md:h-10 flex items-center justify-center rounded-full font-bold text-sm md:text-lg text-white border-2 border-blue-800 ${getAvatarColor(display)}`}>{display.charAt(0).toUpperCase()}</span>
               );
             })}
           </div>
           <div className="flex flex-col items-center md:items-end">
-            <span className="text-lg text-blue-200 font-semibold mb-1">Total Settlements</span>
-            <span className="text-3xl font-extrabold text-white">₹{(totalOwedToYou - totalOwedByYou).toLocaleString('en-IN')}</span>
+            <span className="text-sm md:text-lg text-blue-200 font-semibold mb-1">Total Settlements</span>
+            <span className="text-2xl md:text-3xl font-extrabold text-white">₹{(totalOwedToYou - totalOwedByYou).toLocaleString('en-IN')}</span>
           </div>
         </div>
         {/* Settlements sections */}
-        <div className="flex flex-col md:flex-row gap-8">
+        <div className="flex flex-col md:flex-row gap-4 md:gap-8">
           {/* You owe */}
           <div className="flex-1">
-            <div className="text-lg font-bold text-red-400 mb-2">You owe</div>
+            <div className="text-base md:text-lg font-bold text-red-400 mb-2">You owe</div>
             {Array.isArray(owedByYou) && owedByYou.length === 0 ? (
-              <div className="text-gray-400">No settlements to show.</div>
+              <div className="text-gray-400 text-sm">No settlements to show.</div>
             ) : (
-              <ul className="flex flex-col gap-3">
+              <ul className="flex flex-col gap-2 md:gap-3">
                 {Array.isArray(owedByYou) ? owedByYou.map((s, idx) => {
                   const toDisplay = typeof s.to === 'string' ? s.to : '';
                   return (
-                    <li key={idx} className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 shadow">
-                      <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg text-white ${getAvatarColor(toDisplay)}`}>{toDisplay.charAt(0).toUpperCase()}</span>
-                      <span className="flex-1 text-blue-200 font-semibold">{toDisplay}</span>
-                      <span className="text-red-400 font-bold text-lg">₹{s.amount.toLocaleString('en-IN')}</span>
+                    <li key={idx} className="flex items-center gap-2 md:gap-3 bg-zinc-800 rounded-lg md:rounded-xl px-3 md:px-4 py-2 md:py-3 shadow">
+                      <span className={`w-7 h-7 md:w-9 md:h-9 flex items-center justify-center rounded-full font-bold text-sm md:text-lg text-white ${getAvatarColor(toDisplay)}`}>{toDisplay.charAt(0).toUpperCase()}</span>
+                      <span className="flex-1 text-blue-200 font-semibold text-sm md:text-base truncate">{toDisplay}</span>
+                      <span className="text-red-400 font-bold text-sm md:text-lg">₹{s.amount.toLocaleString('en-IN')}</span>
                       <button
-                        className="bg-blue-700 hover:bg-blue-800 text-white rounded-lg px-4 py-2 font-bold shadow transition disabled:opacity-50"
+                        className="bg-blue-700 hover:bg-blue-800 text-white rounded-lg px-2 py-1 md:px-4 md:py-2 font-bold shadow transition disabled:opacity-50 text-xs md:text-sm"
                         disabled={settling === s.to}
                         onClick={() => handleSettle(s.to, 'pay')}
                       >
@@ -114,20 +114,20 @@ const Settlements = ({ group, people, loading }) => {
           </div>
           {/* Owes you */}
           <div className="flex-1">
-            <div className="text-lg font-bold text-green-400 mb-2">Owes you</div>
+            <div className="text-base md:text-lg font-bold text-green-400 mb-2">Owes you</div>
             {Array.isArray(owedToYou) && owedToYou.length === 0 ? (
-              <div className="text-gray-400">No settlements to show.</div>
+              <div className="text-gray-400 text-sm">No settlements to show.</div>
             ) : (
-              <ul className="flex flex-col gap-3">
+              <ul className="flex flex-col gap-2 md:gap-3">
                 {Array.isArray(owedToYou) ? owedToYou.map((s, idx) => {
                   const fromDisplay = typeof s.from === 'string' ? s.from : '';
                   return (
-                    <li key={idx} className="flex items-center gap-3 bg-zinc-800 rounded-xl px-4 py-3 shadow">
-                      <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg text-white ${getAvatarColor(fromDisplay)}`}>{fromDisplay.charAt(0).toUpperCase()}</span>
-                      <span className="flex-1 text-blue-200 font-semibold">{fromDisplay}</span>
-                      <span className="text-green-400 font-bold text-lg">₹{s.amount.toLocaleString('en-IN')}</span>
+                    <li key={idx} className="flex items-center gap-2 md:gap-3 bg-zinc-800 rounded-lg md:rounded-xl px-3 md:px-4 py-2 md:py-3 shadow">
+                      <span className={`w-7 h-7 md:w-9 md:h-9 flex items-center justify-center rounded-full font-bold text-sm md:text-lg text-white ${getAvatarColor(fromDisplay)}`}>{fromDisplay.charAt(0).toUpperCase()}</span>
+                      <span className="flex-1 text-blue-200 font-semibold text-sm md:text-base truncate">{fromDisplay}</span>
+                      <span className="text-green-400 font-bold text-sm md:text-lg">₹{s.amount.toLocaleString('en-IN')}</span>
                       <button
-                        className="bg-green-700 hover:bg-green-800 text-white rounded-lg px-4 py-2 font-bold shadow transition disabled:opacity-50"
+                        className="bg-green-700 hover:bg-green-800 text-white rounded-lg px-2 py-1 md:px-4 md:py-2 font-bold shadow transition disabled:opacity-50 text-xs md:text-sm"
                         disabled={settling === s.from}
                         onClick={() => handleSettle(s.from, 'receive')}
                       >
