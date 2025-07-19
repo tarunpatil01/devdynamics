@@ -110,6 +110,9 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
     setLoading(false);
   };
 
+  const safeSplitWith = Array.isArray(splitWith) ? splitWith : [];
+  const safeUsers = Array.isArray(users) ? users : [];
+
   return (
     <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-4">
       <h2 className="text-2xl font-bold text-blue-700 mb-2">Add Expense</h2>
@@ -127,8 +130,8 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
           >
             {usersLoading ? (
               <option>Loading users...</option>
-            ) : (Array.isArray(users) && users.length > 0) ? (
-              users.map(user => (
+            ) : (safeUsers.length > 0) ? (
+              safeUsers.map(user => (
                 <option key={user} value={user}>{user}</option>
               ))
             ) : (
@@ -140,9 +143,9 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
         <div className="flex-1">
           <label className="block font-semibold mb-1 text-blue-200">Split With</label>
           <div className="flex flex-wrap gap-2">
-            {usersLoading ? <div>Loading users...</div> : (Array.isArray(users) && users.length > 0) ? users.map(user => (
+            {usersLoading ? <div>Loading users...</div> : (safeUsers.length > 0) ? safeUsers.map(user => (
               <label key={user} className="flex items-center gap-1">
-                <input type="checkbox" checked={Array.isArray(splitWith) && splitWith.includes(user)} onChange={() => handleSplitWithChange(user)} className="accent-blue-500" />
+                <input type="checkbox" checked={safeSplitWith.includes(user)} onChange={() => handleSplitWithChange(user)} className="accent-blue-500" />
                 <span className="text-blue-200">{user}</span>
               </label>
             )) : <span className="text-gray-400">No users found.</span>}
@@ -172,7 +175,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
       </div>
       <div>
         <label className="block font-semibold mb-2">Split Details</label>
-        {(Array.isArray(splitWith) && splitWith.length > 0) ? splitWith.map(person => (
+        {safeSplitWith.length > 0 ? safeSplitWith.map(person => (
           <div key={person} className="flex items-center gap-2 mb-2">
             <span className="text-purple-700 font-medium w-24">{person}</span>
             {splitType === 'equal' ? (
@@ -195,7 +198,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
               />
             )}
             {splitType === 'percentage' && <span className="text-gray-500">%</span>}
-            {splitType === 'exact' && <span className="text-gray-500">9</span>}
+            {splitType === 'exact' && <span className="text-gray-500"> 9</span>}
             {splitType === 'shares' && <span className="text-gray-500">shares</span>}
           </div>
         )) : null}
