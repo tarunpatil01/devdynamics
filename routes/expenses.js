@@ -29,8 +29,9 @@ router.get('/analytics', auth, async (req, res) => {
     // Category-wise totals
     const categoryTotals = {};
     expenses.forEach(exp => {
-      if (!categoryTotals[exp.category]) categoryTotals[exp.category] = 0;
-      categoryTotals[exp.category] += exp.amount;
+      const cat = exp.category || 'Other';
+      if (!categoryTotals[cat]) categoryTotals[cat] = 0;
+      categoryTotals[cat] += exp.amount;
     });
     // Monthly summaries
     const monthly = {};
@@ -159,6 +160,10 @@ router.post('/', auth, expenseValidation, async (req, res) => {
     }
     const expense = new Expense({ amount, description, paid_by, split_type, split_details, group, user: req.userId, category, recurring });
     await expense.save();
+    // Emit socket event for new expense to the group room
+    if (req.app.get('io') && group) {
+      req.app.get('io').to(String(group)).emit('expenseCreated', expense);
+    }
     res.json({ success: true, data: expense, message: `Expense added successfully${missingPeople.length ? ", people auto-added: " + missingPeople.join(", ") : ""}` });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error', error: err.message });
@@ -212,6 +217,10 @@ router.put('/:id', auth, async (req, res) => {
       { new: true }
     );
     if (!expense) return res.status(404).json({ success: false, message: 'Expense not found' });
+    // Emit socket event for updated expense
+    if (req.app.get('io') && group) {
+      req.app.get('io').to(String(group)).emit('expenseUpdated', expense);
+    }
     res.json({ success: true, data: expense, message: `Expense updated successfully${missingPeople.length ? ", people auto-added: " + missingPeople.join(", ") : ""}` });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error', error: err.message });
@@ -223,6 +232,10 @@ router.delete('/:id', auth, async (req, res) => {
   try {
     const expense = await Expense.findOneAndDelete({ _id: req.params.id, user: req.userId });
     if (!expense) return res.status(404).json({ success: false, message: 'Expense not found' });
+    // Emit socket event for deleted expense
+    if (req.app.get('io') && expense.group) {
+      req.app.get('io').to(String(expense.group)).emit('expenseDeleted', { _id: expense._id, group: expense.group });
+    }
     res.json({ success: true, message: 'Expense deleted successfully' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });

@@ -144,6 +144,8 @@ const io = new Server(server, {
   }
 });
 
+app.set('io', io);
+
 io.on('connection', (socket) => {
   console.log('Socket connected:', socket.id);
   // Join group room

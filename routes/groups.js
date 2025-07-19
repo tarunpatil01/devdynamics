@@ -24,6 +24,10 @@ router.post('/', auth, async (req, res) => {
   try {
     const group = new Group({ name, owner: req.userId, members: [req.userId, ...(members || [])] });
     await group.save();
+    // Emit socket event for new group
+    if (req.app.get('io')) {
+      req.app.get('io').emit('groupCreated', group);
+    }
     res.json({ success: true, data: group });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
@@ -33,7 +37,16 @@ router.post('/', auth, async (req, res) => {
 // List groups for user
 router.get('/', auth, async (req, res) => {
   try {
-    const groups = await Group.find({ members: req.userId }) || [];
+    const userId = req.userId;
+    const User = require('../models/User');
+    const user = await User.findById(userId);
+    const username = user.username;
+    const groups = await Group.find({
+      $or: [
+        { owner: userId },
+        { members: { $in: [userId, username] } }
+      ]
+    });
     res.json({ success: true, data: Array.isArray(groups) ? groups : [] });
   } catch (err) {
     console.error('Error in GET /groups:', err);
@@ -50,6 +63,10 @@ router.post('/:id/join', auth, async (req, res) => {
       { new: true }
     );
     if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
+    // Emit socket event for group update
+    if (req.app.get('io')) {
+      req.app.get('io').emit('groupUpdated', group);
+    }
     res.json({ success: true, data: group });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
@@ -65,6 +82,10 @@ router.post('/:id/leave', auth, async (req, res) => {
       { new: true }
     );
     if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
+    // Emit socket event for group update
+    if (req.app.get('io')) {
+      req.app.get('io').emit('groupUpdated', group);
+    }
     res.json({ success: true, data: group });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
@@ -83,6 +104,10 @@ router.post('/:id/add-person', auth, async (req, res) => {
       { new: true }
     );
     if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
+    // Emit socket event for group update
+    if (req.app.get('io')) {
+      req.app.get('io').emit('groupUpdated', group);
+    }
     res.json({ success: true, data: group });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });

@@ -7,6 +7,7 @@ import Analytics from './components/Analytics';
 
 function App() {
   const token = localStorage.getItem('token');
+  console.log('Token in App.jsx:', token);
   return (
     <Routes>
       <Route path="/login" element={<Login />} />

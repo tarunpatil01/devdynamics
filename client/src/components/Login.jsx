@@ -135,6 +135,7 @@ const Login = () => {
       }
       localStorage.setItem('token', data.token);
       localStorage.setItem('username', data.user.username);
+      console.log('Token after login:', localStorage.getItem('token'));
       navigate('/dashboard');
     } catch (err) {
       setError(err.message);

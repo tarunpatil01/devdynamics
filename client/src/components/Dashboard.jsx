@@ -58,6 +58,39 @@ function Dashboard() {
     };
   }, [token, selectedGroup]);
 
+  // Listen for new group creation
+  useEffect(() => {
+    socket.on('groupCreated', (group) => {
+      fetchAll(); // Refetch groups
+    });
+    // Listen for new expense in the current group
+    socket.on('expenseCreated', (expense) => {
+      if (expense.group === selectedGroup) {
+        fetchAll(); // Refetch expenses, balances, etc.
+      }
+    });
+    socket.on('expenseUpdated', (expense) => {
+      if (expense.group === selectedGroup) {
+        fetchAll();
+      }
+    });
+    socket.on('expenseDeleted', (payload) => {
+      if (payload.group === selectedGroup) {
+        fetchAll();
+      }
+    });
+    socket.on('groupUpdated', (group) => {
+      fetchAll();
+    });
+    return () => {
+      socket.off('groupCreated');
+      socket.off('expenseCreated');
+      socket.off('expenseUpdated');
+      socket.off('expenseDeleted');
+      socket.off('groupUpdated');
+    };
+  }, [selectedGroup]);
+
   // Fetch all data for selected group
   const fetchAll = async () => {
     if (!token) return;
