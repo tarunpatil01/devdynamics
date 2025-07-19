@@ -2,6 +2,8 @@ const express = require('express');
 const Expense = require('../models/Expense');
 const { expenseValidation } = require('./validator');
 const { validationResult } = require('express-validator');
+const jwt = require('jsonwebtoken');
+const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
 const router = express.Router();
 
 // GET /expenses - List all expenses with pagination
@@ -18,13 +20,18 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Simple token-based auth middleware
+// JWT-based auth middleware (same as other routes)
 function auth(req, res, next) {
-  const token = req.headers['authorization'];
-  if (!token || token !== 'Bearer your-secret-token') {
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
+  const header = req.headers['authorization'];
+  if (!header) return res.status(401).json({ success: false, message: 'No token provided' });
+  const token = header.replace('Bearer ', '');
+  try {
+    const decoded = jwt.verify(token, JWT_SECRET);
+    req.userId = decoded.userId;
+    next();
+  } catch {
+    return res.status(401).json({ success: false, message: 'Invalid token' });
   }
-  next();
 }
 
 // Validate split_details

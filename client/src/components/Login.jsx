@@ -18,7 +18,15 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
         body: JSON.stringify({ username, password })
       });
       const data = await res.json();
-      if (!res.ok || !data.success) throw new Error(data.message || 'Login failed');
+      if (!res.ok || !data.success) {
+        if (data.message && data.message.toLowerCase().includes('invalid credentials')) {
+          setError('User not found. Please register first.');
+        } else {
+          setError(data.message || 'Login failed');
+        }
+        setLoading(false);
+        return;
+      }
       onLogin(data.token, data.user);
     } catch (err) {
       setError(err.message);

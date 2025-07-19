@@ -68,6 +68,7 @@ function App() {
 
   // Fetch all data for selected group
   const fetchAll = async () => {
+    if (!token) return; // Prevent fetch if not logged in
     setLoading(true);
     setError('');
     try {
@@ -94,12 +95,9 @@ function App() {
       setGroups(grpData.data || []);
       // Fetch group people and messages if group selected
       if (selectedGroup) {
-        // Fetch group people
         setGroupPeople(pplData.data || []);
-        // Fetch group messages (stub, replace with real API)
         const msgRes = await fetch(`${baseURL}/groups/${selectedGroup}/messages`, { headers });
         const msgData = msgRes.ok ? await msgRes.json() : { data: [] };
-        // Messages now have sender object and created_at
         setGroupMessages(msgData.data || []);
       }
     } catch (err) {
@@ -130,7 +128,7 @@ function App() {
   const handleSendGroupMessage = async (message) => {
     try {
       // Send to backend for persistence
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devynamics-yw9g.onrender.com';
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
       const res = await fetch(`${baseURL}/groups/${selectedGroup}/messages`, {
         method: 'POST',
@@ -259,7 +257,7 @@ function App() {
           <main className="flex flex-col gap-6">
             {showGroups ? (
               <Groups
-                group={groups.find(g => g._id === selectedGroup)}
+                group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
                 people={groupPeople}
                 onAddPerson={handleAddPersonToGroup}
                 messages={groupMessages}
