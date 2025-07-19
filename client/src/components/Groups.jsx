@@ -85,7 +85,13 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpe
               <div key={msg._id || idx} className="mb-4 flex items-start gap-3">
                 <span className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-lg ${getAvatarColor(msg.sender?.name || msg.sender || 'Unknown')}`}>{String(msg.sender?.name || msg.sender || 'U').charAt(0).toUpperCase()}</span>
                 <div className="flex flex-col">
-                  <span className="text-sm text-blue-200 font-semibold mb-1">{msg.sender?.name || msg.sender || 'Unknown'}</span>
+                  <span className="text-sm text-blue-200 font-semibold mb-1">
+                    {typeof msg.sender === 'string'
+                      ? msg.sender
+                      : (msg.sender && typeof msg.sender.name === 'string'
+                          ? msg.sender.name
+                          : 'Unknown')}
+                  </span>
                   <span className="bg-blue-950 text-white rounded-2xl px-4 py-2 inline-block max-w-xs break-words shadow-md text-base">{msg.text}</span>
                   <span className="text-xs text-gray-500 mt-1">{msg.created_at ? new Date(msg.created_at).toLocaleString() : ''}</span>
                 </div>

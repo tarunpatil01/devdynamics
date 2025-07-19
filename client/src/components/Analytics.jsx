@@ -104,8 +104,8 @@ const Analytics = () => {
         <h3 className="text-xl font-semibold text-yellow-300 mb-2">Top 5 Transactions</h3>
         <ul className="list-decimal pl-6">
           {data.topTransactions.map((exp, idx) => (
-            <li key={exp._id}>
-              {exp.description} - ₹{exp.amount.toLocaleString('en-IN')} ({exp.category}, {new Date(exp.created_at).toLocaleDateString()})
+            <li key={exp._id && exp._id.toString ? exp._id.toString() : idx}>
+              {typeof exp.description === 'string' ? exp.description : ''} - ₹{typeof exp.amount === 'number' || typeof exp.amount === 'string' ? Number(exp.amount).toLocaleString('en-IN') : ''} ({typeof exp.category === 'string' ? exp.category : ''}, {exp.created_at ? new Date(exp.created_at).toLocaleDateString() : ''})
             </li>
           ))}
         </ul>

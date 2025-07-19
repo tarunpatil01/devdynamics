@@ -210,7 +210,9 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
               <option>Loading users...</option>
             ) : (safeUsers.length > 0) ? (
               safeUsers.map(user => (
-                <option key={user} value={user}>{user}</option>
+                <option key={typeof user === 'string' ? user : JSON.stringify(user)} value={typeof user === 'string' ? user : ''}>
+                  {typeof user === 'string' ? user : ''}
+                </option>
               ))
             ) : (
               <option disabled>No users found</option>
@@ -222,9 +224,9 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
           <label className="block font-semibold mb-1 text-blue-200">Split With</label>
           <div className="flex flex-wrap gap-2">
             {usersLoading ? <div>Loading users...</div> : (safeUsers.length > 0) ? safeUsers.map(user => (
-              <label key={user} className="flex items-center gap-1">
+              <label key={typeof user === 'string' ? user : JSON.stringify(user)} className="flex items-center gap-1">
                 <input type="checkbox" checked={safeSplitWith.includes(user)} onChange={() => handleSplitWithChange(user)} className="accent-blue-500" />
-                <span className="text-blue-200">{user}</span>
+                <span className="text-blue-200">{typeof user === 'string' ? user : ''}</span>
               </label>
             )) : <span className="text-gray-400">No users found.</span>}
           </div>
@@ -254,8 +256,8 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
       <div>
         <label className="block font-semibold mb-2">Split Details</label>
         {safeSplitWith.length > 0 ? safeSplitWith.map(person => (
-          <div key={person} className="flex items-center gap-2 mb-2">
-            <span className="text-purple-700 font-medium w-24">{person}</span>
+          <div key={typeof person === 'string' ? person : JSON.stringify(person)} className="flex items-center gap-2 mb-2">
+            <span className="text-purple-700 font-medium w-24">{typeof person === 'string' ? person : ''}</span>
             {splitType === 'equal' ? (
               <input
                 type="number"

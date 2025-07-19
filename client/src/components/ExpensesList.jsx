@@ -21,10 +21,10 @@ const ExpensesList = ({ expenses, onEdit, onDelete }) => {
           {safeExpenses.map((exp, idx) => (
             <li key={exp._id && exp._id.toString ? exp._id.toString() : idx} className="flex flex-col md:flex-row justify-between items-center py-2 border-b border-blue-900 last:border-b-0 gap-2 transition-all duration-200 hover:bg-zinc-800/60 rounded-xl">
               <div className="flex flex-col md:flex-row gap-2 items-center w-full">
-                <span className="font-bold text-blue-200 text-lg">{exp.description}</span>
-                <span className="ml-2 text-white">₹{exp.amount}</span>
-                <span className="ml-2 text-pink-400">Paid by: {exp.paid_by}</span>
-                <span className="ml-2 text-gray-400">Split: {exp.split_type}</span>
+                <span className="font-bold text-blue-200 text-lg">{typeof exp.description === 'string' ? exp.description : ''}</span>
+                <span className="ml-2 text-white">₹{typeof exp.amount === 'number' || typeof exp.amount === 'string' ? exp.amount : ''}</span>
+                <span className="ml-2 text-pink-400">Paid by: {typeof exp.paid_by === 'string' ? exp.paid_by : ''}</span>
+                <span className="ml-2 text-gray-400">Split: {typeof exp.split_type === 'string' ? exp.split_type : ''}</span>
               </div>
               <div className="flex gap-2 mt-2 md:mt-0">
                 <button className="bg-yellow-700 hover:bg-yellow-800 text-white px-3 py-1 rounded-lg shadow transition-all duration-200" onClick={() => onEdit(exp)}>Edit</button>
