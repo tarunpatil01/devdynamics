@@ -20,35 +20,6 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
   const [nextDue, setNextDue] = useState('');
   const [selectedGroup, setSelectedGroup] = useState(group || (Array.isArray(groups) && groups.length === 1 ? groups[0]._id : ''));
 
-  // Fetch all users from backend 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setUsersLoading(true);
-      try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-        const token = localStorage.getItem('token');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${baseURL}/people/users`, { headers });
-        const data = await res.json();
-        setUsers(Array.isArray(data?.data) ? data.data : []);
-      } catch {
-        setUsers([]);
-      }
-      setUsersLoading(false);
-    };
-    fetchUsers();
-  }, []);
-
-  // Default paidBy to logged-in user
-  useEffect(() => {
-    const user = localStorage.getItem('username');
-    if (user) setPaidBy(user);
-  }, []);
-
-  useEffect(() => {
-    if (group) setSelectedGroup(group);
-  }, [group]);
-
   // Fetch group members for selected group, or all users if no group is selected
   useEffect(() => {
     const fetchUsers = async () => {
@@ -73,6 +44,16 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
     };
     fetchUsers();
   }, [selectedGroup]);
+
+  // Default paidBy to logged-in user
+  useEffect(() => {
+    const user = localStorage.getItem('username');
+    if (user) setPaidBy(user);
+  }, []);
+
+  useEffect(() => {
+    if (group) setSelectedGroup(group);
+  }, [group]);
 
   // Handle checkbox change for splitWith
   const handleSplitWithChange = (person) => {
