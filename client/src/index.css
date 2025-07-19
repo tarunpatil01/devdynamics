@@ -59,7 +59,34 @@
   width: 100%;
 }
 
-/* Mobile-first responsive breakpoints */
+/* Device-specific responsive breakpoints */
+@media (max-width: 480px) {
+  .xs-hidden {
+    display: none !important;
+  }
+  
+  .xs-full {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  
+  .xs-stack {
+    flex-direction: column !important;
+  }
+  
+  .xs-text-xs {
+    font-size: 0.75rem !important;
+  }
+  
+  .xs-p-1 {
+    padding: 0.25rem !important;
+  }
+  
+  .xs-gap-1 {
+    gap: 0.25rem !important;
+  }
+}
+
 @media (max-width: 640px) {
   .mobile-hidden {
     display: none !important;
@@ -97,11 +124,25 @@
   }
 }
 
+@media (max-width: 1024px) {
+  .laptop-hidden {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1280px) {
+  .desktop-only {
+    display: block !important;
+  }
+}
+
 /* Prevent horizontal scroll on all devices */
 html, body {
   overflow-x: hidden;
   max-width: 100vw;
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 * {
@@ -141,13 +182,35 @@ html, body {
 }
 
 /* Responsive typography */
+@media (max-width: 480px) {
+  h1 { font-size: 1.25rem !important; }
+  h2 { font-size: 1.125rem !important; }
+  h3 { font-size: 1rem !important; }
+}
+
 @media (max-width: 640px) {
   h1 { font-size: 1.5rem !important; }
   h2 { font-size: 1.25rem !important; }
   h3 { font-size: 1.125rem !important; }
 }
 
+@media (min-width: 1024px) {
+  h1 { font-size: 2.25rem !important; }
+  h2 { font-size: 1.875rem !important; }
+  h3 { font-size: 1.5rem !important; }
+}
+
 /* Responsive spacing */
+@media (max-width: 480px) {
+  .xs-space-y-1 > * + * {
+    margin-top: 0.25rem;
+  }
+  
+  .xs-space-y-2 > * + * {
+    margin-top: 0.5rem;
+  }
+}
+
 @media (max-width: 640px) {
   .mobile-space-y-2 > * + * {
     margin-top: 0.5rem;
@@ -155,5 +218,116 @@ html, body {
   
   .mobile-space-y-4 > * + * {
     margin-top: 1rem;
+  }
+}
+
+/* Sidebar responsive fixes */
+@media (max-width: 768px) {
+  .sidebar-mobile {
+    width: 100vw !important;
+    max-width: 320px !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .sidebar-desktop {
+    position: relative !important;
+    transform: none !important;
+  }
+}
+
+/* Main content responsive fixes */
+@media (max-width: 768px) {
+  .main-mobile {
+    margin-left: 0 !important;
+    width: 100% !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .main-desktop {
+    margin-left: 18rem !important; /* 288px */
+  }
+}
+
+/* Container responsive fixes */
+@media (max-width: 480px) {
+  .container-xs {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .container-sm {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .container-md {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container-lg {
+    padding-left: 2rem !important;
+    padding-right: 2rem !important;
+  }
+}
+
+/* Grid responsive fixes */
+@media (max-width: 480px) {
+  .grid-xs-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+  
+  .grid-xs-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .grid-sm-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr)) !important;
+  }
+  
+  .grid-sm-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  
+  .grid-sm-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .grid-md-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+  
+  .grid-md-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  
+  .grid-md-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+@media (min-width: 1024px) {
+  .grid-lg-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  }
+  
+  .grid-lg-4 {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+  
+  .grid-lg-5 {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
   }
 }

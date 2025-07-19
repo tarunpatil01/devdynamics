@@ -316,23 +316,18 @@ function Dashboard() {
       <div className="min-h-screen w-full bg-gradient-to-br from-black via-zinc-900 to-blue-950 responsive-container">
         {/* Hamburger button for mobile only */}
         <button
-          className="fixed top-4 left-4 z-40 bg-blue-700 hover:bg-blue-800 text-white p-2 rounded-lg shadow-lg focus:outline-none md:hidden touch-target"
+          className="fixed top-4 left-4 z-50 bg-blue-700 hover:bg-blue-800 text-white p-2 rounded-lg shadow-lg focus:outline-none md:hidden touch-target"
           onClick={() => setSidebarOpen(true)}
           aria-label="Open sidebar"
         >
           <svg width="24" height="24" fill="none" viewBox="0 0 24 24"><rect y="5" width="24" height="2" rx="1" fill="currentColor"/><rect y="11" width="24" height="2" rx="1" fill="currentColor"/><rect y="17" width="24" height="2" rx="1" fill="currentColor"/></svg>
         </button>
         
-        {/* Sidebar overlay for mobile only */}
-        {sidebarOpen && (
-          <div className="fixed inset-0 bg-black/60 z-30 md:hidden" onClick={() => setSidebarOpen(false)}></div>
-        )}
-        
-        {/* Sidebar always visible on desktop, overlay on mobile */}
+        {/* Sidebar */}
         <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
         
         {/* Main content area */}
-        <main className="md:ml-72 flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 w-full min-h-screen overflow-x-hidden">
+        <main className="w-full md:ml-72 flex flex-col items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8 min-h-screen overflow-x-hidden main-mobile md:main-desktop">
           <div className="w-full max-w-none bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-3 sm:p-4 md:p-6 flex flex-col gap-4 md:gap-6 responsive-container">
             {/* Header */}
             <header className="mb-4 md:mb-6 text-center relative">
