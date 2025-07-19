@@ -329,7 +329,7 @@ function Dashboard() {
         )}
         {/* Sidebar always visible on desktop, overlay on mobile */}
         <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-12 w-full md:ml-72">
+        <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-12 w-full md:ml-7">
           <div className="w-full max-w-6xl bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-8 flex flex-col gap-8">
             <header className="mb-8 text-center relative">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
