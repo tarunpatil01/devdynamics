@@ -72,7 +72,7 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage }) => {
           <div ref={chatRef} className="flex-1 overflow-y-auto bg-zinc-900 rounded-2xl p-4 mb-3 border border-blue-800 max-h-[420px] min-h-[320px] shadow-inner">
             {safeMessages.length > 0 ? safeMessages.map((msg, idx) => (
               <div key={msg._id || idx} className="mb-4 flex items-start gap-3">
-                <span className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-lg ${getAvatarColor(msg.sender?.name || msg.sender || 'Unknown')}`}>{(msg.sender?.name || msg.sender || 'U').charAt(0).toUpperCase()}</span>
+                <span className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-lg ${getAvatarColor(msg.sender?.name || msg.sender || 'Unknown')}`}>{String(msg.sender?.name || msg.sender || 'U').charAt(0).toUpperCase()}</span>
                 <div className="flex flex-col">
                   <span className="text-sm text-blue-200 font-semibold mb-1">{msg.sender?.name || msg.sender || 'Unknown'}</span>
                   <span className="bg-blue-950 text-white rounded-2xl px-4 py-2 inline-block max-w-xs break-words shadow-md text-base">{msg.text}</span>
