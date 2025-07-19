@@ -10,6 +10,8 @@ import Sidebar from './Sidebar';
 import Groups from './Groups';
 import { socket } from '../socket';
 import ErrorBoundary from './ErrorBoundary';
+import Spinner from './Spinner';
+import ErrorMessage from './ErrorMessage';
 
 function Dashboard() {
   // Hamburger sidebar state
@@ -198,12 +200,7 @@ function Dashboard() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-purple-100 to-pink-100">
-        <div className="bg-white p-8 rounded shadow-xl border-2 border-red-200">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">Error</h2>
-          <p className="text-red-500 mb-4">{error}</p>
-          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={() => { setError(''); fetchAll(); }}>Retry</button>
-          <Toast message={toast.message} type={toast.type} onClose={closeToast} />
-        </div>
+        <ErrorMessage message={error} onRetry={fetchAll} />
       </div>
     );
   }
@@ -211,11 +208,7 @@ function Dashboard() {
   return (
     <ErrorBoundary>
       {globalError && <Toast message={globalError} type="error" onClose={() => setGlobalError('')} />}
-      {loading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <SkeletonCard />
-        </div>
-      )}
+      {loading && <Spinner />}
       <div className="min-h-screen w-full overflow-x-hidden flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
         {/* Hamburger button for mobile only */}
         <button

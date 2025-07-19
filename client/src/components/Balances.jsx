@@ -36,14 +36,14 @@ const Balances = () => {
         <div className="text-red-400">{error}</div>
       ) : (
         <ul className="flex flex-col gap-2">
-          {Object.keys(safeBalances).length === 0 ? (
+          {safeBalances && Object.entries(safeBalances).length === 0 ? (
             <li className="text-gray-500">No balances found.</li>
           ) : (
-            Object.keys(safeBalances).map((person) => (
+            safeBalances && Object.entries(safeBalances).map(([person, balance]) => (
               <li key={person} className="flex justify-between items-center py-2 border-b border-blue-900 last:border-b-0 transition-all duration-200 hover:bg-zinc-800/60 rounded-xl">
                 <span className="font-medium text-blue-200 text-lg">{person}</span>
-                <span className={balances[person] < 0 ? 'text-red-400 font-bold' : 'text-green-400 font-bold'}>
-                  {balances[person]}
+                <span className={balance < 0 ? 'text-red-400 font-bold' : 'text-green-400 font-bold'}>
+                  {balance}
                 </span>
               </li>
             ))
