@@ -16,7 +16,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
   const { toast, showToast, closeToast } = useToast();
   const [paidByError, setPaidByError] = useState('');
 
-  // Fetch all users from backend
+  // Fetch all users from backend 
   useEffect(() => {
     const fetchUsers = async () => {
       setUsersLoading(true);
@@ -26,7 +26,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${baseURL}/people/users`, { headers });
         const data = await res.json();
-        setUsers(Array.isArray(data.data) ? data.data : []);
+        setUsers(Array.isArray(data?.data) ? data.data : []);
       } catch {
         setUsers([]);
       }
@@ -141,7 +141,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
           <div className="flex flex-wrap gap-2">
             {usersLoading ? <div>Loading users...</div> : Array.isArray(users) && users.length > 0 ? users.map(user => (
               <label key={user} className="flex items-center gap-1">
-                <input type="checkbox" checked={splitWith.includes(user)} onChange={() => handleSplitWithChange(user)} className="accent-blue-500" />
+                <input type="checkbox" checked={Array.isArray(splitWith) && splitWith.includes(user)} onChange={() => handleSplitWithChange(user)} className="accent-blue-500" />
                 <span className="text-blue-200">{user}</span>
               </label>
             )) : <span className="text-gray-400">No users found.</span>}
@@ -171,7 +171,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
       </div>
       <div>
         <label className="block font-semibold mb-2">Split Details</label>
-        {Array.isArray(splitWith) ? splitWith.map(person => (
+        {Array.isArray(splitWith) && splitWith.length > 0 ? splitWith.map(person => (
           <div key={person} className="flex items-center gap-2 mb-2">
             <span className="text-purple-700 font-medium w-24">{person}</span>
             {splitType === 'equal' ? (
