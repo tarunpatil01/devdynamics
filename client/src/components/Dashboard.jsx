@@ -181,12 +181,12 @@ function Dashboard() {
     // eslint-disable-next-line
   }, [selectedGroup, token]);
 
-  const addExpense = async (expense) => {
+  const addExpense = async (expense, isEdit = false) => {
     setError('');
     try {
       const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-      const method = editExpense ? 'PUT' : 'POST';
-      const url = editExpense ? `${baseURL}/expenses/${editExpense._id}` : `${baseURL}/expenses`;
+      const method = isEdit ? 'PUT' : 'POST';
+      const url = isEdit ? `${baseURL}/expenses/${expense._id}` : `${baseURL}/expenses`;
       const res = await fetch(url, {
         method,
         headers: {
@@ -209,7 +209,7 @@ function Dashboard() {
       }
       setEditExpense(null);
       await fetchAll();
-      if (!editExpense) showToast('Expense added!', 'success');
+      if (!isEdit) showToast('Expense added!', 'success');
     } catch (err) {
       setError('Failed to save expense.');
       showToast('Failed to save expense.', 'error');
@@ -232,9 +232,9 @@ function Dashboard() {
     } else {
       updatedExpense[field] = newValue;
     }
-    // Call addExpense with editExpense set
+    // Call addExpense with edit flag
     setEditExpense(updatedExpense);
-    addExpense(updatedExpense);
+    addExpense(updatedExpense, true);
     setEditExpense(null);
   };
 
