@@ -14,6 +14,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const { toast, showToast, closeToast } = useToast();
+  const [paidByError, setPaidByError] = useState('');
 
   // Fetch all users from backend
   useEffect(() => {
@@ -72,6 +73,12 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+    setPaidByError('');
+    if (!paidBy) {
+      setPaidByError('Please select who paid.');
+      showToast('Please select who paid.', 'error');
+      return;
+    }
     const splitErr = validateSplitDetails();
     if (splitErr) {
       setError(splitErr);
@@ -124,6 +131,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
             )}
           </select>
         </div>
+        {paidByError && <div className="text-red-500 text-xs mt-1">{paidByError}</div>}
         <div className="flex-1">
           <label className="block font-semibold mb-1 text-blue-200">Split With</label>
           <div className="flex flex-wrap gap-2">
