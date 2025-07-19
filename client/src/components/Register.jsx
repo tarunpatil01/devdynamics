@@ -13,7 +13,8 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
     setSuccess('');
     setLoading(true);
     try {
-      const res = await fetch('/auth/register', {
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+      const res = await fetch(`${baseURL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })

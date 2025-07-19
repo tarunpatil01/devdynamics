@@ -4,7 +4,8 @@ export const fetchBalances = createAsyncThunk('balances/fetchBalances', async (_
   try {
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
-    const res = await fetch('/balances', { headers });
+    const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+    const res = await fetch(`${baseURL}/balances`, { headers });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       return rejectWithValue(errorData.message || 'Failed to fetch balances');

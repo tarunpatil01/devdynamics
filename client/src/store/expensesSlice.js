@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchExpenses = createAsyncThunk('expenses/fetchExpenses', async () => {
-  const res = await fetch('/expenses');
+  const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const res = await fetch(`${baseURL}/expenses`);
   const data = await res.json();
   return data.data;
 });

@@ -1,7 +1,8 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchGroups = createAsyncThunk('groups/fetchGroups', async (token) => {
-  const res = await fetch('/groups', {
+  const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const res = await fetch(`${baseURL}/groups`, {
     headers: { Authorization: `Bearer ${token}` },
   });
   const data = await res.json();
