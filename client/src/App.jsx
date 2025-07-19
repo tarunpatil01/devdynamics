@@ -194,7 +194,8 @@ function App() {
   const handleDelete = async (id) => {
     setError('');
     try {
-      const res = await fetch(`/expenses/${id}`, {
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+      const res = await fetch(`${baseURL}/expenses/${id}`, {
         method: 'DELETE',
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),

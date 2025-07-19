@@ -1,8 +1,24 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+
+const avatarColors = [
+  'bg-blue-700', 'bg-pink-700', 'bg-green-700', 'bg-yellow-700', 'bg-purple-700', 'bg-red-700', 'bg-indigo-700', 'bg-teal-700'
+];
+function getAvatarColor(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  return avatarColors[Math.abs(hash) % avatarColors.length];
+}
 
 const Groups = ({ group, people, onAddPerson, messages, onSendMessage }) => {
   const [newPerson, setNewPerson] = useState('');
   const [message, setMessage] = useState('');
+  const chatRef = useRef(null);
+
+  useEffect(() => {
+    if (chatRef.current) {
+      chatRef.current.scrollTop = chatRef.current.scrollHeight;
+    }
+  }, [messages]);
 
   const handleAddPerson = (e) => {
     e.preventDefault();
@@ -21,23 +37,17 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage }) => {
   };
 
   return (
-    <div className="flex flex-col h-full w-full max-w-lg mx-auto p-2 md:p-4 bg-black text-white rounded-2xl shadow-2xl border-2 border-blue-900 animate-fadein">
-      <h2 className="text-2xl font-bold text-white mb-4 text-center">{group?.name ? `Group: ${group.name}` : 'Select a group'}</h2>
-      <div className="flex flex-col md:flex-row gap-6 mb-4">
+    <div className="flex flex-col h-full w-full max-w-3xl mx-auto p-2 md:p-6 bg-black text-white rounded-2xl shadow-2xl border-2 border-blue-900 animate-fadein">
+      <h2 className="text-3xl font-bold text-white mb-6 text-center drop-shadow">{group?.name ? `Group: ${group.name}` : 'Select a group'}</h2>
+      <div className="flex flex-col md:flex-row gap-8 mb-4">
         {/* People in Group */}
-        <div className="flex-1">
-          <h3 className="text-lg font-semibold text-gray-200 mb-2">People in Group</h3>
-          <ul className="mb-2 flex flex-wrap gap-2">
+        <div className="flex-1 min-w-[200px]">
+          <h3 className="text-lg font-semibold text-gray-200 mb-3">People in Group</h3>
+          <ul className="mb-4 flex flex-col gap-3">
             {people && people.length > 0 ? people.map((person, idx) => (
-              <li key={person._id || person.name || idx} className="flex items-center gap-2 py-1 px-2 bg-gray-900 rounded shadow text-white">
-                {person.avatar ? (
-                  <img src={person.avatar} alt={person.name} className="w-6 h-6 rounded-full" />
-                ) : (
-                  <span className="w-6 h-6 flex items-center justify-center rounded-full bg-blue-700 text-white font-bold text-xs">
-                    {person.initials || (person.name ? person.name.slice(0,2).toUpperCase() : '?')}
-                  </span>
-                )}
-                <span>{person.name || person}</span>
+              <li key={person._id || person.name || idx} className="flex items-center gap-3 py-2 px-3 bg-zinc-900 rounded-xl shadow text-white">
+                <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg ${getAvatarColor(person.name || person)}`}>{(person.name || person).charAt(0).toUpperCase()}</span>
+                <span className="font-semibold text-blue-200 text-base">{person.name || person}</span>
               </li>
             )) : <li className="text-gray-500">No people in group.</li>}
           </ul>
@@ -47,27 +57,21 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage }) => {
               value={newPerson}
               onChange={e => setNewPerson(e.target.value)}
               placeholder="Add person"
-              className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
+              className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full"
             />
-            <button type="submit" className="w-full sm:w-auto bg-blue-700 hover:bg-blue-800 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2">Add</button>
+            <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50">Add</button>
           </form>
         </div>
         {/* Group Chat */}
-        <div className="flex-1 flex flex-col">
-          <h3 className="text-lg font-semibold text-gray-200 mb-2">Group Chat</h3>
-          <div className="flex-1 overflow-y-auto bg-gray-900 rounded p-2 mb-2 border border-gray-800 max-h-80 md:max-h-96">
+        <div className="flex-1 flex flex-col min-w-[320px]">
+          <h3 className="text-lg font-semibold text-gray-200 mb-3">Group Chat</h3>
+          <div ref={chatRef} className="flex-1 overflow-y-auto bg-zinc-900 rounded-2xl p-4 mb-3 border border-blue-800 max-h-[420px] min-h-[320px] shadow-inner">
             {messages && messages.length > 0 ? messages.map((msg, idx) => (
-              <div key={msg._id || idx} className="mb-2 flex items-start gap-2">
-                {msg.sender && msg.sender.avatar ? (
-                  <img src={msg.sender.avatar} alt={msg.sender.name} className="w-6 h-6 rounded-full mt-1" />
-                ) : (
-                  <span className="w-6 h-6 flex items-center justify-center rounded-full bg-pink-700 text-white font-bold text-xs mt-1">
-                    {msg.sender && msg.sender.initials ? msg.sender.initials : (msg.sender && msg.sender.name ? msg.sender.name.slice(0,2).toUpperCase() : '?')}
-                  </span>
-                )}
+              <div key={msg._id || idx} className="mb-4 flex items-start gap-3">
+                <span className={`w-10 h-10 flex items-center justify-center rounded-full font-bold text-lg ${getAvatarColor(msg.sender?.name || msg.sender || 'Unknown')}`}>{(msg.sender?.name || msg.sender || 'U').charAt(0).toUpperCase()}</span>
                 <div className="flex flex-col">
-                  <span className="text-sm text-blue-200 font-semibold">{msg.sender && msg.sender.name ? msg.sender.name : (msg.sender || 'Unknown')}</span>
-                  <span className="bg-gray-800 text-white rounded px-2 py-1 inline-block max-w-xs">{msg.text}</span>
+                  <span className="text-sm text-blue-200 font-semibold mb-1">{msg.sender?.name || msg.sender || 'Unknown'}</span>
+                  <span className="bg-blue-950 text-white rounded-2xl px-4 py-2 inline-block max-w-xs break-words shadow-md text-base">{msg.text}</span>
                   <span className="text-xs text-gray-500 mt-1">{msg.created_at ? new Date(msg.created_at).toLocaleString() : ''}</span>
                 </div>
               </div>
@@ -79,9 +83,9 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage }) => {
               value={message}
               onChange={e => setMessage(e.target.value)}
               placeholder="Type a message..."
-              className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
+              className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 flex-1"
             />
-            <button type="submit" className="w-full sm:w-auto bg-pink-700 hover:bg-pink-800 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2">Send</button>
+            <button type="submit" className="bg-pink-700 hover:bg-pink-800 text-white rounded px-6 py-2 font-bold shadow transition disabled:opacity-50">Send</button>
           </form>
         </div>
       </div>

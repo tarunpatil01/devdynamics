@@ -6,10 +6,35 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
   const dispatch = useDispatch();
   const { items: groups, status, error } = useSelector(state => state.groups);
   const [groupName, setGroupName] = useState('');
+  const [users, setUsers] = useState([]);
+  const [selectedUsers, setSelectedUsers] = useState([]);
+  const [usersLoading, setUsersLoading] = useState(true);
 
   useEffect(() => {
     if (token) dispatch(fetchGroups(token));
   }, [dispatch, token]);
+
+  // Fetch all users for group creation
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setUsersLoading(true);
+      try {
+        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`${baseURL}/people/users`, { headers });
+        const data = await res.json();
+        setUsers(Array.isArray(data.data) ? data.data : []);
+      } catch {
+        setUsers([]);
+      }
+      setUsersLoading(false);
+    };
+    fetchUsers();
+  }, [token]);
+
+  const handleUserSelect = (user) => {
+    setSelectedUsers(prev => prev.includes(user) ? prev.filter(u => u !== user) : [...prev, user]);
+  };
 
   const handleCreate = async () => {
     if (!groupName) return;
@@ -20,10 +45,11 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ name: groupName }),
+      body: JSON.stringify({ name: groupName, members: selectedUsers }),
     });
     if (res.ok) {
       setGroupName('');
+      setSelectedUsers([]);
       dispatch(fetchGroups(token));
     }
   };
@@ -39,19 +65,37 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
           placeholder="New group name"
           className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 flex-1 min-w-0"
         />
-        <button
-          onClick={handleCreate}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-all duration-200 font-semibold shadow"
-        >
-          Create
-        </button>
       </div>
+      <div className="mb-2">
+        <label className="block text-blue-200 font-semibold mb-1">Add Members</label>
+        <div className="flex flex-wrap gap-2">
+          {usersLoading ? <span className="text-gray-400">Loading users...</span> : users.length > 0 ? users.map(user => (
+            <button
+              key={user}
+              type="button"
+              className={`flex items-center gap-2 px-3 py-1 rounded-full border transition-all duration-200 font-semibold shadow ${selectedUsers.includes(user) ? 'bg-blue-700 text-white border-blue-500' : 'bg-zinc-800 text-blue-300 border-blue-300'}`}
+              onClick={() => handleUserSelect(user)}
+            >
+              <span className="w-6 h-6 flex items-center justify-center rounded-full bg-blue-500 text-white font-bold text-sm">
+                {user.charAt(0).toUpperCase()}
+              </span>
+              {user}
+            </button>
+          )) : <span className="text-gray-400">No users found.</span>}
+        </div>
+      </div>
+      <button
+        onClick={handleCreate}
+        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition-all duration-200 font-semibold shadow mt-2"
+      >
+        Create
+      </button>
       {status === 'loading' ? (
         <div>Loading groups...</div>
       ) : error ? (
         <div className="text-red-500">{error}</div>
       ) : (
-        <ul className="flex gap-2 flex-wrap">
+        <ul className="flex gap-2 flex-wrap mt-4">
           {groups.map(group => (
             <li key={group._id}>
               <button
