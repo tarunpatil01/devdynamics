@@ -334,45 +334,45 @@ function Dashboard() {
         )}
         {/* Sidebar always visible on desktop, overlay on mobile */}
         <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
-        <main className="md:ml-64 lg:ml-72 flex flex-col items-center justify-center p-2 md:p-4 w-full min-h-screen overflow-x-hidden">
-          <div className="w-full max-w-none bg-zinc-900/90 rounded-xl shadow-2xl border border-blue-800 p-3 md:p-4 flex flex-col gap-3 md:gap-4">
-            <header className="mb-3 md:mb-4 text-center relative">
-              <div className="flex flex-col md:flex-row justify-between items-center gap-2 md:gap-4">
-                <h1 className="text-2xl md:text-3xl font-extrabold text-white mb-1 md:mb-2 drop-shadow">Split App</h1>
-                <Link to="/analytics" className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 md:px-3 md:py-2 rounded font-bold shadow transition-all duration-200 text-xs md:text-sm">Analytics</Link>
+        <main className="md:ml-64 lg:ml-72 flex flex-col items-center justify-center p-1 md:p-2 w-full min-h-screen overflow-x-hidden">
+          <div className="w-full max-w-none bg-zinc-900/90 rounded-lg shadow-2xl border border-blue-800 p-2 md:p-3 flex flex-col gap-2 md:gap-3">
+            <header className="mb-2 md:mb-3 text-center relative">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-1 md:gap-2">
+                <h1 className="text-xl md:text-2xl font-extrabold text-white mb-1 drop-shadow">Split App</h1>
+                <Link to="/analytics" className="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded font-bold shadow transition-all duration-200 text-xs">Analytics</Link>
               </div>
-              <p className="text-sm md:text-lg text-gray-300">Track group expenses, balances, and settlements easily.</p>
+              <p className="text-xs md:text-sm text-gray-300">Track group expenses, balances, and settlements easily.</p>
             </header>
             {showGroups ? (
-              <div className="mb-4 md:mb-6 w-full">
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-lg md:text-xl font-bold text-blue-400">Your Groups</h3>
+              <div className="mb-3 md:mb-4 w-full">
+                <div className="flex items-center justify-between mb-1 md:mb-2">
+                  <h3 className="text-sm md:text-lg font-bold text-blue-400">Your Groups</h3>
                   <button
-                    className="bg-green-700 hover:bg-green-800 text-white px-2 py-1 md:px-3 md:py-2 rounded font-bold shadow transition-all duration-200 text-xs md:text-sm"
+                    className="bg-green-700 hover:bg-green-800 text-white px-2 py-1 rounded font-bold shadow transition-all duration-200 text-xs"
                     onClick={() => setShowGroupManager(v => !v)}
                   >
                     {showGroupManager ? 'Close' : 'Create Group'}
                   </button>
                 </div>
                 {showGroupManager && (
-                  <div className="mb-3 md:mb-4 w-full">
+                  <div className="mb-2 md:mb-3 w-full">
                     <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
                   </div>
                 )}
-                <div className="flex flex-wrap gap-2 md:gap-3 mb-3 md:mb-4 w-full">
+                <div className="flex flex-wrap gap-1 md:gap-2 mb-2 md:mb-3 w-full">
                   {groups.length === 0 ? (
-                    <div className="text-gray-400 text-sm">No groups found.</div>
+                    <div className="text-gray-400 text-xs">No groups found.</div>
                   ) : (
                     groups.map(group => (
                       <button
                         key={group._id}
-                        className={`flex flex-col items-center px-2 py-1 md:px-3 md:py-2 rounded-lg shadow font-bold transition-all duration-200 w-16 h-16 md:w-20 md:h-20 lg:w-24 lg:h-24 justify-center gap-1 ${selectedGroup === group._id ? 'bg-blue-700 text-white' : 'bg-zinc-800 text-blue-300 hover:bg-blue-900'}`}
+                        className={`flex flex-col items-center px-1 py-1 md:px-2 md:py-1 rounded-lg shadow font-bold transition-all duration-200 w-12 h-12 md:w-16 md:h-16 lg:w-20 lg:h-20 justify-center gap-1 ${selectedGroup === group._id ? 'bg-blue-700 text-white' : 'bg-zinc-800 text-blue-300 hover:bg-blue-900'}`}
                         onClick={() => {
                           setSelectedGroup(group._id);
                           localStorage.setItem('selectedGroup', group._id);
                         }}
                       >
-                        <span className="w-6 h-6 md:w-7 md:h-7 lg:w-8 lg:h-8 flex items-center justify-center rounded-full bg-blue-500 text-white text-sm md:text-lg font-extrabold mb-1">
+                        <span className="w-4 h-4 md:w-5 md:h-5 lg:w-6 lg:h-6 flex items-center justify-center rounded-full bg-blue-500 text-white text-xs md:text-sm font-extrabold mb-1">
                           {group.name?.charAt(0).toUpperCase() || '?'}
                         </span>
                         <span className="truncate w-full text-center text-xs">{group.name}</span>
@@ -393,7 +393,7 @@ function Dashboard() {
                     />
                   </div>
                 ) : (
-                  <div className="text-center text-lg md:text-xl text-white font-bold">Select a group</div>
+                  <div className="text-center text-sm md:text-lg text-white font-bold">Select a group</div>
                 )}
               </div>
             ) : (
@@ -401,7 +401,7 @@ function Dashboard() {
                 <div className="w-full">
                   <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
                 </div>
-                <div className="bg-zinc-900/80 rounded-xl p-3 md:p-4 mb-3 md:mb-4 w-full">
+                <div className="bg-zinc-900/80 rounded-lg p-2 md:p-3 mb-2 md:mb-3 w-full">
                   <ExpenseForm
                     onAdd={addExpense}
                     group={selectedGroup}
@@ -410,32 +410,32 @@ function Dashboard() {
                     setEditExpense={setEditExpense}
                   />
                 </div>
-                <div className="bg-zinc-900/80 rounded-xl p-3 md:p-4 mb-3 md:mb-4 w-full">
+                <div className="bg-zinc-900/80 rounded-lg p-2 md:p-3 mb-2 md:mb-3 w-full">
                   {Array.isArray(expenses) && (!expenses || expenses.length === 0) ? (
-                    <div className="text-gray-500 text-center py-4 md:py-6">
-                      <span className="block text-lg md:text-xl mb-2">🧾</span>
+                    <div className="text-gray-500 text-center py-3 md:py-4">
+                      <span className="block text-lg mb-1">🧾</span>
                       No expenses found.
                     </div>
                   ) : (
                     <ExpensesList expenses={Array.isArray(expenses) ? expenses : []} onEdit={handleEdit} onDelete={handleDelete} />
                   )}
                 </div>
-                <div className="bg-zinc-900/80 rounded-xl p-3 md:p-4 mb-3 md:mb-4 w-full">
+                <div className="bg-zinc-900/80 rounded-lg p-2 md:p-3 mb-2 md:mb-3 w-full">
                   {!balances || Object.keys(balances || {}).length === 0 ? (
-                    <div className="text-gray-500 text-center py-4 md:py-6">
-                      <span className="block text-lg md:text-xl mb-2">💰</span>
+                    <div className="text-gray-500 text-center py-3 md:py-4">
+                      <span className="block text-lg mb-1">💰</span>
                       No balances found.
                     </div>
                   ) : (
                     <Balances balances={balances} loading={loading} />
                   )}
                 </div>
-                <div className="bg-zinc-900/80 rounded-xl p-3 md:p-4 mb-3 md:mb-4 w-full">
+                <div className="bg-zinc-900/80 rounded-lg p-2 md:p-3 mb-2 md:mb-3 w-full">
                   <Settlements settlements={settlements} loading={loading} />
                 </div>
               </>
             )}
-            <footer className="mt-4 md:mt-6 text-center text-xs text-pink-400">
+            <footer className="mt-2 md:mt-3 text-center text-xs text-pink-400">
               <p>Made with <span className="text-blue-200 font-bold">Vite</span> + <span className="text-purple-200 font-bold">React</span> + <span className="text-pink-200 font-bold">Tailwind CSS</span></p>
             </footer>
             <Toast message={toast.message} type={toast.type} onClose={closeToast} />
