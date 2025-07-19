@@ -23,7 +23,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
         const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
         const token = sessionStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${baseURL}/users`, { headers });
+        const res = await fetch(`${baseURL}/people/users`, { headers });
         const data = await res.json();
         setUsers(Array.isArray(data.data) ? data.data : []);
       } catch {
