@@ -126,7 +126,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
           >
             {usersLoading ? (
               <option>Loading users...</option>
-            ) : users.length > 0 ? (
+            ) : Array.isArray(users) && users.length > 0 ? (
               users.map(user => (
                 <option key={user} value={user}>{user}</option>
               ))
@@ -139,7 +139,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
         <div className="flex-1">
           <label className="block font-semibold mb-1 text-blue-200">Split With</label>
           <div className="flex flex-wrap gap-2">
-            {usersLoading ? <div>Loading users...</div> : users.length > 0 ? users.map(user => (
+            {usersLoading ? <div>Loading users...</div> : Array.isArray(users) && users.length > 0 ? users.map(user => (
               <label key={user} className="flex items-center gap-1">
                 <input type="checkbox" checked={splitWith.includes(user)} onChange={() => handleSplitWithChange(user)} className="accent-blue-500" />
                 <span className="text-blue-200">{user}</span>
@@ -171,7 +171,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
       </div>
       <div>
         <label className="block font-semibold mb-2">Split Details</label>
-        {splitWith.map(person => (
+        {Array.isArray(splitWith) ? splitWith.map(person => (
           <div key={person} className="flex items-center gap-2 mb-2">
             <span className="text-purple-700 font-medium w-24">{person}</span>
             {splitType === 'equal' ? (
@@ -197,7 +197,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
             {splitType === 'exact' && <span className="text-gray-500">₹</span>}
             {splitType === 'shares' && <span className="text-gray-500">shares</span>}
           </div>
-        ))}
+        )) : null}
       </div>
       {error && <div className="text-red-500 text-sm">{error}</div>}
       <button type="submit" className="w-full sm:w-auto bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 hover:from-blue-600 hover:to-pink-600 text-white rounded px-4 py-2 font-bold shadow transition disabled:opacity-50 mt-2" disabled={loading}>
