@@ -35,6 +35,7 @@ function Dashboard() {
   const [globalError, setGlobalError] = useState('');
   const navigate = useNavigate();
   const [recurringExpenses, setRecurringExpenses] = useState([]);
+  const [showGroupManager, setShowGroupManager] = useState(false);
 
   useEffect(() => {
     if (!token) {
@@ -252,6 +253,7 @@ function Dashboard() {
     );
   }
 
+  // Show group selection UI when showGroups is true
   return (
     <ErrorBoundary>
       {globalError && <Toast message={globalError} type="error" onClose={() => setGlobalError('')} />}
@@ -281,74 +283,92 @@ function Dashboard() {
               </div>
               <p className="text-xl text-gray-300">Track group expenses, balances, and settlements easily.</p>
             </header>
-            {/* Recurring Expenses Section */}
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold text-yellow-400 mb-2">Recurring Expenses</h3>
-              {recurringExpenses.length === 0 ? (
-                <div className="text-gray-400">No recurring expenses set up.</div>
-              ) : (
-                <ul className="flex flex-col gap-2">
-                  {recurringExpenses.map(exp => (
-                    <li key={exp._id} className="flex flex-col md:flex-row justify-between items-center py-2 border-b border-yellow-900 last:border-b-0 gap-2 transition-all duration-200 hover:bg-yellow-900/20 rounded-xl">
-                      <div className="flex flex-col md:flex-row gap-2 items-center w-full">
-                        <span className="font-bold text-yellow-200 text-lg">{exp.description}</span>
-                        <span className="ml-2 text-white">₹{exp.amount}</span>
-                        <span className="ml-2 text-pink-400">Paid by: {exp.paid_by}</span>
-                        <span className="ml-2 text-gray-400">Category: {exp.category}</span>
-                        <span className="ml-2 text-blue-400">{exp.recurring?.type?.charAt(0).toUpperCase() + exp.recurring?.type?.slice(1)}</span>
-                        {exp.recurring?.next_due && <span className="ml-2 text-green-400">Next: {new Date(exp.recurring.next_due).toLocaleDateString()}</span>}
-                      </div>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-            <main className="flex flex-col gap-6" aria-live="polite">
-              {showGroups ? (
-                <Groups
-                  group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
-                  people={groupPeople}
-                  onAddPerson={handleAddPersonToGroup}
-                  messages={groupMessages}
-                  onSendMessage={handleSendGroupMessage}
-                />
-              ) : (
-                <>
-                  <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
-                  <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                    <ExpenseForm
-                      onAdd={addExpense}
-                      group={selectedGroup}
-                      editExpense={editExpense}
-                      setEditExpense={setEditExpense}
-                    />
+            {showGroups ? (
+              <div className="mb-8">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-2xl font-bold text-blue-400">Your Groups</h3>
+                  <button
+                    className="bg-green-700 hover:bg-green-800 text-white px-4 py-2 rounded font-bold shadow transition-all duration-200"
+                    onClick={() => setShowGroupManager(v => !v)}
+                  >
+                    {showGroupManager ? 'Close' : 'Create Group'}
+                  </button>
+                </div>
+                {showGroupManager && (
+                  <div className="mb-6">
+                    <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
                   </div>
-                  <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                    {Array.isArray(expenses) && (!expenses || expenses.length === 0) ? (
-                      <div className="text-gray-500 text-center py-8">
-                        <span className="block text-2xl mb-2">🧾</span>
-                        No expenses found.
-                      </div>
-                    ) : (
-                      <ExpensesList expenses={Array.isArray(expenses) ? expenses : []} onEdit={handleEdit} onDelete={handleDelete} />
-                    )}
-                  </div>
-                  <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                    {!balances || Object.keys(balances || {}).length === 0 ? (
-                      <div className="text-gray-500 text-center py-8">
-                        <span className="block text-2xl mb-2">💰</span>
-                        No balances found.
-                      </div>
-                    ) : (
-                      <Balances balances={balances} loading={loading} />
-                    )}
-                  </div>
-                  <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                    <Settlements settlements={settlements} loading={loading} />
-                  </div>
-                </>
-              )}
-            </main>
+                )}
+                <div className="flex flex-wrap gap-4 mb-6">
+                  {groups.length === 0 ? (
+                    <div className="text-gray-400">No groups found.</div>
+                  ) : (
+                    groups.map(group => (
+                      <button
+                        key={group._id}
+                        className={`flex flex-col items-center px-4 py-2 rounded-lg shadow font-bold transition-all duration-200 w-32 h-32 justify-center gap-2 ${selectedGroup === group._id ? 'bg-blue-700 text-white' : 'bg-zinc-800 text-blue-300 hover:bg-blue-900'}`}
+                        onClick={() => {
+                          setSelectedGroup(group._id);
+                          localStorage.setItem('selectedGroup', group._id);
+                        }}
+                      >
+                        <span className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-500 text-white text-2xl font-extrabold mb-1">
+                          {group.name?.charAt(0).toUpperCase() || '?'}
+                        </span>
+                        <span className="truncate w-full text-center">{group.name}</span>
+                        <span className="text-xs text-blue-200">{Array.isArray(group.members) ? group.members.length : 0} members</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+                {selectedGroup ? (
+                  <Groups
+                    group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
+                    people={groupPeople}
+                    onAddPerson={handleAddPersonToGroup}
+                    messages={groupMessages}
+                    onSendMessage={handleSendGroupMessage}
+                  />
+                ) : (
+                  <div className="text-center text-2xl text-white font-bold">Select a group</div>
+                )}
+              </div>
+            ) : (
+              <>
+                <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                  <ExpenseForm
+                    onAdd={addExpense}
+                    group={selectedGroup}
+                    editExpense={editExpense}
+                    setEditExpense={setEditExpense}
+                  />
+                </div>
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                  {Array.isArray(expenses) && (!expenses || expenses.length === 0) ? (
+                    <div className="text-gray-500 text-center py-8">
+                      <span className="block text-2xl mb-2">🧾</span>
+                      No expenses found.
+                    </div>
+                  ) : (
+                    <ExpensesList expenses={Array.isArray(expenses) ? expenses : []} onEdit={handleEdit} onDelete={handleDelete} />
+                  )}
+                </div>
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                  {!balances || Object.keys(balances || {}).length === 0 ? (
+                    <div className="text-gray-500 text-center py-8">
+                      <span className="block text-2xl mb-2">💰</span>
+                      No balances found.
+                    </div>
+                  ) : (
+                    <Balances balances={balances} loading={loading} />
+                  )}
+                </div>
+                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                  <Settlements settlements={settlements} loading={loading} />
+                </div>
+              </>
+            )}
             <footer className="mt-8 text-center text-xs text-pink-400">
               <p>Made with <span className="text-blue-200 font-bold">Vite</span> + <span className="text-purple-200 font-bold">React</span> + <span className="text-pink-200 font-bold">Tailwind CSS</span></p>
             </footer>

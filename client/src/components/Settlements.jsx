@@ -17,7 +17,8 @@ const Settlements = ({ group, people, loading }) => {
   console.log('Settlements from backend:', settlements);
   const [settling, setSettling] = useState(null); // user being settled with
 
-  const username = localStorage.getItem('username');
+  // Use normalized username for comparison
+  const username = (localStorage.getItem('username') || '').trim().toLowerCase();
   useEffect(() => {
     if (username) {
       dispatch(fetchSettlements());
@@ -26,8 +27,8 @@ const Settlements = ({ group, people, loading }) => {
 
   // Aggregate owed by you and owed to you
   const safeSettlements = Array.isArray(settlements) ? settlements : [];
-  const owedByYou = Array.isArray(safeSettlements) ? safeSettlements.filter(s => s.from === username) : [];
-  const owedToYou = Array.isArray(safeSettlements) ? safeSettlements.filter(s => s.to === username) : [];
+  const owedByYou = Array.isArray(safeSettlements) ? safeSettlements.filter(s => (s.from || '').trim().toLowerCase() === username) : [];
+  const owedToYou = Array.isArray(safeSettlements) ? safeSettlements.filter(s => (s.to || '').trim().toLowerCase() === username) : [];
   const totalOwedByYou = Array.isArray(owedByYou) ? owedByYou.reduce((sum, s) => sum + s.amount, 0) : 0;
   const totalOwedToYou = Array.isArray(owedToYou) ? owedToYou.reduce((sum, s) => sum + s.amount, 0) : 0;
 
