@@ -75,6 +75,17 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
     e.preventDefault();
     setError('');
     setPaidByError('');
+    // Frontend validation
+    if (!amount || isNaN(amount) || Number(amount) <= 0) {
+      setError('Amount must be a positive number.');
+      showToast('Amount must be a positive number.', 'error');
+      return;
+    }
+    if (!description || !description.trim()) {
+      setError('Description is required.');
+      showToast('Description is required.', 'error');
+      return;
+    }
     if (!paidBy) {
       setPaidByError('Please select who paid.');
       showToast('Please select who paid.', 'error');

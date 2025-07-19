@@ -73,6 +73,15 @@ router.post('/', auth, expenseValidation, async (req, res) => {
   try {
     let { amount, description, paid_by, split_type, split_details, group, split_with } = req.body;
     if (!paid_by) paid_by = req.userId;
+    if (typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'Amount must be a positive number.' });
+    }
+    if (!description || !description.trim()) {
+      return res.status(400).json({ success: false, message: 'Description is required.' });
+    }
+    if (!paid_by) {
+      return res.status(400).json({ success: false, message: 'Paid by is required.' });
+    }
     if (!Array.isArray(split_with) || split_with.length === 0) {
       return res.status(400).json({ success: false, message: 'split_with must be a non-empty array of people.' });
     }
@@ -118,6 +127,15 @@ router.put('/:id', auth, async (req, res) => {
   try {
     let { amount, description, paid_by, split_type, split_details, group, split_with } = req.body;
     if (!paid_by) paid_by = req.userId;
+    if (typeof amount !== 'number' || amount <= 0) {
+      return res.status(400).json({ success: false, message: 'Amount must be a positive number.' });
+    }
+    if (!description || !description.trim()) {
+      return res.status(400).json({ success: false, message: 'Description is required.' });
+    }
+    if (!paid_by) {
+      return res.status(400).json({ success: false, message: 'Paid by is required.' });
+    }
     if (!Array.isArray(split_with) || split_with.length === 0) {
       return res.status(400).json({ success: false, message: 'split_with must be a non-empty array of people.' });
     }

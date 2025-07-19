@@ -14,6 +14,7 @@ const Balances = () => {
   }, [dispatch, token]);
 
   const safeBalances = balances && typeof balances === 'object' ? balances : {};
+  const hasBalances = Object.keys(safeBalances).length > 0 && Object.values(safeBalances).some(v => v !== 0);
   const handleEditBalance = () => {
     // TODO: Implement edit balance modal or logic
     alert('Edit balance feature coming soon!');
@@ -34,20 +35,18 @@ const Balances = () => {
         <div className="text-blue-200">Loading balances...</div>
       ) : error ? (
         <div className="text-red-400">{error}</div>
+      ) : !hasBalances ? (
+        <div className="text-gray-500">No balances found.</div>
       ) : (
         <ul className="flex flex-col gap-2">
-          {safeBalances && Object.entries(safeBalances).length === 0 ? (
-            <li className="text-gray-500">No balances found.</li>
-          ) : (
-            safeBalances && Object.entries(safeBalances).map(([person, balance]) => (
-              <li key={person} className="flex justify-between items-center py-2 border-b border-blue-900 last:border-b-0 transition-all duration-200 hover:bg-zinc-800/60 rounded-xl">
-                <span className="font-medium text-blue-200 text-lg">{person}</span>
-                <span className={balance < 0 ? 'text-red-400 font-bold' : 'text-green-400 font-bold'}>
-                  {balance}
-                </span>
-              </li>
-            ))
-          )}
+          {Object.entries(safeBalances).map(([person, balance]) => (
+            <li key={person} className="flex justify-between items-center py-2 border-b border-blue-900 last:border-b-0 transition-all duration-200 hover:bg-zinc-800/60 rounded-xl">
+              <span className="font-medium text-blue-200 text-lg">{person}</span>
+              <span className={balance < 0 ? 'text-red-400 font-bold' : 'text-green-400 font-bold'}>
+                {balance}
+              </span>
+            </li>
+          ))}
         </ul>
       )}
     </div>

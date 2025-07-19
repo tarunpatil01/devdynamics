@@ -14,6 +14,7 @@ function getAvatarColor(name) {
 const Settlements = ({ group, people, loading }) => {
   const dispatch = useDispatch();
   const { items: settlements, status, error } = useSelector(state => state.settlements);
+  console.log('Settlements from backend:', settlements);
   const [settling, setSettling] = useState(null); // user being settled with
 
   const username = localStorage.getItem('username');
@@ -84,7 +85,7 @@ const Settlements = ({ group, people, loading }) => {
           <div className="flex-1">
             <div className="text-lg font-bold text-red-400 mb-2">You owe</div>
             {Array.isArray(owedByYou) && owedByYou.length === 0 ? (
-              <div className="text-gray-400">You owe nothing.</div>
+              <div className="text-gray-400">No settlements to show.</div>
             ) : (
               <ul className="flex flex-col gap-3">
                 {Array.isArray(owedByYou) ? owedByYou.map((s, idx) => (
@@ -108,7 +109,7 @@ const Settlements = ({ group, people, loading }) => {
           <div className="flex-1">
             <div className="text-lg font-bold text-green-400 mb-2">Owes you</div>
             {Array.isArray(owedToYou) && owedToYou.length === 0 ? (
-              <div className="text-gray-400">No one owes you.</div>
+              <div className="text-gray-400">No settlements to show.</div>
             ) : (
               <ul className="flex flex-col gap-3">
                 {Array.isArray(owedToYou) ? owedToYou.map((s, idx) => (

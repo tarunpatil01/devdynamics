@@ -79,6 +79,7 @@ function getSettlements(balances) {
 router.get('/', auth, async (req, res) => {
   try {
     const balances = await calculateBalances(req.userId);
+    console.log('Calculated balances:', balances);
     const settlements = getSettlements(balances);
     res.json({ success: true, data: settlements });
   } catch (err) {

@@ -160,7 +160,18 @@ function Dashboard() {
         },
         body: JSON.stringify({ ...expense, group: selectedGroup })
       });
-      if (!res.ok) throw new Error('Failed to save expense');
+      if (!res.ok) {
+        if (res.status === 404) {
+          showToast('Expense not found. It may have been deleted.', 'error');
+          setError('Expense not found. It may have been deleted.');
+        } else {
+          showToast('Failed to save expense.', 'error');
+          setError('Failed to save expense.');
+        }
+        setEditExpense(null);
+        await fetchAll();
+        return;
+      }
       setEditExpense(null);
       await fetchAll();
       showToast(editExpense ? 'Expense updated!' : 'Expense added!', 'success');
@@ -178,14 +189,24 @@ function Dashboard() {
   const handleDelete = async (id) => {
     setError('');
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devynamics-yw9g.onrender.com';
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const res = await fetch(`${baseURL}/expenses/${id}`, {
         method: 'DELETE',
         headers: {
           ...(token ? { Authorization: `Bearer ${token}` } : {}),
         },
       });
-      if (!res.ok) throw new Error('Failed to delete expense');
+      if (!res.ok) {
+        if (res.status === 404) {
+          showToast('Expense not found. It may have been deleted.', 'error');
+          setError('Expense not found. It may have been deleted.');
+        } else {
+          showToast('Failed to delete expense.', 'error');
+          setError('Failed to delete expense.');
+        }
+        await fetchAll();
+        return;
+      }
       await fetchAll();
       showToast('Expense deleted!', 'success');
     } catch (err) {
