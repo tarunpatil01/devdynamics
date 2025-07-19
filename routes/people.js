@@ -3,6 +3,7 @@ const Expense = require('../models/Expense');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
 const router = express.Router();
+const User = require('../models/User');
 
 function auth(req, res, next) {
   const header = req.headers['authorization'];
@@ -29,6 +30,16 @@ async function getAllPeople(userId) {
   });
   return Array.from(peopleSet);
 }
+
+// GET /users - List all registered usernames
+router.get('/users', auth, async (req, res) => {
+  try {
+    const users = await User.find({}, 'username');
+    res.json({ success: true, data: users.map(u => u.username) });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'Server error' });
+  }
+});
 
 // GET /people - List all people for user
 router.get('/', auth, async (req, res) => {

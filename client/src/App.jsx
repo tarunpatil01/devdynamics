@@ -270,10 +270,16 @@ function App() {
         </aside>
         <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-12 w-full">
           <div className="w-full max-w-6xl bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-8 flex flex-col gap-8">
-            <header className="mb-8 text-center">
+            <header className="mb-8 text-center relative">
               <div className="flex flex-col md:flex-row justify-between items-center gap-4">
                 <h1 className="text-5xl font-extrabold text-white mb-2 drop-shadow">Split App</h1>
-                <button className="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-xl shadow ml-0 md:ml-4 transition-all duration-200 text-lg" onClick={handleLogout} aria-label="Logout">Logout</button>
+                <button
+                  className="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-xl shadow ml-0 md:ml-4 transition-all duration-200 text-lg md:static absolute top-4 right-4 md:top-auto md:right-auto text-sm px-3 py-1"
+                  onClick={handleLogout}
+                  aria-label="Logout"
+                >
+                  Logout
+                </button>
               </div>
               <p className="text-xl text-gray-300">Track group expenses, balances, and settlements easily.</p>
             </header>
