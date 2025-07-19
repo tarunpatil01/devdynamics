@@ -373,6 +373,7 @@ function Dashboard() {
                   <ExpenseForm
                     onAdd={addExpense}
                     group={selectedGroup}
+                    groups={groups}
                     editExpense={editExpense}
                     setEditExpense={setEditExpense}
                   />

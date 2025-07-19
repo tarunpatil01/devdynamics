@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
 
-const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
+const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense }) => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [paidBy, setPaidBy] = useState('');
@@ -18,6 +18,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
   const [category, setCategory] = useState('Food');
   const [recurringType, setRecurringType] = useState('none');
   const [nextDue, setNextDue] = useState('');
+  const [selectedGroup, setSelectedGroup] = useState(group || (Array.isArray(groups) && groups.length === 1 ? groups[0]._id : ''));
 
   // Fetch all users from backend 
   useEffect(() => {
@@ -43,6 +44,10 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
     const user = sessionStorage.getItem('username');
     if (user) setPaidBy(user);
   }, []);
+
+  useEffect(() => {
+    if (group) setSelectedGroup(group);
+  }, [group]);
 
   // Handle checkbox change for splitWith
   const handleSplitWithChange = (person) => {
@@ -121,7 +126,7 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
         split_type: splitType,
         split_details: splitDetailsToSend,
         split_with: splitWith,
-        group,
+        group: selectedGroup,
         category,
         recurring
       });
@@ -141,6 +146,22 @@ const ExpenseForm = ({ onAdd, group, editExpense, setEditExpense }) => {
   return (
     <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-4">
       <h2 className="text-2xl font-bold text-blue-700 mb-2">Add Expense</h2>
+      {Array.isArray(groups) && groups.length > 1 && (
+        <div className="mb-2">
+          <label className="block font-semibold mb-1 text-blue-200">Group</label>
+          <select
+            value={selectedGroup}
+            onChange={e => setSelectedGroup(e.target.value)}
+            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
+            required
+          >
+            <option value="" disabled>Select group</option>
+            {groups.map(g => (
+              <option key={g._id} value={g._id}>{g.name}</option>
+            ))}
+          </select>
+        </div>
+      )}
       <div className="flex flex-col md:flex-row gap-4">
         <input type="number" step="0.01" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2" />
         <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} required className="border border-purple-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-purple-700 placeholder-purple-300 flex-1" />
