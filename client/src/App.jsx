@@ -211,7 +211,7 @@ function App() {
 
   // Skeleton loader for main content
   const SkeletonCard = () => (
-    <div className="w-full max-w-2xl bg-zinc-900/80 rounded-2xl shadow-2xl border-2 border-blue-900 p-6 md:p-10 flex flex-col gap-6 animate-pulse mt-12 mb-12 min-h-[400px]">
+    <div className="w-full bg-zinc-900/80 rounded-2xl shadow-2xl border-2 border-blue-900 p-6 md:p-10 flex flex-col gap-6 animate-pulse min-h-[400px]">
       <div className="h-10 bg-zinc-800 rounded mb-4"></div>
       <div className="h-6 bg-zinc-800 rounded mb-2"></div>
       <div className="h-6 bg-zinc-800 rounded mb-2"></div>
@@ -250,67 +250,71 @@ function App() {
           <SkeletonCard />
         </div>
       )}
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black via-zinc-900 to-blue-950 px-2">
-        <div className="w-full max-w-2xl bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-8 flex flex-col gap-8">
-          <header className="mb-8 text-center">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-              <h1 className="text-5xl font-extrabold text-white mb-2 drop-shadow">Split App</h1>
-              <button className="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-xl shadow ml-0 md:ml-4 transition-all duration-200 text-lg" onClick={handleLogout} aria-label="Logout">Logout</button>
-            </div>
-            <p className="text-xl text-gray-300">Track group expenses, balances, and settlements easily.</p>
-          </header>
-          <main className="flex flex-col gap-6" aria-live="polite">
-            {showGroups ? (
-              <Groups
-                group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
-                people={groupPeople}
-                onAddPerson={handleAddPersonToGroup}
-                messages={groupMessages}
-                onSendMessage={handleSendGroupMessage}
-              />
-            ) : (
-              <>
-                <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                  <ExpenseForm
-                    onAdd={addExpense}
-                    people={people}
-                    group={selectedGroup}
-                    editExpense={editExpense}
-                    setEditExpense={setEditExpense}
-                  />
-                </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                  {expenses.length === 0 ? (
-                    <div className="text-gray-500 text-center py-8">
-                      <span className="block text-2xl mb-2">🧾</span>
-                      No expenses found.
-                    </div>
-                  ) : (
-                    <ExpensesList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
-                  )}
-                </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                  {Object.keys(balances).length === 0 ? (
-                    <div className="text-gray-500 text-center py-8">
-                      <span className="block text-2xl mb-2">💰</span>
-                      No balances found.
-                    </div>
-                  ) : (
-                    <Balances balances={balances} loading={loading} />
-                  )}
-                </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                  <Settlements settlements={settlements} loading={loading} />
-                </div>
-              </>
-            )}
-          </main>
-          <footer className="mt-8 text-center text-xs text-pink-400">
-            <p>Made with <span className="text-blue-200 font-bold">Vite</span> + <span className="text-purple-200 font-bold">React</span> + <span className="text-pink-200 font-bold">Tailwind CSS</span></p>
-          </footer>
-          <Toast message={toast.message} type={toast.type} onClose={closeToast} />
-        </div>
+      <div className="min-h-screen flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
+        {/* Sidebar always visible on desktop, collapsible on mobile */}
+        <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-12 w-full">
+          <div className="w-full max-w-6xl bg-zinc-900/90 rounded-2xl shadow-2xl border border-blue-800 p-8 flex flex-col gap-8">
+            <header className="mb-8 text-center">
+              <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+                <h1 className="text-5xl font-extrabold text-white mb-2 drop-shadow">Split App</h1>
+                <button className="bg-red-700 hover:bg-red-800 text-white px-6 py-3 rounded-xl shadow ml-0 md:ml-4 transition-all duration-200 text-lg" onClick={handleLogout} aria-label="Logout">Logout</button>
+              </div>
+              <p className="text-xl text-gray-300">Track group expenses, balances, and settlements easily.</p>
+            </header>
+            <main className="flex flex-col gap-6" aria-live="polite">
+              {showGroups ? (
+                <Groups
+                  group={Array.isArray(groups) ? groups.find(g => g._id === selectedGroup) : null}
+                  people={groupPeople}
+                  onAddPerson={handleAddPersonToGroup}
+                  messages={groupMessages}
+                  onSendMessage={handleSendGroupMessage}
+                />
+              ) : (
+                <>
+                  <GroupManager token={token} selectedGroup={selectedGroup} setSelectedGroup={setSelectedGroup} />
+                  <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                    <ExpenseForm
+                      onAdd={addExpense}
+                      people={people}
+                      group={selectedGroup}
+                      editExpense={editExpense}
+                      setEditExpense={setEditExpense}
+                    />
+                  </div>
+                  <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                    {expenses.length === 0 ? (
+                      <div className="text-gray-500 text-center py-8">
+                        <span className="block text-2xl mb-2">🧾</span>
+                        No expenses found.
+                      </div>
+                    ) : (
+                      <ExpensesList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
+                    )}
+                  </div>
+                  <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                    {Object.keys(balances).length === 0 ? (
+                      <div className="text-gray-500 text-center py-8">
+                        <span className="block text-2xl mb-2">💰</span>
+                        No balances found.
+                      </div>
+                    ) : (
+                      <Balances balances={balances} loading={loading} />
+                    )}
+                  </div>
+                  <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                    <Settlements settlements={settlements} loading={loading} />
+                  </div>
+                </>
+              )}
+            </main>
+            <footer className="mt-8 text-center text-xs text-pink-400">
+              <p>Made with <span className="text-blue-200 font-bold">Vite</span> + <span className="text-purple-200 font-bold">React</span> + <span className="text-pink-200 font-bold">Tailwind CSS</span></p>
+            </footer>
+            <Toast message={toast.message} type={toast.type} onClose={closeToast} />
+          </div>
+        </main>
       </div>
     </ErrorBoundary>
   );
