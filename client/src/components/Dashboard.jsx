@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import ExpenseForm from './ExpenseForm';
 import ExpensesList from './ExpensesList';
 import Balances from './Balances';
@@ -31,6 +32,13 @@ function Dashboard() {
   const [groupPeople, setGroupPeople] = useState([]);
   const [groupMessages, setGroupMessages] = useState([]);
   const [globalError, setGlobalError] = useState('');
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!token) {
+      navigate('/login');
+    }
+  }, [token, navigate]);
 
   useEffect(() => {
     if (token && selectedGroup) {
