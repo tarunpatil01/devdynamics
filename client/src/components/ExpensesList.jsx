@@ -1,15 +1,16 @@
 import React from 'react';
 
 const ExpensesList = ({ expenses, onEdit, onDelete }) => {
-  const safeExpenses = Array.isArray(expenses) ? expenses : [];
+  // Extra safety: fallback to empty array if expenses is null/undefined
+  const safeExpenses = Array.isArray(expenses) ? expenses : (expenses ? [expenses] : []);
   return (
     <div className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein">
       <h2 className="text-2xl font-extrabold text-white mb-4 drop-shadow">Expenses</h2>
-      {safeExpenses.length === 0 ? (
+      {Array.isArray(safeExpenses) && safeExpenses.length === 0 ? (
         <div className="text-gray-500">No expenses found.</div>
       ) : (
         <ul className="flex flex-col gap-2">
-          {safeExpenses.map(exp => (
+          {Array.isArray(safeExpenses) ? safeExpenses.map(exp => (
             <li key={exp._id} className="flex flex-col md:flex-row justify-between items-center py-2 border-b border-blue-900 last:border-b-0 gap-2 transition-all duration-200 hover:bg-zinc-800/60 rounded-xl">
               <div className="flex flex-col md:flex-row gap-2 items-center w-full">
                 <span className="font-bold text-blue-200 text-lg">{exp.description}</span>
@@ -22,7 +23,7 @@ const ExpensesList = ({ expenses, onEdit, onDelete }) => {
                 <button className="bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-lg shadow transition-all duration-200" onClick={() => onDelete(exp._id)}>Delete</button>
               </div>
             </li>
-          ))}
+          )) : null}
         </ul>
       )}
     </div>

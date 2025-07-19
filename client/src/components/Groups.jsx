@@ -93,4 +93,9 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage }) => {
   );
 };
 
+Groups.defaultProps = {
+  people: [],
+  messages: [],
+};
+
 export default Groups;
