@@ -197,6 +197,7 @@ function Dashboard() {
         split_details: (expense.split_details && typeof expense.split_details === 'object') ? expense.split_details : {},
         group: (expense.group && expense.group !== '{{groupId}}' && expense.group !== '') ? expense.group : selectedGroup,
       };
+      console.log('Sending payload to backend:', JSON.stringify(payload, null, 2));
       const res = await fetch(url, {
         method,
         headers: {

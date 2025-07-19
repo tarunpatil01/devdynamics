@@ -63,7 +63,10 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
       setPaidBy(editExpense.paid_by || '');
       setSplitType(editExpense.split_type || 'equal');
       setSplitDetails(editExpense.split_details || {});
-      setSplitWith(Array.isArray(editExpense.split_with) ? editExpense.split_with : []);
+      // For editing, populate split_with from split_details keys if split_with is empty
+      const splitWithFromDetails = Object.keys(editExpense.split_details || {});
+      const splitWithFromExpense = Array.isArray(editExpense.split_with) ? editExpense.split_with : [];
+      setSplitWith(splitWithFromExpense.length > 0 ? splitWithFromExpense : splitWithFromDetails);
       setCategory(editExpense.category || 'Food');
       setSelectedGroup(editExpense.group || group || '');
       if (editExpense.recurring && editExpense.recurring.type) {

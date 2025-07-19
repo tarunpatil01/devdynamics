@@ -96,6 +96,15 @@ function validateSplitDetails(split_type, split_details) {
       total += v;
     }
     return true;
+  } else if (split_type === 'shares') {
+    let totalShares = 0;
+    for (const k in split_details) {
+      const v = split_details[k];
+      if (typeof v !== 'number' || v <= 0) return false;
+      totalShares += v;
+    }
+    if (totalShares <= 0) return false;
+    return true;
   }
   return false;
 }
@@ -162,8 +171,14 @@ router.post('/', auth, expenseValidation, async (req, res) => {
 });
 
 // PUT /expenses/:id - Update expense for user
-router.put('/:id', auth, async (req, res) => {
+router.put('/:id', auth, expenseValidation, async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    console.log('PUT /expenses/:id - Validation errors:', errors.array());
+    return res.status(400).json({ success: false, errors: errors.array() });
+  }
   try {
+    console.log('PUT /expenses/:id - Request body:', JSON.stringify(req.body, null, 2));
     let { amount, description, paid_by, split_type, split_details, group, split_with, category, recurring } = req.body;
     if (!paid_by) paid_by = req.userId;
     if (typeof amount !== 'number' || amount <= 0) {
@@ -192,6 +207,9 @@ router.put('/:id', auth, async (req, res) => {
     }
     if (!validateSplitDetails(split_type, split_details)) {
       return res.status(400).json({ success: false, message: 'Invalid split_details' });
+    }
+    if (!group) {
+      return res.status(400).json({ success: false, message: 'Group is required. Please select or create a group before adding an expense.' });
     }
     const People = require('../models/People');
     const missingPeople = [];
