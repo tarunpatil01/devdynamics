@@ -38,7 +38,7 @@ app.use('/expenses', expensesRouter);
 const authRouter = require('./routes/auth');
 app.use('/auth', authRouter);
 
-// Unregister endpoint (delete user account) - This is the first instance
+// Unregister endpoint (delete user account)
 app.delete('/auth/unregister', async (req, res) => {
   const header = req.headers['authorization'];
   if (!header) return res.status(401).json({ success: false, message: 'No token provided' });
@@ -60,29 +60,6 @@ app.delete('/auth/unregister', async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
-
-app.delete('/auth/unregister', async (req, res) => {
-  const header = req.headers['authorization'];
-  if (!header) return res.status(401).json({ success: false, message: 'No token provided' });
-  const token = header.replace('Bearer ', '');
-  const jwt = require('jsonwebtoken');
-  const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
-  let userId;
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    userId = decoded.userId;
-  } catch {
-    return res.status(401).json({ success: false, message: 'Invalid token' });
-  }
-  try {
-    const User = require('./models/User');
-    await User.findByIdAndDelete(userId);
-    res.json({ success: true, message: 'User account deleted' });
-  } catch (err) {
-    res.status(500).json({ success: false, message: 'Server error' });
-  }
-});
-// This duplicate endpoint has been removed
 
 const peopleRouter = require('./routes/people');
 const balancesRouter = require('./routes/balances');

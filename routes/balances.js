@@ -82,15 +82,6 @@ router.put('/', auth, async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error', error: err.message });
   }
 });
-      balances[person] -= share;
-    });
-  });
-  // Round balances to 2 decimals
-  Object.keys(balances).forEach(p => {
-    balances[p] = parseFloat(balances[p].toFixed(2));
-  });
-  return balances;
-}
 
 // GET /balances - Show each person's balance for user
 router.get('/', auth, async (req, res) => {

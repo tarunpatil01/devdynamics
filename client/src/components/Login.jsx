@@ -19,7 +19,6 @@ const Login = ({ onLogin, onSwitchToRegister }) => {
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || 'Login failed');
       onLogin(data.token, data.user);
-      window.location.replace('/dashboard');
     } catch (err) {
       setError(err.message);
     }

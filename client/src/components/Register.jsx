@@ -20,11 +20,8 @@ const Register = ({ onRegister, onSwitchToLogin }) => {
       });
       const data = await res.json();
       if (!res.ok || !data.success) throw new Error(data.message || 'Registration failed');
-      setSuccess('Registration successful! Redirecting to dashboard...');
+      setSuccess('Registration successful! You can now login.');
       if (onRegister) onRegister();
-      setTimeout(() => {
-        window.location.replace('/dashboard');
-      }, 1200);
     } catch (err) {
       setError(err.message);
     }
