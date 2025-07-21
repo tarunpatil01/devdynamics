@@ -236,7 +236,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
       )}
       <div className="flex flex-col md:flex-row gap-4">
         <div className="flex-1 relative">
-          <input type="number" step="0.01" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className={`border ${error.includes('Amount') ? 'border-red-500' : 'border-blue-500'} bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2`} />
+          <input type="number" step="0.01" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className={`border ${error.includes('Amount') ? 'border-red-500' : 'border-blue-500'} bg-zinc-800 text-white placeholder:text-blue-300 rounded px-8 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2`} />
           <span className="absolute right-2 top-2">
             <Tooltip text="Enter the total amount for this expense."><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
           </span>
@@ -249,7 +249,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
           </span>
           {error.includes('Description') && <div className="text-red-500 text-xs mt-1">{error}</div>}
         </div>
-        <select value={category} onChange={e => setCategory(e.target.value)} required className="border border-green-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 w-full mb-2">
+        <select value={category} onChange={e => setCategory(e.target.value)} required className="border border-green-500 bg-zinc-800 text-white rounded px-1 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 w-full mb-2">
           <option value="Food">Food</option>
           <option value="Travel">Travel</option>
           <option value="Utilities">Utilities</option>
