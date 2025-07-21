@@ -213,7 +213,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
 
   return (
     <>
-    <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-4">
+    <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-4 max-w-2xl mx-auto w-full">
       <h2 className="text-2xl font-bold text-blue-700 mb-2 flex items-center gap-2">
         Add Expense
         <Tooltip text="Fill out the form to add a new group expense. All fields are required."><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
