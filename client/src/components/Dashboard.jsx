@@ -451,19 +451,19 @@ function Dashboard() {
                     <ExpensesList expenses={Array.isArray(expenses) ? expenses : []} onEdit={handleEdit} onDelete={handleDelete} />
                   )}
                 </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                  {!balances || Object.keys(balances || {}).length === 0 ? (
-                    <div className="text-gray-500 text-center py-8">
-                      <span className="block text-2xl mb-2">💰</span>
-                      No balances found.
+                {/* Only show balances and settlements if a group is selected */}
+                {selectedGroup ? (
+                  <>
+                    <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                      <Balances balances={balances} loading={loading} groupId={selectedGroup} />
                     </div>
-                  ) : (
-                    <Balances balances={balances} loading={loading} groupId={selectedGroup} />
-                  )}
-                </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                  <Settlements settlements={settlements} loading={loading} groupId={selectedGroup} />
-                </div>
+                    <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
+                      <Settlements settlements={settlements} loading={loading} groupId={selectedGroup} />
+                    </div>
+                  </>
+                ) : (
+                  <div className="text-center text-2xl text-white font-bold">Select a group to view balances and settlements</div>
+                )}
               </>
             )}
             <footer className="mt-8 text-center text-xs text-pink-400">

@@ -190,6 +190,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
     setLoading(false);
   };
 
+  const safeSplitWith = Array.isArray(splitWith) ? splitWith : [];
   // Deduplicate usernames (case-insensitive) and filter out userId-like strings
   const safeUsers = Array.isArray(users)
     ? Array.from(new Set(users
