@@ -93,7 +93,7 @@ function Dashboard() {
 
   // Fetch all data for selected group
   const fetchAll = async () => {
-    if (!token) return;
+    if (!token || !selectedGroup) return; // Prevent requests if no group is selected
     setLoading(true);
     setError('');
     try {
