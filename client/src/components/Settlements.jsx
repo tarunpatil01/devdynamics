@@ -203,7 +203,7 @@ const Settlements = ({ groupId, group, people, loading }) => {
                         aria-label={`Settle up with ${s.to}`}
                       >
                         <Tooltip text="Click to settle your balance with this person. You will record a payment and your balances will update.">
-                          {settling === s.to ? 'Settling...' : 'Settle up'}
+                        {settling === s.to ? 'Settling...' : 'Settle up'}
                         </Tooltip>
                       </button>
                     </li>

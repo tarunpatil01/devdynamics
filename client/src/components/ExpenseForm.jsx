@@ -213,7 +213,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
 
   return (
     <>
-    <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-4 max-w-2xl mx-auto w-full">
+    <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-4">
       <h2 className="text-2xl font-bold text-blue-700 mb-2 flex items-center gap-2">
         Add Expense
         <Tooltip text="Fill out the form to add a new group expense. All fields are required."><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
@@ -235,27 +235,29 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
         </div>
       )}
       <div className="flex flex-col md:flex-row gap-4">
-        <div className="flex-1 relative">
+        <div className="flex-1 relative min-w-[120px] max-w-[180px]">
           <input type="number" step="0.01" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className={`border ${error.includes('Amount') ? 'border-red-500' : 'border-blue-500'} bg-zinc-800 text-white placeholder:text-blue-300 rounded px-8 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2`} />
           <span className="absolute right-2 top-2">
             <Tooltip text="Enter the total amount for this expense."><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
           </span>
           {error.includes('Amount') && <div className="text-red-500 text-xs mt-1">{error}</div>}
         </div>
-        <div className="flex-1 relative">
-          <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} required className={`border ${error.includes('Description') ? 'border-red-500' : 'border-purple-300'} rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-purple-700 placeholder-purple-300 flex-1`} />
+        <div className="flex-[2] relative min-w-[200px]">
+          <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} required className={`border ${error.includes('Description') ? 'border-red-500' : 'border-purple-300'} rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-purple-700 placeholder-purple-300 w-full`} />
           <span className="absolute right-2 top-2">
             <Tooltip text="Describe what this expense is for (e.g., Dinner, Taxi, etc.)"><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
           </span>
           {error.includes('Description') && <div className="text-red-500 text-xs mt-1">{error}</div>}
         </div>
-        <select value={category} onChange={e => setCategory(e.target.value)} required className="border border-green-500 bg-zinc-800 text-white rounded px-1 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 w-full mb-2">
-          <option value="Food">Food</option>
-          <option value="Travel">Travel</option>
-          <option value="Utilities">Utilities</option>
-          <option value="Entertainment">Entertainment</option>
-          <option value="Other">Other</option>
-        </select>
+        <div className="flex-1 min-w-[160px] max-w-[220px]">
+          <select value={category} onChange={e => setCategory(e.target.value)} required className="border border-green-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 w-full mb-2">
+            <option value="Food">Food</option>
+            <option value="Travel">Travel</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
       </div>
       <div className="flex flex-col md:flex-row gap-4 items-center">
         <div className="flex-1 relative">
