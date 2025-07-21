@@ -133,7 +133,7 @@ function Dashboard() {
   // Add person to group
   const handleAddPersonToGroup = async (personName) => {
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devynamics-yw9g.onrender.com';
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
       const res = await fetch(`${baseURL}/groups/${selectedGroup}/add-person`, {
         method: 'POST',
@@ -419,11 +419,11 @@ function Dashboard() {
                       No balances found.
                     </div>
                   ) : (
-                    <Balances balances={balances} loading={loading} />
+                    <Balances balances={balances} loading={loading} groupId={selectedGroup} />
                   )}
                 </div>
                 <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                  <Settlements settlements={settlements} loading={loading} />
+                  <Settlements settlements={settlements} loading={loading} groupId={selectedGroup} />
                 </div>
               </>
             )}

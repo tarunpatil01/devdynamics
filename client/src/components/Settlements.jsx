@@ -11,7 +11,7 @@ function getAvatarColor(name) {
   return avatarColors[Math.abs(hash) % avatarColors.length];
 }
 
-const Settlements = ({ group, people, loading }) => {
+const Settlements = ({ groupId, group, people, loading }) => {
   const dispatch = useDispatch();
   const { items: settlements, status, error } = useSelector(state => state.settlements);
   console.log('Settlements from backend:', settlements);
@@ -20,10 +20,10 @@ const Settlements = ({ group, people, loading }) => {
   // Use normalized username for comparison
   const username = (localStorage.getItem('username') || '').trim().toLowerCase();
   useEffect(() => {
-    if (username) {
-      dispatch(fetchSettlements());
+    if (username && groupId) {
+      dispatch(fetchSettlements(groupId));
     }
-  }, [dispatch, username]);
+  }, [dispatch, username, groupId]);
 
   // Aggregate owed by you and owed to you
   const safeSettlements = Array.isArray(settlements) ? settlements : [];
@@ -54,7 +54,8 @@ const Settlements = ({ group, people, loading }) => {
         body: JSON.stringify({
           user: username,
           counterparty: user,
-          direction
+          direction,
+          group: groupId
         })
       });
       if (!res.ok) throw new Error('Failed to settle up');

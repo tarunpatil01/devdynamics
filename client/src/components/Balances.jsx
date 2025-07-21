@@ -2,16 +2,16 @@ import React, { useEffect } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchBalances } from '../store/balancesSlice';
 
-const Balances = () => {
+const Balances = ({ groupId }) => {
   const dispatch = useDispatch();
   const { items: balances, status, error } = useSelector(state => state.balances);
 
   const token = localStorage.getItem('token');
   useEffect(() => {
-    if (token) {
-      dispatch(fetchBalances());
+    if (token && groupId) {
+      dispatch(fetchBalances(groupId));
     }
-  }, [dispatch, token]);
+  }, [dispatch, token, groupId]);
 
   const safeBalances = balances && typeof balances === 'object' ? balances : {};
   const hasBalances = Object.keys(safeBalances).length > 0 && Object.values(safeBalances).some(v => v !== 0);

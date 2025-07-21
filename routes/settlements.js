@@ -52,6 +52,41 @@ async function calculateBalances(userId) {
   return balances;
 }
 
+// Helper to calculate balances for group
+async function calculateBalancesForGroup(groupId) {
+  const expenses = await Expense.find({ group: groupId });
+  const balances = {};
+  expenses.forEach(exp => {
+    const paidBy = exp.paid_by.trim().toLowerCase();
+    if (!balances[paidBy]) balances[paidBy] = 0;
+    let splits = {};
+    if (exp.split_type === 'equal') {
+      const people = Object.keys(exp.split_details).length > 0 ? Object.keys(exp.split_details) : [paidBy];
+      const share = parseFloat((exp.amount / people.length).toFixed(2));
+      people.forEach(person => {
+        splits[person.trim().toLowerCase()] = share;
+      });
+    } else if (exp.split_type === 'percentage') {
+      Object.entries(exp.split_details).forEach(([person, percent]) => {
+        splits[person.trim().toLowerCase()] = parseFloat(((exp.amount * percent) / 100).toFixed(2));
+      });
+    } else if (exp.split_type === 'exact') {
+      Object.entries(exp.split_details).forEach(([person, amt]) => {
+        splits[person.trim().toLowerCase()] = parseFloat(amt);
+      });
+    }
+    balances[paidBy] += parseFloat(exp.amount);
+    Object.entries(splits).forEach(([person, share]) => {
+      if (!balances[person]) balances[person] = 0;
+      balances[person] -= share;
+    });
+  });
+  Object.keys(balances).forEach(p => {
+    balances[p] = parseFloat(balances[p].toFixed(2));
+  });
+  return balances;
+}
+
 // Helper to calculate settlements (minimize transactions)
 function getSettlements(balances) {
   const settlements = [];
@@ -75,11 +110,14 @@ function getSettlements(balances) {
   return settlements;
 }
 
-// GET /settlements - Get current settlement summary for user
+// GET /settlements - Get current settlement summary for group
 router.get('/', auth, async (req, res) => {
   try {
-    const balances = await calculateBalances(req.userId);
-    console.log('Calculated balances:', balances);
+    const groupId = req.query.group;
+    if (!groupId) {
+      return res.status(400).json({ success: false, message: 'Group ID is required as query parameter ?group=GROUP_ID' });
+    }
+    const balances = await calculateBalancesForGroup(groupId);
     const settlements = getSettlements(balances);
     res.json({ success: true, data: settlements });
   } catch (err) {
@@ -90,27 +128,22 @@ router.get('/', auth, async (req, res) => {
 // POST /settlements/settle - Settle up between two users
 router.post('/settle', auth, async (req, res) => {
   try {
-    const { user, counterparty, direction } = req.body;
-    if (!user || !counterparty || !['pay', 'receive'].includes(direction)) {
-      return res.status(400).json({ success: false, message: 'Invalid request' });
+    const { user, counterparty, direction, group } = req.body;
+    if (!user || !counterparty || !['pay', 'receive'].includes(direction) || !group) {
+      return res.status(400).json({ success: false, message: 'Invalid request. user, counterparty, direction, and group are required.' });
     }
-    // Find all expenses for this user
-    const balances = await calculateBalances(req.userId);
+    // Find all expenses for this group
+    const balances = await calculateBalancesForGroup(group);
     const userKey = user.trim().toLowerCase();
     const counterpartyKey = counterparty.trim().toLowerCase();
     let amount = 0;
     if (direction === 'pay') {
       // You pay counterparty: you owe them
-      amount = Math.abs(balances[userKey] || 0) < 0.01 ? 0 : -(balances[userKey] || 0);
-      // Find how much you owe this counterparty
-      // But we want to settle only the amount owed to this counterparty
-      // So, recalculate settlements and find the right amount
       const settlements = getSettlements(balances);
       const s = settlements.find(s => s.from === user && s.to === counterparty);
       if (!s) return res.status(400).json({ success: false, message: 'No outstanding settlement found' });
       amount = s.amount;
       // Create a settlement expense
-      const Expense = require('../models/Expense');
       await Expense.create({
         amount,
         description: `Settlement between ${user} and ${counterparty}`,
@@ -118,16 +151,15 @@ router.post('/settle', auth, async (req, res) => {
         split_type: 'exact',
         split_details: { [counterparty]: amount },
         split_with: [counterparty],
-        user: req.userId
+        user: req.userId,
+        group
       });
     } else if (direction === 'receive') {
       // Counterparty pays you: they owe you
-      amount = Math.abs(balances[counterpartyKey] || 0) < 0.01 ? 0 : -(balances[counterpartyKey] || 0);
       const settlements = getSettlements(balances);
       const s = settlements.find(s => s.from === counterparty && s.to === user);
       if (!s) return res.status(400).json({ success: false, message: 'No outstanding settlement found' });
       amount = s.amount;
-      const Expense = require('../models/Expense');
       await Expense.create({
         amount,
         description: `Settlement between ${counterparty} and ${user}`,
@@ -135,7 +167,8 @@ router.post('/settle', auth, async (req, res) => {
         split_type: 'exact',
         split_details: { [user]: amount },
         split_with: [user],
-        user: req.userId
+        user: req.userId,
+        group
       });
     }
     res.json({ success: true, message: 'Settlement recorded' });
