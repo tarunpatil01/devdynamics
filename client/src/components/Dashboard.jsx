@@ -451,8 +451,8 @@ function Dashboard() {
                     <ExpensesList expenses={Array.isArray(expenses) ? expenses : []} onEdit={handleEdit} onDelete={handleDelete} />
                   )}
                 </div>
-                {/* Only show balances and settlements if a group is selected */}
-                {selectedGroup ? (
+                {/* Only show balances and settlements if a group is selected and groupId is valid */}
+                {selectedGroup && typeof selectedGroup === 'string' && selectedGroup.length > 0 ? (
                   <>
                     <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
                       <Balances balances={balances} loading={loading} groupId={selectedGroup} />
@@ -462,7 +462,15 @@ function Dashboard() {
                     </div>
                   </>
                 ) : (
-                  <div className="text-center text-2xl text-white font-bold">Select a group to view balances and settlements</div>
+                  <div className="text-center text-2xl text-white font-bold flex flex-col items-center gap-4 py-12">
+                    <span className="text-5xl">👥</span>
+                    <span>
+                      {groups.length === 0
+                        ? 'No groups found. Create a group to get started!'
+                        : 'Select a group to view balances and settlements.'}
+                    </span>
+                    <span className="text-lg text-blue-200 font-normal">No expenses or balances yet? Add a group and start tracking your shared costs!</span>
+                  </div>
                 )}
               </>
             )}
