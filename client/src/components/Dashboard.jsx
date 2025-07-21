@@ -185,6 +185,12 @@ function Dashboard() {
 
   const addExpense = async (expense, isEdit = false) => {
     setError('');
+    // Optimistic UI: add expense immediately
+    if (!isEdit) {
+      const tempId = 'temp-' + Date.now();
+      const optimisticExpense = { ...expense, _id: tempId, optimistic: true };
+      setExpenses(prev => [optimisticExpense, ...prev]);
+    }
     try {
       const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const method = isEdit ? 'PUT' : 'POST';
@@ -214,6 +220,8 @@ function Dashboard() {
           showToast('Failed to save expense.', 'error');
           setError('Failed to save expense.');
         }
+        // Revert optimistic update
+        if (!isEdit) setExpenses(prev => prev.filter(e => !e.optimistic));
         setEditExpense(null);
         await fetchAll();
         return;
@@ -221,9 +229,13 @@ function Dashboard() {
       setEditExpense(null);
       await fetchAll();
       if (!isEdit) showToast('Expense added!', 'success');
+      // Remove optimistic expense (will be replaced by real one from server)
+      if (!isEdit) setExpenses(prev => prev.filter(e => !e.optimistic));
     } catch (err) {
       setError('Failed to save expense.');
       showToast('Failed to save expense.', 'error');
+      // Revert optimistic update
+      if (!isEdit) setExpenses(prev => prev.filter(e => !e.optimistic));
       throw err;
     }
   };
@@ -339,6 +351,32 @@ function Dashboard() {
               </div>
               <p className="text-xl text-gray-300">Track group expenses, balances, and settlements easily.</p>
             </header>
+            {/* Sticky group context header */}
+            {selectedGroup && (
+              <div className="sticky top-0 z-20 bg-blue-950/90 border-b border-blue-800 rounded-2xl px-6 py-4 mb-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 shadow-xl animate-fadein">
+                <div className="flex items-center gap-4">
+                  <span className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-600 text-white text-3xl font-extrabold shadow">{(groups.find(g => g._id === selectedGroup)?.name || '?').charAt(0).toUpperCase()}</span>
+                  <div>
+                    <div className="text-2xl font-bold text-white drop-shadow">{groups.find(g => g._id === selectedGroup)?.name || 'Group'}</div>
+                    <div className="text-blue-200 text-sm font-semibold">{Array.isArray(groupPeople) && groupPeople.length > 0 ? groupPeople.join(', ') : 'No members'}</div>
+                  </div>
+                </div>
+                <div className="flex gap-2 flex-wrap items-center">
+                  {groups.map(group => (
+                    <button
+                      key={group._id}
+                      className={`px-4 py-2 rounded-lg font-bold transition-all duration-200 border-2 shadow text-lg ${selectedGroup === group._id ? 'bg-blue-700 text-white border-blue-400' : 'bg-zinc-800 text-blue-300 border-blue-700 hover:bg-blue-900'}`}
+                      onClick={() => {
+                        setSelectedGroup(group._id);
+                        localStorage.setItem('selectedGroup', group._id);
+                      }}
+                    >
+                      {group.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {showGroups ? (
               <div className="mb-8">
                 <div className="flex items-center justify-between mb-2">
@@ -400,6 +438,7 @@ function Dashboard() {
                     groups={groups}
                     editExpense={editExpense}
                     setEditExpense={setEditExpense}
+                    recentExpenses={Array.isArray(expenses) ? expenses.slice(0, 5) : []}
                   />
                 </div>
                 <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">

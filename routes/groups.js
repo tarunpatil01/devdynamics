@@ -100,10 +100,13 @@ router.post('/:id/add-person', auth, async (req, res) => {
   try {
     const { name } = req.body;
     if (!name) return res.status(400).json({ success: false, message: 'Name required' });
-    // You may want to look up user by name, here we just add name to group (for demo)
+    const User = require('../models/User');
+    const user = await User.findOne({ username: name });
+    if (!user) return res.status(400).json({ success: false, message: 'User not found. Only registered users can be added.' });
+    // Only add username to group members
     const group = await Group.findByIdAndUpdate(
       req.params.id,
-      { $addToSet: { members: name } },
+      { $addToSet: { members: user.username } },
       { new: true }
     );
     if (!group) return res.status(404).json({ success: false, message: 'Group not found' });

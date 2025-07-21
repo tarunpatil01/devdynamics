@@ -1,8 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
+import ExpensesList from './ExpensesList';
 
-const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense }) => {
+// Tooltip component
+const Tooltip = ({ text, children }) => (
+  <span className="relative group">
+    {children}
+    <span className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-max max-w-xs px-3 py-2 rounded bg-zinc-800 text-blue-100 text-xs shadow-lg opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 pointer-events-none transition-opacity z-50">
+      {text}
+    </span>
+  </span>
+);
+
+const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, recentExpenses = [] }) => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [paidBy, setPaidBy] = useState('');
@@ -19,6 +30,9 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
   const [recurringType, setRecurringType] = useState('none');
   const [nextDue, setNextDue] = useState('');
   const [selectedGroup, setSelectedGroup] = useState(group || (Array.isArray(groups) && groups.length === 1 ? groups[0]._id : ''));
+  const [paidByInput, setPaidByInput] = useState('');
+  const [splitWithInput, setSplitWithInput] = useState('');
+  const [splitWithSuggestions, setSplitWithSuggestions] = useState([]);
 
   // Fetch group members for selected group, or all users if no group is selected
   useEffect(() => {
@@ -176,16 +190,33 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
     setLoading(false);
   };
 
-  const safeSplitWith = Array.isArray(splitWith) ? splitWith : [];
-  const safeUsers = Array.isArray(users) ? users.filter(user => 
-    typeof user === 'string' && 
-    user.trim().length > 0 && 
-    !user.match(/^[0-9a-fA-F]{24}$/) // Filter out ObjectId strings
-  ) : [];
+  // Deduplicate usernames (case-insensitive) and filter out userId-like strings
+  const safeUsers = Array.isArray(users)
+    ? Array.from(new Set(users
+        .filter(user => typeof user === 'string' && user.trim().length > 0 && !user.match(/^[0-9a-fA-F]{24}$/))
+        .map(u => u.trim().toLowerCase())
+      ))
+      .map(u => users.find(orig => typeof orig === 'string' && orig.trim().toLowerCase() === u))
+    : [];
+
+  // Auto-complete for Paid By
+  const paidBySuggestions = safeUsers.filter(u => u.toLowerCase().includes(paidByInput.toLowerCase()));
+  // Auto-complete for Split With
+  useEffect(() => {
+    if (splitWithInput) {
+      setSplitWithSuggestions(safeUsers.filter(u => u.toLowerCase().includes(splitWithInput.toLowerCase()) && !safeSplitWith.includes(u)));
+    } else {
+      setSplitWithSuggestions([]);
+    }
+  }, [splitWithInput, safeUsers, safeSplitWith]);
 
   return (
+    <>
     <form onSubmit={handleSubmit} className="bg-zinc-900/80 backdrop-blur-lg rounded-2xl shadow-2xl p-6 mb-6 border-2 border-blue-900 text-white animate-fadein flex flex-col gap-4">
-      <h2 className="text-2xl font-bold text-blue-700 mb-2">Add Expense</h2>
+      <h2 className="text-2xl font-bold text-blue-700 mb-2 flex items-center gap-2">
+        Add Expense
+        <Tooltip text="Fill out the form to add a new group expense. All fields are required."><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
+      </h2>
       {Array.isArray(groups) && groups.length > 1 && (
         <div className="mb-2">
           <label className="block font-semibold mb-1 text-blue-200">Group</label>
@@ -203,8 +234,20 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
         </div>
       )}
       <div className="flex flex-col md:flex-row gap-4">
-        <input type="number" step="0.01" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className="border border-blue-500 bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2" />
-        <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} required className="border border-purple-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-purple-700 placeholder-purple-300 flex-1" />
+        <div className="flex-1 relative">
+          <input type="number" step="0.01" placeholder="Amount" value={amount} onChange={e => setAmount(e.target.value)} required className={`border ${error.includes('Amount') ? 'border-red-500' : 'border-blue-500'} bg-zinc-800 text-white placeholder:text-blue-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2`} />
+          <span className="absolute right-2 top-2">
+            <Tooltip text="Enter the total amount for this expense."><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
+          </span>
+          {error.includes('Amount') && <div className="text-red-500 text-xs mt-1">{error}</div>}
+        </div>
+        <div className="flex-1 relative">
+          <input type="text" placeholder="Description" value={description} onChange={e => setDescription(e.target.value)} required className={`border ${error.includes('Description') ? 'border-red-500' : 'border-purple-300'} rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-400 bg-white text-purple-700 placeholder-purple-300 flex-1`} />
+          <span className="absolute right-2 top-2">
+            <Tooltip text="Describe what this expense is for (e.g., Dinner, Taxi, etc.)"><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
+          </span>
+          {error.includes('Description') && <div className="text-red-500 text-xs mt-1">{error}</div>}
+        </div>
         <select value={category} onChange={e => setCategory(e.target.value)} required className="border border-green-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-400 transition-all duration-200 w-full mb-2">
           <option value="Food">Food</option>
           <option value="Travel">Travel</option>
@@ -214,41 +257,70 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
         </select>
       </div>
       <div className="flex flex-col md:flex-row gap-4 items-center">
-        <div className="flex-1">
-          <label className="block font-semibold mb-1 text-blue-200">Paid By</label>
-          <select
-            value={paidBy}
-            onChange={e => setPaidBy(e.target.value)}
-            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
-          >
-            {usersLoading ? (
-              <option>Loading users...</option>
-            ) : (safeUsers.length > 0) ? (
-              safeUsers.map(user => (
-                <option key={typeof user === 'string' ? user : JSON.stringify(user)} value={typeof user === 'string' ? user : ''}>
-                  {typeof user === 'string' ? user : ''}
-                </option>
-              ))
-            ) : (
-              <option disabled>No users found</option>
-            )}
-          </select>
+        <div className="flex-1 relative">
+          <label className="block font-semibold mb-1 text-blue-200 flex items-center gap-2">
+            Paid By
+            <Tooltip text="Who paid for this expense? Start typing to search group members."><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
+          </label>
+          <input
+            type="text"
+            value={paidByInput || paidBy}
+            onChange={e => {
+              setPaidByInput(e.target.value);
+              setPaidBy(e.target.value);
+            }}
+            className={`border ${paidByError ? 'border-red-500' : 'border-blue-500'} bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2`}
+            placeholder="Type to search..."
+            autoComplete="off"
+          />
+          {paidByInput && paidBySuggestions.length > 0 && (
+            <ul className="absolute z-10 bg-zinc-900 border border-blue-700 rounded w-full mt-1 max-h-32 overflow-y-auto">
+              {paidBySuggestions.map(u => (
+                <li key={u} className="px-3 py-1 hover:bg-blue-800 cursor-pointer" onClick={() => { setPaidBy(u); setPaidByInput(u); }}>
+                  {u}
+                </li>
+              ))}
+            </ul>
+          )}
+          {paidByError && <div className="text-red-500 text-xs mt-1">{paidByError}</div>}
         </div>
-        {paidByError && <div className="text-red-500 text-xs mt-1">{paidByError}</div>}
-        <div className="flex-1">
-          <label className="block font-semibold mb-1 text-blue-200">Split With</label>
-          <div className="flex flex-wrap gap-2">
-            {usersLoading ? <div>Loading users...</div> : (safeUsers.length > 0) ? safeUsers.map(user => (
-              <label key={typeof user === 'string' ? user : JSON.stringify(user)} className="flex items-center gap-1">
-                <input type="checkbox" checked={safeSplitWith.includes(user)} onChange={() => handleSplitWithChange(user)} className="accent-blue-500" />
-                <span className="text-blue-200">{typeof user === 'string' ? user : ''}</span>
-              </label>
-            )) : <span className="text-gray-400">No users found.</span>}
+        <div className="flex-1 relative">
+          <label className="block font-semibold mb-1 text-blue-200 flex items-center gap-2">
+            Split With
+            <Tooltip text="Select group members to split this expense with. Type to search and add."><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
+          </label>
+          <div className="flex flex-wrap gap-2 mb-2">
+            {safeSplitWith.map(user => (
+              <span key={user} className="bg-blue-700 text-white rounded-full px-3 py-1 flex items-center gap-1">
+                {user}
+                <button type="button" className="ml-1 text-white hover:text-red-400" onClick={() => handleSplitWithChange(user)}>&times;</button>
+              </span>
+            ))}
           </div>
+          <input
+            type="text"
+            value={splitWithInput}
+            onChange={e => setSplitWithInput(e.target.value)}
+            className="border border-blue-500 bg-zinc-800 text-white rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all duration-200 w-full mb-2"
+            placeholder="Type to add member..."
+            autoComplete="off"
+          />
+          {splitWithInput && splitWithSuggestions.length > 0 && (
+            <ul className="absolute z-10 bg-zinc-900 border border-blue-700 rounded w-full mt-1 max-h-32 overflow-y-auto">
+              {splitWithSuggestions.map(u => (
+                <li key={u} className="px-3 py-1 hover:bg-blue-800 cursor-pointer" onClick={() => { setSplitWith([...safeSplitWith, u]); setSplitWithInput(''); }}>
+                  {u}
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
       <div>
-        <label className="block font-semibold mb-2 text-blue-200">Split Type</label>
+        <label className="block font-semibold mb-2 text-blue-200 flex items-center gap-2">
+          Split Type
+          <Tooltip text="Choose how to split the expense: equally, by percentage, by amount, or by shares."><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
+        </label>
         <div className="flex flex-col gap-2 sm:flex-row sm:gap-4">
           <label className="flex items-center gap-2">
             <input type="radio" name="splitType" value="equal" checked={splitType === 'equal'} onChange={() => handleSplitTypeChange('equal')} className="accent-blue-500" />
@@ -317,6 +389,19 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense })
       </button>
       <Toast message={toast.message} type={toast.type} onClose={closeToast} />
     </form>
+    {/* Improve empty state for no users or no group */}
+    {(!selectedGroup || safeUsers.length === 0) && (
+      <div className="text-gray-400 flex flex-col items-center gap-2 mt-4">
+        <span className="text-3xl">👥</span>
+        {(!selectedGroup) ? 'Please select a group to add expenses.' : 'No group members found.'}
+      </div>
+    )}
+    {/* Recent Activity Feed */}
+    <div className="bg-zinc-900/80 rounded-2xl shadow-2xl border-2 border-blue-900 p-4 mt-4">
+      <h3 className="text-xl font-bold text-blue-400 mb-2">Recent Activity</h3>
+      <ExpensesList expenses={recentExpenses.slice(0, 5)} onEdit={() => {}} onDelete={() => {}} />
+    </div>
+    </>
   );
 };
 
