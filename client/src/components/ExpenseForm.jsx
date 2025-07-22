@@ -13,7 +13,7 @@ const Tooltip = ({ text, children }) => (
   </span>
 );
 
-const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, recentExpenses = [] }) => {
+const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, recentExpenses = [], onEdit, onDelete }) => {
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   const [paidBy, setPaidBy] = useState('');
@@ -402,7 +402,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
     {/* Recent Activity Feed */}
     <div className="bg-zinc-900/80 rounded-2xl shadow-2xl border-2 border-blue-900 p-4 mt-4">
       <h3 className="text-xl font-bold text-blue-400 mb-2">Recent Activity</h3>
-      <ExpensesList expenses={recentExpenses.slice(0, 5)} onEdit={() => {}} onDelete={() => {}} />
+      <ExpensesList expenses={recentExpenses.slice(0, 5)} onEdit={onEdit} onDelete={onDelete} />
     </div>
     </>
   );
