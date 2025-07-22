@@ -98,7 +98,7 @@ const Settlements = ({ groupId, group, people, loading }) => {
     setOptimisticRemoved(prev => [...prev, `${confirm.direction}-${confirm.user}`]);
     try {
       const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-      const token = sessionStorage.getItem('token');
+      const token = localStorage.getItem('token');
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
       const res = await fetch(`${baseURL}/settlements/settle`, {
         method: 'POST',
