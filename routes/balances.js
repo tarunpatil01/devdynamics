@@ -117,18 +117,20 @@ async function calculateBalancesForGroup(groupId) {
 }
 
 // Helper to calculate balances for group, only for expenses where user is involved
-async function calculateBalancesForGroupForUser(groupId, username) {
+async function calculateBalancesForGroupForUser(groupId, username, userId) {
   const Expense = require('../models/Expense');
   const expenses = await Expense.find({
     group: groupId,
     $or: [
-      { paid_by: username },
-      { split_with: username }
+      { 'paid_by.username': username },
+      { 'paid_by.userId': userId },
+      { 'split_with.username': username },
+      { 'split_with.userId': userId }
     ]
   });
   const balances = {};
   expenses.forEach(exp => {
-    const paidBy = exp.paid_by.trim().toLowerCase();
+    const paidBy = (exp.paid_by.username || '').trim().toLowerCase();
     if (!balances[paidBy]) balances[paidBy] = 0;
     let splits = {};
     if (exp.split_type === 'equal') {
@@ -168,7 +170,8 @@ router.get('/', auth, async (req, res) => {
     const User = require('../models/User');
     const user = await User.findById(req.userId);
     const username = user ? user.username : null;
-    const balances = await calculateBalancesForGroupForUser(groupId, username);
+    const userId = user ? user._id : null;
+    const balances = await calculateBalancesForGroupForUser(groupId, username, userId);
     res.json({ success: true, data: balances });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });

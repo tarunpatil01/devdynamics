@@ -364,8 +364,8 @@ function Dashboard() {
                     <div className="text-blue-200 text-sm font-semibold">
                       {Array.isArray(groupPeople) && groupPeople.length > 0
                         ? groupPeople.join(', ')
-                        : (Array.isArray(groups) && groups.find(g => g._id === selectedGroup) && Array.isArray(groups.find(g => g._id === selectedGroup).members) && groups.find(g => g._id === selectedGroup).members.length > 0
-                          ? groups.find(g => g._id === selectedGroup).members.join(', ')
+                        : (Array.isArray(groups) && groups.find(g => g._id === selectedGroup) && Array.isArray(groups.find(g => g._id === selectedGroup).members)
+                          ? groups.find(g => g._id === selectedGroup).members.filter(m => typeof m === 'string' && !/^[0-9a-fA-F]{24}$/.test(m)).join(', ') || 'No members'
                           : 'No members')}
                     </div>
                   </div>

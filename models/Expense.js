@@ -14,9 +14,11 @@ const expenseSchema = new mongoose.Schema({
     maxlength: 256
   },
   paid_by: {
-    type: String,
-    required: true,
-    trim: true
+    type: {
+      username: { type: String, required: true, trim: true },
+      userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+    },
+    required: true
   },
   split_type: {
     type: String,
@@ -28,7 +30,12 @@ const expenseSchema = new mongoose.Schema({
     required: true
   },
   split_with: {
-    type: [String],
+    type: [
+      {
+        username: { type: String, required: true, trim: true },
+        userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }
+      }
+    ],
     required: true,
     validate: {
       validator: function(v) {

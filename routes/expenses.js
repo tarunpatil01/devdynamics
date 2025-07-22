@@ -17,12 +17,14 @@ router.get('/', auth, async (req, res) => {
     const user = await User.findById(userId);
     const username = user ? user.username : null;
     if (groupId && username) {
-      // Only return expenses for this group where the user is involved
+      // Only return expenses for this group where the user is involved (by userId or username)
       const expenses = await Expense.find({
         group: groupId,
         $or: [
-          { paid_by: username },
-          { split_with: username }
+          { 'paid_by.username': username },
+          { 'paid_by.userId': userId },
+          { 'split_with.username': username },
+          { 'split_with.userId': userId }
         ]
       });
       return res.json({ success: true, data: expenses });
@@ -134,15 +136,35 @@ router.post('/', auth, expenseValidation, async (req, res) => {
   }
   try {
     let { amount, description, paid_by, split_type, split_details, group, split_with, category, recurring } = req.body;
-    if (!paid_by) paid_by = req.userId;
+    const User = require('../models/User');
+    // paid_by: can be username or userId, always store as { username, userId }
+    let paidByUser = null;
+    if (typeof paid_by === 'string') {
+      paidByUser = await User.findOne({ username: paid_by });
+      if (!paidByUser) paidByUser = await User.findById(paid_by);
+    } else if (typeof paid_by === 'object' && paid_by.userId) {
+      paidByUser = await User.findById(paid_by.userId);
+    }
+    if (!paidByUser) return res.status(400).json({ success: false, message: 'Paid by user not found.' });
+    const paidByObj = { username: paidByUser.username, userId: paidByUser._id };
+    // split_with: array of usernames or userIds, always store as [{ username, userId }]
+    const splitWithObjs = [];
+    for (const person of split_with) {
+      let user = null;
+      if (typeof person === 'string') {
+        user = await User.findOne({ username: person });
+        if (!user) user = await User.findById(person);
+      } else if (typeof person === 'object' && person.userId) {
+        user = await User.findById(person.userId);
+      }
+      if (user) splitWithObjs.push({ username: user.username, userId: user._id });
+    }
+    if (splitWithObjs.length === 0) return res.status(400).json({ success: false, message: 'No valid split_with users found.' });
     if (typeof amount !== 'number' || amount <= 0) {
       return res.status(400).json({ success: false, message: 'Amount must be a positive number.' });
     }
     if (!description || !description.trim()) {
       return res.status(400).json({ success: false, message: 'Description is required.' });
-    }
-    if (!paid_by) {
-      return res.status(400).json({ success: false, message: 'Paid by is required.' });
     }
     if (!category || !['Food', 'Travel', 'Utilities', 'Entertainment', 'Other'].includes(category)) {
       return res.status(400).json({ success: false, message: 'Category is required and must be valid.' });
@@ -152,11 +174,8 @@ router.post('/', auth, expenseValidation, async (req, res) => {
         return res.status(400).json({ success: false, message: 'Recurring type must be one of none, weekly, monthly.' });
       }
     }
-    if (!Array.isArray(split_with) || split_with.length === 0) {
-      return res.status(400).json({ success: false, message: 'split_with must be a non-empty array of people.' });
-    }
     const splitPeople = Object.keys(split_details);
-    if (splitPeople.some(p => !split_with.includes(p))) {
+    if (splitPeople.some(p => !splitWithObjs.map(u => u.username).includes(p))) {
       return res.status(400).json({ success: false, message: 'split_details must only contain selected people.' });
     }
     if (!validateSplitDetails(split_type, split_details)) {
@@ -168,14 +187,14 @@ router.post('/', auth, expenseValidation, async (req, res) => {
     // Auto-add people from split_details if missing
     const People = require('../models/People');
     const missingPeople = [];
-    for (const personName of split_with) {
-      const personExists = await People.findOne({ name: personName, group });
+    for (const personObj of splitWithObjs) {
+      const personExists = await People.findOne({ name: personObj.username, group });
       if (!personExists) {
-        missingPeople.push(personName);
-        await People.create({ name: personName, group });
+        missingPeople.push(personObj.username);
+        await People.create({ name: personObj.username, group });
       }
     }
-    const expense = new Expense({ amount, description, paid_by, split_type, split_details, split_with, group, user: req.userId, category, recurring });
+    const expense = new Expense({ amount, description, paid_by: paidByObj, split_type, split_details, split_with: splitWithObjs, group, user: req.userId, category, recurring });
     await expense.save();
     // Emit socket event for new expense to the group room
     if (req.app.get('io') && group) {
