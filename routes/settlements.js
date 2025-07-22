@@ -3,6 +3,7 @@ const Expense = require('../models/Expense');
 const jwt = require('jsonwebtoken');
 const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
 const router = express.Router();
+const mongoose = require('mongoose');
 
 function auth(req, res, next) {
   const header = req.headers['authorization'];
@@ -55,15 +56,18 @@ async function calculateBalances(userId) {
 // Helper to calculate balances for group, only for expenses where user is involved
 async function calculateBalancesForGroupForUser(groupId, username, userId) {
   const Expense = require('../models/Expense');
-  const expenses = await Expense.find({
+  const userIdObj = mongoose.Types.ObjectId(userId);
+  const query = {
     group: groupId,
     $or: [
       { 'paid_by.username': username },
-      { 'paid_by.userId': userId },
+      { 'paid_by.userId': userIdObj },
       { 'split_with.username': username },
-      { 'split_with.userId': userId }
+      { 'split_with.userId': userIdObj }
     ]
-  });
+  };
+  console.log('SETTLEMENTS QUERY:', { username, userId: userIdObj, query });
+  const expenses = await Expense.find(query);
   const balances = {};
   expenses.forEach(exp => {
     const paidBy = (exp.paid_by.username || '').trim().toLowerCase();

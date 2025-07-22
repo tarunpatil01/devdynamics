@@ -7,6 +7,7 @@ const JWT_SECRET = process.env.JWT_SECRET || 'devdynamics_secret';
 const router = express.Router();
 const Group = require('../models/Group');
 const crypto = require('crypto');
+const mongoose = require('mongoose');
 
 // GET /expenses - List all expenses with pagination or by group/user involvement
 router.get('/', auth, async (req, res) => {
@@ -16,17 +17,20 @@ router.get('/', auth, async (req, res) => {
     const User = require('../models/User');
     const user = await User.findById(userId);
     const username = user ? user.username : null;
+    const userIdObj = mongoose.Types.ObjectId(userId);
     if (groupId && username) {
       // Only return expenses for this group where the user is involved (by userId or username)
-      const expenses = await Expense.find({
+      const query = {
         group: groupId,
         $or: [
           { 'paid_by.username': username },
-          { 'paid_by.userId': userId },
+          { 'paid_by.userId': userIdObj },
           { 'split_with.username': username },
-          { 'split_with.userId': userId }
+          { 'split_with.userId': userIdObj }
         ]
-      });
+      };
+      console.log('EXPENSES QUERY:', { username, userId: userIdObj, query });
+      const expenses = await Expense.find(query);
       return res.json({ success: true, data: expenses });
     }
     // Default: all expenses with pagination
