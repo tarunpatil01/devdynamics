@@ -17,6 +17,7 @@ const ExpensesPage = () => {
   const [error, setError] = useState('');
   const { toast, showToast, closeToast } = useToast();
   const [selectedGroup, setSelectedGroup] = useState(localStorage.getItem('selectedGroup') || '');
+  const [groups, setGroups] = useState([]);
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const [category, setCategory] = useState('');
@@ -27,6 +28,22 @@ const ExpensesPage = () => {
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
   const [showGroups, setShowGroups] = useState(false);
+
+  // Fetch groups and set default selected group if needed
+  useEffect(() => {
+    const fetchGroups = async () => {
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${baseURL}/groups`, { headers });
+      const data = await res.json();
+      setGroups(Array.isArray(data.data) ? data.data : []);
+      if ((!selectedGroup || selectedGroup === '') && Array.isArray(data.data) && data.data.length > 0) {
+        setSelectedGroup(data.data[0]._id);
+        localStorage.setItem('selectedGroup', data.data[0]._id);
+      }
+    };
+    if (token) fetchGroups();
+  }, [token]);
 
   // Fetch group members for edit form
   useEffect(() => {
@@ -74,6 +91,18 @@ const ExpensesPage = () => {
     };
     if (token && selectedGroup) fetchExpenses();
   }, [token, selectedGroup, page, category, paidBy, search]);
+
+  // Fallback UI if no group is selected
+  if (!selectedGroup) {
+    return (
+      <div className="min-h-screen w-full flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
+        <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} />
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-white text-2xl">Please select a group to view expenses.</div>
+        </div>
+      </div>
+    );
+  }
 
   const handleEdit = (expense) => {
     setEditExpense(expense);
@@ -207,6 +236,25 @@ const ExpensesPage = () => {
       <div className="flex-1 p-6">
         <div className="max-w-3xl mx-auto">
           <h1 className="text-4xl font-bold text-blue-400 mb-8 text-center">All Expenses</h1>
+          {/* Group Selector Dropdown */}
+          {groups.length > 0 && (
+            <div className="mb-6 flex items-center gap-4">
+              <label className="text-blue-200 font-semibold">Group:</label>
+              <select
+                value={selectedGroup}
+                onChange={e => {
+                  setSelectedGroup(e.target.value);
+                  localStorage.setItem('selectedGroup', e.target.value);
+                  setPage(1);
+                }}
+                className="px-3 py-2 rounded bg-zinc-800 text-blue-200 border border-blue-700"
+              >
+                {groups.map(g => (
+                  <option key={g._id} value={g._id}>{g.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
             <input
               type="text"
