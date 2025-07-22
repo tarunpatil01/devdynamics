@@ -450,16 +450,6 @@ function Dashboard() {
                     recentExpenses={Array.isArray(expenses) ? expenses.slice(0, 5) : []}
                   />
                 </div>
-                <div className="bg-zinc-900/80 rounded-2xl p-4 mb-4">
-                  {Array.isArray(expenses) && (!expenses || expenses.length === 0) ? (
-                    <div className="text-gray-500 text-center py-8">
-                      <span className="block text-2xl mb-2">🧾</span>
-                      No expenses found.
-                    </div>
-                  ) : (
-                    <ExpensesList expenses={Array.isArray(expenses) ? expenses : []} onEdit={handleEdit} onDelete={handleDelete} />
-                  )}
-                </div>
                 {/* Only show balances and settlements if a group is selected and groupId is valid */}
                 {selectedGroup && typeof selectedGroup === 'string' && selectedGroup.length > 0 ? (
                   <>

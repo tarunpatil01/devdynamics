@@ -38,7 +38,9 @@ const ExpensesList = ({ expenses, onEdit, onDelete }) => {
               <div className="flex flex-col md:flex-row gap-2 items-center w-full">
                 <span className="font-bold text-blue-200 text-lg">{typeof exp.description === 'string' ? exp.description : ''}</span>
                 <span className="ml-2 text-white">₹{typeof exp.amount === 'number' || typeof exp.amount === 'string' ? exp.amount : ''}</span>
-                <span className="ml-2 text-pink-400">Paid by: {typeof exp.paid_by === 'string' ? exp.paid_by : ''}</span>
+                <span className="ml-2 text-pink-400">
+                  Paid by: {exp.paid_by && typeof exp.paid_by === 'object' && exp.paid_by.username ? exp.paid_by.username : (typeof exp.paid_by === 'string' ? exp.paid_by : '')}
+                </span>
                 <span className="ml-2 text-gray-400">Split: {typeof exp.split_type === 'string' ? exp.split_type : ''}</span>
               </div>
               <div className="flex gap-2 mt-2 md:mt-0">

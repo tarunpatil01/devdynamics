@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Sidebar = ({ showGroups, setShowGroups, sidebarOpen, setSidebarOpen }) => {
   const username = localStorage.getItem('username');
@@ -30,6 +31,13 @@ const Sidebar = ({ showGroups, setShowGroups, sidebarOpen, setSidebarOpen }) => 
         >
           <span role="img" aria-label="groups" className="text-2xl">👥</span> Groups
         </button>
+        <Link
+          to="/expenses"
+          className="w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg bg-zinc-800 text-yellow-300 hover:bg-yellow-900"
+          onClick={() => setSidebarOpen(false)}
+        >
+          <span role="img" aria-label="expenses" className="text-2xl">🧾</span> Expenses
+        </Link>
       </nav>
       <div className="mt-auto p-6 flex flex-col gap-4 border-t border-blue-900">
         <div className="flex items-center gap-3 bg-zinc-800 rounded-2xl px-5 py-4 shadow text-purple-200">
