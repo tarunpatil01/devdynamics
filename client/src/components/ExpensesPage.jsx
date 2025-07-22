@@ -3,6 +3,7 @@ import ExpensesList from './ExpensesList';
 import Spinner from './Spinner';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
+import Sidebar from './Sidebar';
 
 const PAGE_SIZE = 5;
 
@@ -25,6 +26,7 @@ const ExpensesPage = () => {
   const [editExpense, setEditExpense] = useState(null);
   const [users, setUsers] = useState([]);
   const [usersLoading, setUsersLoading] = useState(false);
+  const [showGroups, setShowGroups] = useState(false);
 
   // Fetch group members for edit form
   useEffect(() => {
@@ -200,99 +202,102 @@ const ExpensesPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black via-zinc-900 to-blue-950 p-6">
-      <div className="max-w-3xl mx-auto">
-        <h1 className="text-4xl font-bold text-blue-400 mb-8 text-center">All Expenses</h1>
-        <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
-          <input
-            type="text"
-            placeholder="Search description..."
-            value={search}
-            onChange={e => { setSearch(e.target.value); setPage(1); }}
-            className="px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
-          />
-          <select
-            value={category}
-            onChange={e => { setCategory(e.target.value); setPage(1); }}
-            className="px-3 py-2 rounded bg-zinc-800 text-blue-200 border border-blue-700"
-          >
-            <option value="">All Categories</option>
-            {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-          </select>
-          <select
-            value={paidBy}
-            onChange={e => { setPaidBy(e.target.value); setPage(1); }}
-            className="px-3 py-2 rounded bg-zinc-800 text-blue-200 border border-blue-700"
-          >
-            <option value="">All Payers</option>
-            {paidByOptions.map(p => <option key={p} value={p}>{p}</option>)}
-          </select>
-        </div>
-        {loading && <Spinner />}
-        {error && <Toast message={error} type="error" onClose={closeToast} />}
-        <ExpensesList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
-        <div className="flex justify-center items-center gap-2 mt-6">
-          <button
-            className="px-4 py-2 rounded bg-blue-700 text-white font-bold disabled:opacity-50"
-            onClick={() => setPage(p => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            Previous
-          </button>
-          <span className="text-blue-200 font-semibold">Page {page} of {totalPages || 1}</span>
-          <button
-            className="px-4 py-2 rounded bg-blue-700 text-white font-bold disabled:opacity-50"
-            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages || totalPages === 0}
-          >
-            Next
-          </button>
-        </div>
-        {/* Edit Modal */}
-        {editExpense && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <form onSubmit={handleEditSubmit} className="bg-zinc-900 rounded-2xl shadow-2xl p-8 border-2 border-blue-900 flex flex-col gap-4 min-w-[320px] max-w-lg w-full">
-              <div className="text-xl font-bold text-white mb-2">Edit Expense</div>
-              <label className="text-blue-200 font-semibold">Amount
-                <input type="number" step="0.01" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.amount} onChange={e => handleEditFieldChange('amount', e.target.value)} required />
-              </label>
-              <label className="text-blue-200 font-semibold">Description
-                <input type="text" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.description} onChange={e => handleEditFieldChange('description', e.target.value)} required />
-              </label>
-              <label className="text-blue-200 font-semibold">Category
-                <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.category} onChange={e => handleEditFieldChange('category', e.target.value)} required>
-                  {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                </select>
-              </label>
-              <label className="text-blue-200 font-semibold">Paid By
-                <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.paid_by} onChange={e => handleEditFieldChange('paid_by', e.target.value)} required>
-                  <option value="">Select</option>
-                  {users.map(u => <option key={u} value={u}>{u}</option>)}
-                </select>
-              </label>
-              <label className="text-blue-200 font-semibold">Split Type
-                <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.split_type} onChange={e => handleEditFieldChange('split_type', e.target.value)} required>
-                  {splitTypes.map(st => <option key={st} value={st}>{st}</option>)}
-                </select>
-              </label>
-              <label className="text-blue-200 font-semibold">Split With
-                <select multiple className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.split_with} onChange={e => handleEditFieldChange('split_with', Array.from(e.target.selectedOptions, o => o.value))} required>
-                  {users.map(u => <option key={u} value={u}>{u}</option>)}
-                </select>
-              </label>
-              {/* For non-equal splits, allow editing split_details as JSON */}
-              {editFields.split_type !== 'equal' && (
-                <label className="text-blue-200 font-semibold">Split Details (JSON: {{user: amount/percent}})
-                  <input type="text" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={typeof editFields.split_details === 'string' ? editFields.split_details : JSON.stringify(editFields.split_details || {})} onChange={e => handleEditFieldChange('split_details', e.target.value)} />
-                </label>
-              )}
-              <div className="flex gap-4 justify-end mt-4">
-                <button type="button" className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded font-bold" onClick={() => setEditExpense(null)}>Cancel</button>
-                <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded font-bold">Save</button>
-              </div>
-            </form>
+    <div className="min-h-screen w-full flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
+      <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} />
+      <div className="flex-1 p-6">
+        <div className="max-w-3xl mx-auto">
+          <h1 className="text-4xl font-bold text-blue-400 mb-8 text-center">All Expenses</h1>
+          <div className="flex flex-wrap gap-4 mb-6 items-center justify-between">
+            <input
+              type="text"
+              placeholder="Search description..."
+              value={search}
+              onChange={e => { setSearch(e.target.value); setPage(1); }}
+              className="px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+            />
+            <select
+              value={category}
+              onChange={e => { setCategory(e.target.value); setPage(1); }}
+              className="px-3 py-2 rounded bg-zinc-800 text-blue-200 border border-blue-700"
+            >
+              <option value="">All Categories</option>
+              {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+            </select>
+            <select
+              value={paidBy}
+              onChange={e => { setPaidBy(e.target.value); setPage(1); }}
+              className="px-3 py-2 rounded bg-zinc-800 text-blue-200 border border-blue-700"
+            >
+              <option value="">All Payers</option>
+              {paidByOptions.map(p => <option key={p} value={p}>{p}</option>)}
+            </select>
           </div>
-        )}
+          {loading && <Spinner />}
+          {error && <Toast message={error} type="error" onClose={closeToast} />}
+          <ExpensesList expenses={expenses} onEdit={handleEdit} onDelete={handleDelete} />
+          <div className="flex justify-center items-center gap-2 mt-6">
+            <button
+              className="px-4 py-2 rounded bg-blue-700 text-white font-bold disabled:opacity-50"
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </button>
+            <span className="text-blue-200 font-semibold">Page {page} of {totalPages || 1}</span>
+            <button
+              className="px-4 py-2 rounded bg-blue-700 text-white font-bold disabled:opacity-50"
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages || totalPages === 0}
+            >
+              Next
+            </button>
+          </div>
+          {/* Edit Modal */}
+          {editExpense && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+              <form onSubmit={handleEditSubmit} className="bg-zinc-900 rounded-2xl shadow-2xl p-8 border-2 border-blue-900 flex flex-col gap-4 min-w-[320px] max-w-lg w-full">
+                <div className="text-xl font-bold text-white mb-2">Edit Expense</div>
+                <label className="text-blue-200 font-semibold">Amount
+                  <input type="number" step="0.01" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.amount} onChange={e => handleEditFieldChange('amount', e.target.value)} required />
+                </label>
+                <label className="text-blue-200 font-semibold">Description
+                  <input type="text" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.description} onChange={e => handleEditFieldChange('description', e.target.value)} required />
+                </label>
+                <label className="text-blue-200 font-semibold">Category
+                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.category} onChange={e => handleEditFieldChange('category', e.target.value)} required>
+                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                  </select>
+                </label>
+                <label className="text-blue-200 font-semibold">Paid By
+                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.paid_by} onChange={e => handleEditFieldChange('paid_by', e.target.value)} required>
+                    <option value="">Select</option>
+                    {users.map(u => <option key={u} value={u}>{u}</option>)}
+                  </select>
+                </label>
+                <label className="text-blue-200 font-semibold">Split Type
+                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.split_type} onChange={e => handleEditFieldChange('split_type', e.target.value)} required>
+                    {splitTypes.map(st => <option key={st} value={st}>{st}</option>)}
+                  </select>
+                </label>
+                <label className="text-blue-200 font-semibold">Split With
+                  <select multiple className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.split_with} onChange={e => handleEditFieldChange('split_with', Array.from(e.target.selectedOptions, o => o.value))} required>
+                    {users.map(u => <option key={u} value={u}>{u}</option>)}
+                  </select>
+                </label>
+                {/* For non-equal splits, allow editing split_details as JSON */}
+                {editFields.split_type !== 'equal' && (
+                  <label className="text-blue-200 font-semibold">Split Details (JSON: {{user: amount/percent}})
+                    <input type="text" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={typeof editFields.split_details === 'string' ? editFields.split_details : JSON.stringify(editFields.split_details || {})} onChange={e => handleEditFieldChange('split_details', e.target.value)} />
+                  </label>
+                )}
+                <div className="flex gap-4 justify-end mt-4">
+                  <button type="button" className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded font-bold" onClick={() => setEditExpense(null)}>Cancel</button>
+                  <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded font-bold">Save</button>
+                </div>
+              </form>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
