@@ -361,7 +361,13 @@ function Dashboard() {
                   <span className="w-12 h-12 flex items-center justify-center rounded-full bg-blue-600 text-white text-3xl font-extrabold shadow">{(groups.find(g => g._id === selectedGroup)?.name || '?').charAt(0).toUpperCase()}</span>
                   <div>
                     <div className="text-2xl font-bold text-white drop-shadow">{groups.find(g => g._id === selectedGroup)?.name || 'Group'}</div>
-                    <div className="text-blue-200 text-sm font-semibold">{Array.isArray(groupPeople) && groupPeople.length > 0 ? groupPeople.join(', ') : 'No members'}</div>
+                    <div className="text-blue-200 text-sm font-semibold">
+                      {Array.isArray(groupPeople) && groupPeople.length > 0
+                        ? groupPeople.join(', ')
+                        : (Array.isArray(groups) && groups.find(g => g._id === selectedGroup) && Array.isArray(groups.find(g => g._id === selectedGroup).members) && groups.find(g => g._id === selectedGroup).members.length > 0
+                          ? groups.find(g => g._id === selectedGroup).members.join(', ')
+                          : 'No members')}
+                    </div>
                   </div>
                 </div>
                 <div className="flex gap-2 flex-wrap items-center">

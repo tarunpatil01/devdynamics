@@ -116,14 +116,59 @@ async function calculateBalancesForGroup(groupId) {
   return balances;
 }
 
-// GET /balances - Show each person's balance for user
+// Helper to calculate balances for group, only for expenses where user is involved
+async function calculateBalancesForGroupForUser(groupId, username) {
+  const Expense = require('../models/Expense');
+  const expenses = await Expense.find({
+    group: groupId,
+    $or: [
+      { paid_by: username },
+      { split_with: username }
+    ]
+  });
+  const balances = {};
+  expenses.forEach(exp => {
+    const paidBy = exp.paid_by.trim().toLowerCase();
+    if (!balances[paidBy]) balances[paidBy] = 0;
+    let splits = {};
+    if (exp.split_type === 'equal') {
+      const people = Object.keys(exp.split_details).length > 0 ? Object.keys(exp.split_details) : [paidBy];
+      const share = parseFloat((exp.amount / people.length).toFixed(2));
+      people.forEach(person => {
+        splits[person.trim().toLowerCase()] = share;
+      });
+    } else if (exp.split_type === 'percentage') {
+      Object.entries(exp.split_details).forEach(([person, percent]) => {
+        splits[person.trim().toLowerCase()] = parseFloat(((exp.amount * percent) / 100).toFixed(2));
+      });
+    } else if (exp.split_type === 'exact') {
+      Object.entries(exp.split_details).forEach(([person, amt]) => {
+        splits[person.trim().toLowerCase()] = parseFloat(amt);
+      });
+    }
+    balances[paidBy] += parseFloat(exp.amount);
+    Object.entries(splits).forEach(([person, share]) => {
+      if (!balances[person]) balances[person] = 0;
+      balances[person] -= share;
+    });
+  });
+  Object.keys(balances).forEach(p => {
+    balances[p] = parseFloat(balances[p].toFixed(2));
+  });
+  return balances;
+}
+
+// GET /balances - Show each person's balance for group, only for user-involved expenses
 router.get('/', auth, async (req, res) => {
   try {
     const groupId = req.query.group;
     if (!groupId) {
       return res.status(400).json({ success: false, message: 'Group ID is required as query parameter ?group=GROUP_ID' });
     }
-    const balances = await calculateBalancesForGroup(groupId);
+    const User = require('../models/User');
+    const user = await User.findById(req.userId);
+    const username = user ? user.username : null;
+    const balances = await calculateBalancesForGroupForUser(groupId, username);
     res.json({ success: true, data: balances });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });

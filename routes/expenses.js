@@ -8,9 +8,26 @@ const router = express.Router();
 const Group = require('../models/Group');
 const crypto = require('crypto');
 
-// GET /expenses - List all expenses with pagination
-router.get('/', async (req, res) => {
+// GET /expenses - List all expenses with pagination or by group/user involvement
+router.get('/', auth, async (req, res) => {
   try {
+    const groupId = req.query.group;
+    const userId = req.userId;
+    const User = require('../models/User');
+    const user = await User.findById(userId);
+    const username = user ? user.username : null;
+    if (groupId && username) {
+      // Only return expenses for this group where the user is involved
+      const expenses = await Expense.find({
+        group: groupId,
+        $or: [
+          { paid_by: username },
+          { split_with: username }
+        ]
+      });
+      return res.json({ success: true, data: expenses });
+    }
+    // Default: all expenses with pagination
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;

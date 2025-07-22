@@ -52,9 +52,16 @@ async function calculateBalances(userId) {
   return balances;
 }
 
-// Helper to calculate balances for group
-async function calculateBalancesForGroup(groupId) {
-  const expenses = await Expense.find({ group: groupId });
+// Helper to calculate balances for group, only for expenses where user is involved
+async function calculateBalancesForGroupForUser(groupId, username) {
+  const Expense = require('../models/Expense');
+  const expenses = await Expense.find({
+    group: groupId,
+    $or: [
+      { paid_by: username },
+      { split_with: username }
+    ]
+  });
   const balances = {};
   expenses.forEach(exp => {
     const paidBy = exp.paid_by.trim().toLowerCase();
@@ -110,14 +117,17 @@ function getSettlements(balances) {
   return settlements;
 }
 
-// GET /settlements - Get current settlement summary for group
+// GET /settlements - Get current settlement summary for group, only for user-involved expenses
 router.get('/', auth, async (req, res) => {
   try {
     const groupId = req.query.group;
     if (!groupId) {
       return res.status(400).json({ success: false, message: 'Group ID is required as query parameter ?group=GROUP_ID' });
     }
-    const balances = await calculateBalancesForGroup(groupId);
+    const User = require('../models/User');
+    const user = await User.findById(req.userId);
+    const username = user ? user.username : null;
+    const balances = await calculateBalancesForGroupForUser(groupId, username);
     const settlements = getSettlements(balances);
     res.json({ success: true, data: settlements });
   } catch (err) {

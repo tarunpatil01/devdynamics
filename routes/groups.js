@@ -22,7 +22,12 @@ router.post('/', auth, async (req, res) => {
   const { name, members } = req.body;
   if (!name) return res.status(400).json({ success: false, message: 'Group name required' });
   try {
-    const group = new Group({ name, owner: req.userId, members: [req.userId, ...(members || [])] });
+    const User = require('../models/User');
+    const creator = await User.findById(req.userId);
+    if (!creator) return res.status(400).json({ success: false, message: 'Creator not found' });
+    // Store all members as usernames, including creator
+    const memberUsernames = [creator.username, ...(members || [])];
+    const group = new Group({ name, owner: req.userId, members: memberUsernames });
     await group.save();
     // Emit socket event for new group
     if (req.app.get('io')) {
@@ -47,7 +52,7 @@ router.get('/', auth, async (req, res) => {
     const groups = await Group.find({
       $or: [
         { owner: userId },
-        { members: { $in: [userId, username] } }
+        { members: username }
       ]
     });
     res.json({ success: true, data: Array.isArray(groups) ? groups : [] });
