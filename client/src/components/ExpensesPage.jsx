@@ -136,11 +136,6 @@ const ExpensesPage = () => {
       setEditFields({
         amount: editExpense.amount ?? '',
         description: editExpense.description ?? '',
-        category: editExpense.category ?? '',
-        paid_by: (editExpense.paid_by && editExpense.paid_by.username) ? editExpense.paid_by.username : '',
-        split_type: editExpense.split_type ?? '',
-        split_details: editExpense.split_details ?? {},
-        split_with: Array.isArray(editExpense.split_with) ? editExpense.split_with.map(u => u.username) : [],
       });
     }
   }, [editExpense]);
@@ -151,7 +146,6 @@ const ExpensesPage = () => {
 
   const handleEditSubmit = async (e) => {
     e.preventDefault();
-    // Basic validation
     if (!editFields.amount || isNaN(editFields.amount) || Number(editFields.amount) <= 0) {
       showToast('Amount must be a positive number.', 'error');
       return;
@@ -160,40 +154,12 @@ const ExpensesPage = () => {
       showToast('Description is required.', 'error');
       return;
     }
-    if (!editFields.paid_by) {
-      showToast('Please select who paid.', 'error');
-      return;
-    }
-    if (!editFields.category) {
-      showToast('Category is required.', 'error');
-      return;
-    }
-    if (!editFields.split_type) {
-      showToast('Split type is required.', 'error');
-      return;
-    }
-    if (!Array.isArray(editFields.split_with) || editFields.split_with.length === 0) {
-      showToast('Split with must have at least one person.', 'error');
-      return;
-    }
-    // Prepare split_details for equal split
-    let splitDetailsToSend = editFields.split_details;
-    if (editFields.split_type === 'equal') {
-      splitDetailsToSend = Object.fromEntries(editFields.split_with.map(person => [person, 1]));
-    }
     try {
       const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
       const payload = {
         amount: Number(editFields.amount),
         description: editFields.description,
-        paid_by: editFields.paid_by,
-        split_type: editFields.split_type,
-        split_details: splitDetailsToSend,
-        split_with: editFields.split_with,
-        group: selectedGroup,
-        category: editFields.category,
-        recurring: { type: 'none' },
       };
       const res = await fetch(`${baseURL}/expenses/${editExpense._id}`, {
         method: 'PUT',
@@ -311,33 +277,6 @@ const ExpensesPage = () => {
                 <label className="text-blue-200 font-semibold">Description
                   <input type="text" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.description ?? ''} onChange={e => handleEditFieldChange('description', e.target.value)} required />
                 </label>
-                <label className="text-blue-200 font-semibold">Category
-                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.category ?? ''} onChange={e => handleEditFieldChange('category', e.target.value)} required>
-                    {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                  </select>
-                </label>
-                <label className="text-blue-200 font-semibold">Paid By
-                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.paid_by ?? ''} onChange={e => handleEditFieldChange('paid_by', e.target.value)} required>
-                    <option value="">Select</option>
-                    {users.map(u => <option key={u} value={u}>{u}</option>)}
-                  </select>
-                </label>
-                <label className="text-blue-200 font-semibold">Split Type
-                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.split_type ?? ''} onChange={e => handleEditFieldChange('split_type', e.target.value)} required>
-                    {splitTypes.map(st => <option key={st} value={st}>{st}</option>)}
-                  </select>
-                </label>
-                <label className="text-blue-200 font-semibold">Split With
-                  <select multiple className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.split_with ?? []} onChange={e => handleEditFieldChange('split_with', Array.from(e.target.selectedOptions, o => o.value))} required>
-                    {users.map(u => <option key={u} value={u}>{u}</option>)}
-                  </select>
-                </label>
-                {/* For non-equal splits, allow editing split_details as JSON */}
-                {editFields.split_type !== 'equal' && (
-                  <label className="text-blue-200 font-semibold">Split Details (JSON: {{user: amount/percent}})
-                    <input type="text" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={typeof editFields.split_details === 'string' ? editFields.split_details : JSON.stringify(editFields.split_details ?? {})} onChange={e => handleEditFieldChange('split_details', e.target.value)} />
-                  </label>
-                )}
                 <div className="flex gap-4 justify-end mt-4">
                   <button type="button" className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded font-bold" onClick={() => setEditExpense(null)}>Cancel</button>
                   <button type="submit" className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded font-bold">Save</button>
