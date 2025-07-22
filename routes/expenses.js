@@ -18,29 +18,9 @@ router.get('/', auth, async (req, res) => {
       return res.json({ success: true, data: expenses });
     }
     const groupId = req.query.group;
-    const userId = req.userId;
-    const User = require('../models/User');
-    const user = await User.findById(userId);
-    const username = user ? user.username : null;
-    let userIdObj = null;
-    try {
-      userIdObj = userId ? require('mongoose').Types.ObjectId(userId) : null;
-    } catch (e) {
-      console.log('Invalid userId for ObjectId:', userId);
-    }
-    if (groupId && username && userIdObj) {
-      // Only return expenses for this group where the user is involved (by userId or username)
-      const query = {
-        group: groupId,
-        $or: [
-          { 'paid_by.username': username },
-          { 'paid_by.userId': userIdObj },
-          { 'split_with.username': username },
-          { 'split_with.userId': userIdObj }
-        ]
-      };
-      console.log('EXPENSES QUERY:', { username, userId, userIdObj, query });
-      const expenses = await Expense.find(query);
+    if (groupId) {
+      // Return all expenses for the group, regardless of user involvement
+      const expenses = await Expense.find({ group: groupId });
       return res.json({ success: true, data: expenses });
     }
     // Default: all expenses with pagination
