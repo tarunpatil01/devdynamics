@@ -306,29 +306,29 @@ const ExpensesPage = () => {
               <form onSubmit={handleEditSubmit} className="bg-zinc-900 rounded-2xl shadow-2xl p-8 border-2 border-blue-900 flex flex-col gap-4 min-w-[320px] max-w-lg w-full">
                 <div className="text-xl font-bold text-white mb-2">Edit Expense</div>
                 <label className="text-blue-200 font-semibold">Amount
-                  <input type="number" step="0.01" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.amount} onChange={e => handleEditFieldChange('amount', e.target.value)} required />
+                  <input type="number" step="0.01" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.amount || ''} onChange={e => handleEditFieldChange('amount', e.target.value)} required />
                 </label>
                 <label className="text-blue-200 font-semibold">Description
-                  <input type="text" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.description} onChange={e => handleEditFieldChange('description', e.target.value)} required />
+                  <input type="text" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.description || ''} onChange={e => handleEditFieldChange('description', e.target.value)} required />
                 </label>
                 <label className="text-blue-200 font-semibold">Category
-                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.category} onChange={e => handleEditFieldChange('category', e.target.value)} required>
+                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.category || ''} onChange={e => handleEditFieldChange('category', e.target.value)} required>
                     {categories.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                   </select>
                 </label>
                 <label className="text-blue-200 font-semibold">Paid By
-                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.paid_by} onChange={e => handleEditFieldChange('paid_by', e.target.value)} required>
+                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.paid_by || ''} onChange={e => handleEditFieldChange('paid_by', e.target.value)} required>
                     <option value="">Select</option>
                     {users.map(u => <option key={u} value={u}>{u}</option>)}
                   </select>
                 </label>
                 <label className="text-blue-200 font-semibold">Split Type
-                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.split_type} onChange={e => handleEditFieldChange('split_type', e.target.value)} required>
+                  <select className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.split_type || ''} onChange={e => handleEditFieldChange('split_type', e.target.value)} required>
                     {splitTypes.map(st => <option key={st} value={st}>{st}</option>)}
                   </select>
                 </label>
                 <label className="text-blue-200 font-semibold">Split With
-                  <select multiple className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.split_with} onChange={e => handleEditFieldChange('split_with', Array.from(e.target.selectedOptions, o => o.value))} required>
+                  <select multiple className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={editFields.split_with || []} onChange={e => handleEditFieldChange('split_with', Array.from(e.target.selectedOptions, o => o.value))} required>
                     {users.map(u => <option key={u} value={u}>{u}</option>)}
                   </select>
                 </label>

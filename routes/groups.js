@@ -132,14 +132,9 @@ const GroupMessage = require('../models/GroupMessage');
 router.get('/:id/messages', auth, async (req, res) => {
   try {
     const msgs = await GroupMessage.find({ group: req.params.id })
-      .populate('sender', 'username')
+      .populate('sender', 'username') // Populate sender with username
       .sort({ created_at: 1 });
-    // Map sender to always return a string username
-    const messagesWithSenderName = msgs.map(msg => ({
-      ...msg.toObject(),
-      sender: (msg.sender && typeof msg.sender.username === 'string') ? msg.sender.username : 'Unknown',
-    }));
-    res.json({ success: true, data: messagesWithSenderName });
+    res.json({ success: true, data: msgs });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }
