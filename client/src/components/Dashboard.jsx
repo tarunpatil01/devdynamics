@@ -15,6 +15,8 @@ import Spinner from './Spinner';
 import ErrorMessage from './ErrorMessage';
 
 function Dashboard() {
+  const categories = ['Food', 'Travel', 'Utilities', 'Entertainment', 'Other'];
+  const splitTypes = ['equal', 'percentage', 'exact', 'shares'];
   // Hamburger sidebar state
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // Always read token from localStorage
