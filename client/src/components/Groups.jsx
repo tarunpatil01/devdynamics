@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ExpenseForm from './ExpenseForm';
+import Toast from './Toast';
 
 const avatarColors = [
   'bg-blue-700', 'bg-pink-700', 'bg-green-700', 'bg-yellow-700', 'bg-purple-700', 'bg-red-700', 'bg-indigo-700', 'bg-teal-700'
@@ -14,10 +15,34 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpe
   const [newPerson, setNewPerson] = useState('');
   const [message, setMessage] = useState('');
   const chatRef = useRef(null);
+  const [groups, setGroups] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [toast, setToast] = useState({ message: '', type: '' });
+  const token = localStorage.getItem('token');
 
   // Always treat people and messages as arrays
   const safePeople = Array.isArray(people) ? people : [];
   const safeMessages = Array.isArray(messages) ? messages : [];
+
+  // Fetch groups
+  useEffect(() => {
+    const fetchGroups = async () => {
+      setLoading(true);
+      setError('');
+      try {
+        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+        const headers = token ? { Authorization: `Bearer ${token}` } : {};
+        const res = await fetch(`${baseURL}/groups`, { headers });
+        const data = await res.json();
+        setGroups(Array.isArray(data.data) ? data.data : []);
+      } catch {
+        setError('Failed to load groups.');
+      }
+      setLoading(false);
+    };
+    fetchGroups();
+  }, [token]);
 
   useEffect(() => {
     if (chatRef.current) {
@@ -41,9 +66,35 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpe
     }
   };
 
+  const handleDeleteGroup = async (groupId) => {
+    if (!window.confirm('Are you sure you want to delete this group? This action cannot be undone.')) return;
+    try {
+      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+      const headers = token ? { Authorization: `Bearer ${token}` } : {};
+      const res = await fetch(`${baseURL}/groups/${groupId}`, { method: 'DELETE', headers });
+      if (!res.ok) throw new Error('Failed to delete group');
+      setGroups(prev => prev.filter(g => g._id !== groupId));
+      setToast({ message: 'Group deleted!', type: 'success' });
+    } catch {
+      setToast({ message: 'Failed to delete group.', type: 'error' });
+    }
+  };
+
   return (
     <div className="flex flex-col h-full w-full max-w-3xl mx-auto p-2 md:p-6 bg-black text-white rounded-2xl shadow-2xl border-2 border-blue-900 animate-fadein">
-      <h2 className="text-3xl font-bold text-white mb-6 text-center drop-shadow">{group?.name ? `Group: ${group.name}` : 'Select a group'}</h2>
+      <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: '' })} />
+      <h2 className="text-3xl font-bold text-white mb-6 text-center drop-shadow">Groups</h2>
+      <ul className="mb-4 flex flex-col gap-3">
+        {groups.length > 0 ? groups.map((g, idx) => (
+          <li key={g._id} className="flex items-center gap-3 py-2 px-3 bg-zinc-900 rounded-xl shadow text-white justify-between">
+            <div className="flex items-center gap-3">
+              <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg bg-blue-700`}>{g.name.charAt(0).toUpperCase()}</span>
+              <span className="font-semibold text-blue-200 text-base">{g.name}</span>
+            </div>
+            <button className="bg-red-700 hover:bg-red-800 text-white px-3 py-1 rounded-lg shadow transition-all duration-200" onClick={() => handleDeleteGroup(g._id)}>Delete</button>
+          </li>
+        )) : <li className="text-gray-500">No groups found.</li>}
+      </ul>
       {/* Add Expense Form for this group */}
       {group?._id && (
         <div className="mb-8">

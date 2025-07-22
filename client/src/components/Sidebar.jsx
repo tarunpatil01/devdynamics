@@ -19,22 +19,24 @@ const Sidebar = ({ showGroups, setShowGroups, sidebarOpen, setSidebarOpen }) => 
         </button>
       </div>
       <nav className="flex-1 flex flex-col gap-4 p-6">
-        <button
-          className={`w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg ${!showGroups ? 'bg-blue-700 text-white' : 'bg-zinc-800 text-blue-300'}`}
-          onClick={() => { setShowGroups(false); setSidebarOpen(false); }}
+        <Link
+          to="/dashboard"
+          className="w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg bg-blue-700 text-white hover:bg-blue-900"
+          onClick={() => setSidebarOpen && setSidebarOpen(false)}
         >
-          <span role="img" aria-label="split" className="text-2xl">💸</span> Split
-        </button>
-        <button
-          className={`w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg ${showGroups ? 'bg-blue-900 text-blue-200' : 'bg-zinc-800 text-purple-300'}`}
-          onClick={() => { setShowGroups(true); setSidebarOpen(false); }}
+          <span role="img" aria-label="dashboard" className="text-2xl">🏠</span> Dashboard
+        </Link>
+        <Link
+          to="/groups"
+          className="w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg bg-zinc-800 text-purple-300 hover:bg-purple-900"
+          onClick={() => setSidebarOpen && setSidebarOpen(false)}
         >
           <span role="img" aria-label="groups" className="text-2xl">👥</span> Groups
-        </button>
+        </Link>
         <Link
           to="/expenses"
           className="w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg bg-zinc-800 text-yellow-300 hover:bg-yellow-900"
-          onClick={() => setSidebarOpen(false)}
+          onClick={() => setSidebarOpen && setSidebarOpen(false)}
         >
           <span role="img" aria-label="expenses" className="text-2xl">🧾</span> Expenses
         </Link>
