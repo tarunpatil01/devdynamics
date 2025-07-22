@@ -19,9 +19,19 @@ router.get('/', auth, async (req, res) => {
     }
     const groupId = req.query.group;
     if (groupId) {
-      // Return all expenses for the group, regardless of user involvement
-      const expenses = await Expense.find({ group: groupId });
-      return res.json({ success: true, data: expenses });
+      // Pagination and filters
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const skip = (page - 1) * limit;
+      const filter = { group: groupId };
+      if (req.query.category) filter.category = req.query.category;
+      if (req.query.paid_by) filter['paid_by.username'] = req.query.paid_by;
+      if (req.query.search) filter.description = { $regex: req.query.search, $options: 'i' };
+      const [expenses, total] = await Promise.all([
+        Expense.find(filter).sort({ created_at: -1 }).skip(skip).limit(limit),
+        Expense.countDocuments(filter)
+      ]);
+      return res.json({ success: true, data: expenses, total, page, limit });
     }
     // Default: all expenses with pagination
     const page = parseInt(req.query.page) || 1;
