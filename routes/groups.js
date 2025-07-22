@@ -139,15 +139,21 @@ router.get('/:id/messages', auth, async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
-// Send message in group (persistent)
+// POST /groups/:id/messages - Add a new message to the group
 router.post('/:id/messages', auth, async (req, res) => {
   try {
     const { text } = req.body;
-    if (!text) return res.status(400).json({ success: false, message: 'Message required' });
-    const sender = req.userId;
-    const msg = new GroupMessage({ group: req.params.id, sender, text });
+    if (!text || !text.trim()) return res.status(400).json({ success: false, message: 'Message text required' });
+    const GroupMessage = require('../models/GroupMessage');
+    const msg = new GroupMessage({ group: req.params.id, sender: req.userId, text });
     await msg.save();
-    res.json({ success: true, data: msg });
+    // Populate sender with username for real-time emit
+    const populatedMsg = await GroupMessage.findById(msg._id).populate('sender', 'username');
+    // Emit socket event for real-time chat
+    if (req.app.get('io')) {
+      req.app.get('io').to(String(req.params.id)).emit('groupMessage', populatedMsg);
+    }
+    res.json({ success: true, data: populatedMsg });
   } catch (err) {
     res.status(500).json({ success: false, message: 'Server error' });
   }

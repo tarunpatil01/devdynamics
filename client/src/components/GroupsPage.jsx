@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from './Sidebar';
 import Groups from './Groups';
+import { socket } from '../socket';
 
 const GroupsPage = () => {
   const [showGroups, setShowGroups] = useState(false);
@@ -51,6 +52,22 @@ const GroupsPage = () => {
     fetchPeopleAndMessages();
   }, [selectedGroup, token]);
 
+  // Real-time group chat with socket.io
+  useEffect(() => {
+    if (!selectedGroup || !selectedGroup._id) return;
+    socket.emit('joinGroup', selectedGroup._id);
+    const handleGroupMessage = (msg) => {
+      if (msg.group === selectedGroup._id || (msg.group && msg.group.toString() === selectedGroup._id.toString())) {
+        setMessages(prev => [...prev, msg]);
+      }
+    };
+    socket.on('groupMessage', handleGroupMessage);
+    return () => {
+      socket.off('groupMessage', handleGroupMessage);
+      socket.emit('leaveGroup', selectedGroup._id);
+    };
+  }, [selectedGroup]);
+
   // Send message handler
   const handleSendMessage = async (text) => {
     if (!selectedGroup || !selectedGroup._id || !text.trim()) return;
@@ -62,9 +79,7 @@ const GroupsPage = () => {
         headers,
         body: JSON.stringify({ text })
       });
-      if (!res.ok) throw new Error('Failed to send message');
-      const { data: msg } = await res.json();
-      setMessages(prev => [...prev, msg]);
+      // No need to update messages here; real-time socket will handle it
     } catch {}
   };
 
