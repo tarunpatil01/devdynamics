@@ -12,13 +12,23 @@ const mongoose = require('mongoose');
 // GET /expenses - List all expenses with pagination or by group/user involvement
 router.get('/', auth, async (req, res) => {
   try {
+    // Handle recurringOnly query param
+    if (req.query.recurringOnly === 'true') {
+      const expenses = await Expense.find({ 'recurring.type': { $ne: 'none' } });
+      return res.json({ success: true, data: expenses });
+    }
     const groupId = req.query.group;
     const userId = req.userId;
     const User = require('../models/User');
     const user = await User.findById(userId);
     const username = user ? user.username : null;
-    const userIdObj = mongoose.Types.ObjectId(userId);
-    if (groupId && username) {
+    let userIdObj = null;
+    try {
+      userIdObj = userId ? require('mongoose').Types.ObjectId(userId) : null;
+    } catch (e) {
+      console.log('Invalid userId for ObjectId:', userId);
+    }
+    if (groupId && username && userIdObj) {
       // Only return expenses for this group where the user is involved (by userId or username)
       const query = {
         group: groupId,
@@ -29,7 +39,7 @@ router.get('/', auth, async (req, res) => {
           { 'split_with.userId': userIdObj }
         ]
       };
-      console.log('EXPENSES QUERY:', { username, userId: userIdObj, query });
+      console.log('EXPENSES QUERY:', { username, userId, userIdObj, query });
       const expenses = await Expense.find(query);
       return res.json({ success: true, data: expenses });
     }
@@ -41,6 +51,7 @@ router.get('/', auth, async (req, res) => {
     const total = await Expense.countDocuments();
     res.json({ success: true, data: expenses, total, page, limit });
   } catch (err) {
+    console.error('EXPENSES ERROR:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });

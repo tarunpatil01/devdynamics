@@ -120,7 +120,12 @@ async function calculateBalancesForGroup(groupId) {
 // Helper to calculate balances for group, only for expenses where user is involved
 async function calculateBalancesForGroupForUser(groupId, username, userId) {
   const Expense = require('../models/Expense');
-  const userIdObj = mongoose.Types.ObjectId(userId);
+  let userIdObj = null;
+  try {
+    userIdObj = userId ? mongoose.Types.ObjectId(userId) : null;
+  } catch (e) {
+    console.log('Invalid userId for ObjectId (balances):', userId);
+  }
   const query = {
     group: groupId,
     $or: [
@@ -130,7 +135,7 @@ async function calculateBalancesForGroupForUser(groupId, username, userId) {
       { 'split_with.userId': userIdObj }
     ]
   };
-  console.log('BALANCES QUERY:', { username, userId: userIdObj, query });
+  console.log('BALANCES QUERY:', { username, userId, userIdObj, query });
   const expenses = await Expense.find(query);
   const balances = {};
   expenses.forEach(exp => {
