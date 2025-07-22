@@ -53,6 +53,41 @@ async function calculateBalances(userId) {
   return balances;
 }
 
+// Add this function before its first use in settlements.js:
+async function calculateBalancesForGroup(groupId) {
+  const expenses = await Expense.find({ group: groupId });
+  const balances = {};
+  expenses.forEach(exp => {
+    const paidBy = typeof exp.paid_by === 'object' && exp.paid_by.username ? exp.paid_by.username.trim().toLowerCase() : (typeof exp.paid_by === 'string' ? exp.paid_by.trim().toLowerCase() : '');
+    if (!balances[paidBy]) balances[paidBy] = 0;
+    let splits = {};
+    if (exp.split_type === 'equal') {
+      const people = Object.keys(exp.split_details).length > 0 ? Object.keys(exp.split_details) : [paidBy];
+      const share = parseFloat((exp.amount / people.length).toFixed(2));
+      people.forEach(person => {
+        splits[person.trim().toLowerCase()] = share;
+      });
+    } else if (exp.split_type === 'percentage') {
+      Object.entries(exp.split_details).forEach(([person, percent]) => {
+        splits[person.trim().toLowerCase()] = parseFloat(((exp.amount * percent) / 100).toFixed(2));
+      });
+    } else if (exp.split_type === 'exact') {
+      Object.entries(exp.split_details).forEach(([person, amt]) => {
+        splits[person.trim().toLowerCase()] = parseFloat(amt);
+      });
+    }
+    balances[paidBy] += parseFloat(exp.amount);
+    Object.entries(splits).forEach(([person, share]) => {
+      if (!balances[person]) balances[person] = 0;
+      balances[person] -= share;
+    });
+  });
+  Object.keys(balances).forEach(p => {
+    balances[p] = parseFloat(balances[p].toFixed(2));
+  });
+  return balances;
+}
+
 // Helper to calculate balances for group, only for expenses where user is involved
 async function calculateBalancesForGroupForUser(groupId, username, userId) {
   const Expense = require('../models/Expense');
