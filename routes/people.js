@@ -43,12 +43,42 @@ router.get('/users', auth, async (req, res) => {
   }
 });
 
-// GET /people - List all people for user
+// GET /people - List all people for user or group
 router.get('/', auth, async (req, res) => {
   try {
-    const people = await getAllPeople(req.userId);
-    res.json({ success: true, data: people });
+    const groupId = req.query.group;
+    if (groupId) {
+      // If group param is present, return group members
+      const group = await Group.findById(groupId);
+      if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
+      // Members can be ObjectIds or usernames, so normalize to usernames
+      const usernames = [];
+      for (const member of group.members) {
+        if (typeof member === 'string' && member.length > 0) {
+          // Check if it's a valid ObjectId string
+          if (mongoose.Types.ObjectId.isValid(member)) {
+            const user = await User.findById(member);
+            if (user) usernames.push(user.username);
+          } else {
+            // It's a username string
+            usernames.push(member);
+          }
+        } else if (member && member.toString) {
+          // It's an ObjectId object
+          const user = await User.findById(member);
+          if (user) usernames.push(user.username);
+        }
+      }
+      // Filter out any empty or invalid usernames
+      const validUsernames = usernames.filter(username => username && typeof username === 'string' && username.trim().length > 0);
+      return res.json({ success: true, data: validUsernames });
+    } else {
+      // Default: people for user
+      const people = await getAllPeople(req.userId);
+      return res.json({ success: true, data: people });
+    }
   } catch (err) {
+    console.error('Error in GET /people:', err);
     res.status(500).json({ success: false, message: 'Server error' });
   }
 });
