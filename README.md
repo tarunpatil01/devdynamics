@@ -204,3 +204,14 @@ npm run format
 - No manual SQL scripts are needed; collections are created automatically by Mongoose when the app runs.
 - To seed the database with test data, you can use the Postman collection provided (`split-app-api.postman_collection.json`).
 - For a fresh start, drop the database in MongoDB and restart the server. 
+
+## Screenshots
+<img width="2855" height="1579" alt="image" src="https://github.com/user-attachments/assets/0fafcf48-dea1-4901-ac25-077f2faac1e0" />
+<img width="2879" height="1582" alt="image" src="https://github.com/user-attachments/assets/f8672420-8e4d-4570-bdad-0a66595e9770" />
+<img width="2837" height="1587" alt="image" src="https://github.com/user-attachments/assets/2caf03e2-3eff-4d99-930c-5ddcc382f956" />
+<img width="2867" height="1583" alt="image" src="https://github.com/user-attachments/assets/8c2ec322-ef9a-4255-9ed8-c647ff15ded4" />
+<img width="2873" height="1592" alt="image" src="https://github.com/user-attachments/assets/c6caa36a-1d81-469d-938f-77c209398ffa" />
+
+
+
+
