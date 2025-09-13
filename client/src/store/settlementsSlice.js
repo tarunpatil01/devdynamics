@@ -2,11 +2,14 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchSettlements = createAsyncThunk('settlements/fetchSettlements', async (groupId, { rejectWithValue }) => {
   try {
+    const isValidGroup = typeof groupId === 'string' && groupId.trim() !== '' && /^[0-9a-fA-F]{24}$/.test(groupId.trim());
+    if (!isValidGroup) {
+      return [];
+    }
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-    const groupParam = groupId ? `?group=${groupId}` : '';
-    const res = await fetch(`${baseURL}/settlements${groupParam}`, { headers });
+    const res = await fetch(`${baseURL}/settlements?group=${groupId}`, { headers });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       return rejectWithValue(errorData.message || 'Failed to fetch settlements');

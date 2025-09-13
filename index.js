@@ -8,17 +8,26 @@ const Expense = require('./models/Expense');
 dotenv.config();
 
 const app = express();
-const allowedOrigins = [
+// Build allow list for CORS: include production domains + common local dev URLs.
+// You can override / extend by setting CSV in process.env.CLIENT_ORIGINS
+const extraEnvOrigins = process.env.CLIENT_ORIGINS ? process.env.CLIENT_ORIGINS.split(',').map(o => o.trim()).filter(Boolean) : [];
+const allowedOrigins = Array.from(new Set([
   "https://devdynamics-split-app.vercel.app",
-  "https://devynamics-yw9g.onrender.com"
-];
+  "https://devynamics-yw9g.onrender.com", // existing deployed backend
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+  ...extraEnvOrigins
+]));
 app.use(cors({
   origin: function (origin, callback) {
     // allow requests with no origin (like mobile apps, curl, etc.)
     if (!origin) return callback(null, true);
-    if (allowedOrigins.indexOf(origin) === -1) {
-      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
-      return callback(new Error(msg), false);
+    if (!allowedOrigins.includes(origin)) {
+      const msg = `CORS blocked origin: ${origin}`;
+      console.warn(msg);
+      return callback(new Error('Not allowed by CORS'), false);
     }
     return callback(null, true);
   },

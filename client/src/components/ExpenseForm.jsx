@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
 import ExpensesList from './ExpensesList';
@@ -190,7 +190,8 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
     setLoading(false);
   };
 
-  const safeSplitWith = Array.isArray(splitWith) ? splitWith : [];
+  // Memoize safeSplitWith to avoid accidental ReferenceError and unnecessary recalculations
+  const safeSplitWith = useMemo(() => (Array.isArray(splitWith) ? splitWith : []), [splitWith]);
   // Deduplicate usernames (case-insensitive) and filter out userId-like strings
   const safeUsers = Array.isArray(users)
     ? Array.from(new Set(users
@@ -368,7 +369,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
               />
             )}
             {splitType === 'percentage' && <span className="text-gray-500">%</span>}
-            {splitType === 'exact' && <span className="text-gray-500"> 9</span>}
+            {splitType === 'exact' && <span className="text-gray-500">₹</span>}
             {splitType === 'shares' && <span className="text-gray-500">shares</span>}
           </div>
         )) : null}

@@ -2,11 +2,16 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 
 export const fetchBalances = createAsyncThunk('balances/fetchBalances', async (groupId, { rejectWithValue }) => {
   try {
+    // Validate groupId (avoid hitting backend with empty ?group= which causes 400)
+    const isValidGroup = typeof groupId === 'string' && groupId.trim() !== '' && /^[0-9a-fA-F]{24}$/.test(groupId.trim());
+    if (!isValidGroup) {
+      // Silently return empty balances instead of erroring – UI will show empty state
+      return {};
+    }
     const token = localStorage.getItem('token');
     const headers = token ? { Authorization: `Bearer ${token}` } : {};
     const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-    const groupParam = groupId ? `?group=${groupId}` : '';
-    const res = await fetch(`${baseURL}/balances${groupParam}`, { headers });
+    const res = await fetch(`${baseURL}/balances?group=${groupId}`, { headers });
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       return rejectWithValue(errorData.message || 'Failed to fetch balances');

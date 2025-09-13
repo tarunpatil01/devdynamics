@@ -106,7 +106,8 @@ function Dashboard() {
     setError('');
     try {
       const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-      const groupParam = selectedGroup ? `?group=${selectedGroup}` : '';
+      const isValidGroup = typeof selectedGroup === 'string' && selectedGroup.trim() !== '' && /^[0-9a-fA-F]{24}$/.test(selectedGroup.trim());
+      const groupParam = isValidGroup ? `?group=${selectedGroup}` : '';
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const [expRes, balRes, setRes, grpRes] = await Promise.all([
         fetch(`${baseURL}/expenses${groupParam}`, { headers }),
@@ -123,7 +124,7 @@ function Dashboard() {
       setBalances(balData.data && typeof balData.data === 'object' ? balData.data : {});
       setSettlements(Array.isArray(setData.data) ? setData.data : []);
       setGroups(Array.isArray(grpData.data) ? grpData.data : []);
-      if (selectedGroup) {
+      if (isValidGroup) {
         const pplRes = await fetch(`${baseURL}/people${groupParam}`, { headers });
         const pplData = pplRes.ok ? await pplRes.json() : { data: [] };
         setGroupPeople(Array.isArray(pplData.data) ? pplData.data : []);
@@ -600,7 +601,7 @@ function Dashboard() {
             </label>
             {/* For non-equal splits, allow editing split_details as JSON */}
             {editFields.split_type !== 'equal' && (
-              <label className="text-blue-200 font-semibold">Split Details (JSON: {{user: amount/percent}})
+              <label className="text-blue-200 font-semibold">Split Details (JSON: {'{'} username: amountOrPercent {'}'})
                 <input type="text" className="w-full mt-1 px-3 py-2 rounded bg-zinc-800 text-white border border-blue-700" value={typeof editFields.split_details === 'string' ? editFields.split_details : JSON.stringify(editFields.split_details || {})} onChange={e => handleEditFieldChange('split_details', e.target.value)} />
               </label>
             )}
