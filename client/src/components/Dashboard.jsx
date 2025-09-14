@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import ExpenseForm from './ExpenseForm';
 import ExpensesList from './ExpensesList';
@@ -115,6 +115,10 @@ function Dashboard() {
   }, [selectedGroup]);
 
   // Fetch all data for selected group
+  // Use ref to avoid showToast changing identity causing fetchAll to be recreated each render
+  const showToastRef = useRef(showToast);
+  useEffect(() => { showToastRef.current = showToast; }, [showToast]);
+
   const fetchAll = React.useCallback(async () => {
     if (!token || !selectedGroup) {
       setLoading(false); // Hide spinner if no group is selected
@@ -151,10 +155,11 @@ function Dashboard() {
     } catch (err) {
       console.error('fetchAll error', err);
       setError('Failed to load data.');
-      showToast('Failed to load data.', 'error');
+      // Use ref to prevent dependency loop
+      showToastRef.current && showToastRef.current('Failed to load data.', 'error');
     }
     setLoading(false);
-  }, [token, selectedGroup, showToast]);
+  }, [token, selectedGroup]);
 
   // Add person to group
   const handleAddPersonToGroup = async (personName) => {

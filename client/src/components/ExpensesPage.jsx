@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import ExpensesList from './ExpensesList';
 import Spinner from './Spinner';
 import Toast from './Toast';
@@ -18,6 +18,8 @@ const ExpensesPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { showToast, closeToast } = useToast();
+  const showToastRef = useRef(showToast);
+  useEffect(() => { showToastRef.current = showToast; }, [showToast]);
   const [selectedGroup, setSelectedGroup] = useState(localStorage.getItem('selectedGroup') || '');
   const [groups, setGroups] = useState([]);
   const [page, setPage] = useState(1);
@@ -79,12 +81,13 @@ const ExpensesPage = () => {
       } catch (err) {
         console.error('fetchExpenses error', err);
         setError('Failed to load expenses.');
-        showToast('Failed to load expenses.', 'error');
+        showToastRef.current && showToastRef.current('Failed to load expenses.', 'error');
       }
       setLoading(false);
     };
     if (token && selectedGroup) fetchExpenses();
-  }, [token, selectedGroup, page, category, paidBy, search, showToast]);
+    // Exclude showToast from dependencies to avoid recreation loop; using ref instead
+  }, [token, selectedGroup, page, category, paidBy, search]);
 
   // Fallback UI if no group is selected (after all hooks declared)
   if (!selectedGroup) {
@@ -164,14 +167,14 @@ const ExpensesPage = () => {
         } catch (err) {
           console.error('fetchExpenses refresh error', err);
           setError('Failed to load expenses.');
-          showToast('Failed to load expenses.', 'error');
+          showToastRef.current && showToastRef.current('Failed to load expenses.', 'error');
         }
         setLoading(false);
       };
       fetchExpenses();
     } catch (err) {
       console.error('handleEditSubmit error', err);
-      showToast('Failed to update expense.', 'error');
+  showToastRef.current && showToastRef.current('Failed to update expense.', 'error');
     }
   };
   return (

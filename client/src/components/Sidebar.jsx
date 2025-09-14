@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
 const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const username = localStorage.getItem('username');
@@ -19,27 +19,30 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
         </button>
       </div>
       <nav className="flex-1 flex flex-col gap-4 p-6">
-        <Link
+        <NavLink
           to="/dashboard"
-          className="w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg bg-blue-700 text-white hover:bg-blue-900"
           onClick={() => setSidebarOpen && setSidebarOpen(false)}
+          className={({ isActive }) => `w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg
+            ${isActive ? 'bg-blue-700 text-white ring-2 ring-blue-400' : 'bg-zinc-800 text-blue-200 hover:bg-blue-900 hover:text-white'}`}
         >
           <span role="img" aria-label="dashboard" className="text-2xl">🏠</span> Dashboard
-        </Link>
-        <Link
+        </NavLink>
+        <NavLink
           to="/groups"
-          className="w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg bg-zinc-800 text-purple-300 hover:bg-purple-900"
           onClick={() => setSidebarOpen && setSidebarOpen(false)}
+          className={({ isActive }) => `w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg
+            ${isActive ? 'bg-purple-700 text-white ring-2 ring-purple-400' : 'bg-zinc-800 text-purple-300 hover:bg-purple-900 hover:text-white'}`}
         >
           <span role="img" aria-label="groups" className="text-2xl">👥</span> Groups
-        </Link>
-        <Link
+        </NavLink>
+        <NavLink
           to="/expenses"
-          className="w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg bg-zinc-800 text-yellow-300 hover:bg-yellow-900"
           onClick={() => setSidebarOpen && setSidebarOpen(false)}
+          className={({ isActive }) => `w-full text-left px-6 py-5 rounded-2xl font-semibold transition-all duration-200 text-lg flex items-center gap-3 shadow-lg
+            ${isActive ? 'bg-yellow-600 text-white ring-2 ring-yellow-400' : 'bg-zinc-800 text-yellow-300 hover:bg-yellow-900 hover:text-white'}`}
         >
           <span role="img" aria-label="expenses" className="text-2xl">🧾</span> Expenses
-        </Link>
+        </NavLink>
       </nav>
       <div className="mt-auto p-6 flex flex-col gap-4 border-t border-blue-900">
         <div className="flex items-center gap-3 bg-zinc-800 rounded-2xl px-5 py-4 shadow text-purple-200">
