@@ -1,7 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 
-const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
+// If parent does not supply control props, Sidebar becomes self-managed (mobile fallback)
+const Sidebar = ({ sidebarOpen: controlledOpen, setSidebarOpen: controlledSetOpen }) => {
+  const isControlled = typeof controlledOpen === 'boolean' && typeof controlledSetOpen === 'function';
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const sidebarOpen = isControlled ? controlledOpen : uncontrolledOpen;
+  const setSidebarOpen = isControlled ? controlledSetOpen : setUncontrolledOpen;
   const username = localStorage.getItem('username');
   return (
     <aside
@@ -12,11 +17,17 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
     >
       <div className="flex items-center justify-between p-6 border-b border-blue-900">
         <h2 className="text-3xl font-extrabold text-white drop-shadow">Split App</h2>
-        <button className="text-white md:hidden" onClick={() => setSidebarOpen(false)} aria-label="Close sidebar">
-          <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
-            <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M6 18L18 6"/>
-          </svg>
-        </button>
+        {!isControlled && (
+          <button
+            className="text-white md:hidden"
+            onClick={() => setSidebarOpen(false)}
+            aria-label="Close sidebar"
+          >
+            <svg width="24" height="24" fill="none" viewBox="0 0 24 24">
+              <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M6 18L18 6"/>
+            </svg>
+          </button>
+        )}
       </div>
       <nav className="flex-1 flex flex-col gap-4 p-6">
         <NavLink
@@ -75,3 +86,20 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
 };
 
 export default Sidebar;
+
+// Optional external toggle for pages that don't maintain sidebar state
+export const MobileSidebarToggle = ({ className = '' }) => {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className={`fixed top-4 left-4 z-50 p-3 rounded-xl bg-blue-700 text-white shadow-lg md:hidden active:scale-95 transition ${className}`}
+        aria-label="Open sidebar"
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+      </button>
+      <Sidebar sidebarOpen={open} setSidebarOpen={setOpen} />
+    </>
+  );
+};

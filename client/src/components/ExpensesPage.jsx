@@ -3,7 +3,7 @@ import ExpensesList from './ExpensesList';
 import Spinner from './Spinner';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
-import Sidebar from './Sidebar';
+import Sidebar, { MobileSidebarToggle } from './Sidebar';
 import { API_BASE } from '../utils/apiBase';
 import authFetch from '../utils/authFetch';
 
@@ -93,7 +93,10 @@ const ExpensesPage = () => {
   if (!selectedGroup) {
     return (
       <div className="min-h-screen w-full flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
-        <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} />
+        {/* Mobile toggle (appears on small screens) */}
+        <MobileSidebarToggle />
+        {/* Sidebar will self-manage open state when no controlled props passed */}
+        <Sidebar />
         <div className="flex-1 flex items-center justify-center">
           <div className="text-white text-2xl">Please select a group to view expenses.</div>
         </div>
@@ -179,6 +182,7 @@ const ExpensesPage = () => {
   };
   return (
     <div className="min-h-screen w-full flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
+      <MobileSidebarToggle />
       <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} />
       <div className="flex-1 p-6">
         <div className="max-w-3xl mx-auto">

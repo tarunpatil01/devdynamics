@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { API_BASE } from '../utils/apiBase';
 import authFetch from '../utils/authFetch';
-import Sidebar from './Sidebar';
+import Sidebar, { MobileSidebarToggle } from './Sidebar';
 import Groups from './Groups';
 import { socket } from '../socket';
 
@@ -86,6 +86,7 @@ const GroupsPage = () => {
 
   return (
     <div className="min-h-screen w-full flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
+      <MobileSidebarToggle />
       <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       <main className="flex-1 flex flex-col items-center justify-center p-4 md:p-12 w-full md:ml-4">
         {groups.length > 0 && selectedGroup ? (
