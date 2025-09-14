@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const Sidebar = ({ showGroups, setShowGroups, sidebarOpen, setSidebarOpen }) => {
+const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
   const username = localStorage.getItem('username');
   return (
     <aside
@@ -48,7 +48,13 @@ const Sidebar = ({ showGroups, setShowGroups, sidebarOpen, setSidebarOpen }) => 
         </div>
         <button
           className="bg-red-700 hover:bg-red-800 text-white px-4 py-4 rounded-2xl shadow-lg transition-all duration-200 text-lg font-bold w-full"
-          onClick={() => { localStorage.clear(); window.location.replace('/login'); }}
+          onClick={() => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            localStorage.removeItem('selectedGroup');
+            window.dispatchEvent(new Event('auth-token-changed'));
+            window.location.replace('/login');
+          }}
           aria-label="Logout"
         >
           Logout

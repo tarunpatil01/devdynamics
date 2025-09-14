@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { API_BASE } from '../utils/apiBase';
 import Toast from './Toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -22,7 +23,7 @@ const Register = () => {
     setSuccess('');
     setLoading(true);
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
       const res = await fetch(`${baseURL}/auth/register`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { API_BASE } from '../utils/apiBase';
 
 export const fetchExpenses = createAsyncThunk('expenses/fetchExpenses', async () => {
   const token = localStorage.getItem('token');
-  const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
   const headers = token ? { Authorization: `Bearer ${token}` } : {};
   const res = await fetch(`${baseURL}/expenses`, { headers });
   const data = await res.json();

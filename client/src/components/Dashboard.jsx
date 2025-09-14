@@ -13,6 +13,8 @@ import { socket } from '../socket';
 import ErrorBoundary from './ErrorBoundary';
 import Spinner from './Spinner';
 import ErrorMessage from './ErrorMessage';
+import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 
 function Dashboard() {
   const categories = ['Food', 'Travel', 'Utilities', 'Entertainment', 'Other'];
@@ -20,7 +22,7 @@ function Dashboard() {
   // Hamburger sidebar state
   const [sidebarOpen, setSidebarOpen] = useState(false);
   // Always read token from localStorage
-  const token = localStorage.getItem('token') || '';
+  const [token, setToken] = useState(() => localStorage.getItem('token') || '');
   const [expenses, setExpenses] = useState([]);
   const [editExpense, setEditExpense] = useState(null);
   const [balances, setBalances] = useState({});
@@ -28,7 +30,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const { toast, showToast, closeToast } = useToast();
-  const [user, setUser] = useState(null);
+  // Removed unused user state (was not referenced)
   const [selectedGroup, setSelectedGroup] = useState(null);
   const [groups, setGroups] = useState([]);
   const [showGroups, setShowGroups] = useState(false);
@@ -36,17 +38,31 @@ function Dashboard() {
   const [groupMessages, setGroupMessages] = useState([]);
   const [globalError, setGlobalError] = useState('');
   const navigate = useNavigate();
-  const [recurringExpenses, setRecurringExpenses] = useState([]);
+  // TODO: re-enable recurring expenses if feature revived
+  // const [recurringExpenses, setRecurringExpenses] = useState([]);
   const [showGroupManager, setShowGroupManager] = useState(false);
   const [editFields, setEditFields] = useState({});
   const [users, setUsers] = useState([]);
-  const [usersLoading, setUsersLoading] = useState(false);
+  // const [usersLoading, setUsersLoading] = useState(false); // unused
 
   useEffect(() => {
     if (!token) {
       navigate('/login');
     }
   }, [token, navigate]);
+
+  // React to auth token changes fired elsewhere (e.g., Login component)
+  useEffect(() => {
+    const handleTokenChange = () => {
+      setToken(localStorage.getItem('token') || '');
+    };
+    window.addEventListener('auth-token-changed', handleTokenChange);
+    window.addEventListener('storage', handleTokenChange);
+    return () => {
+      window.removeEventListener('auth-token-changed', handleTokenChange);
+      window.removeEventListener('storage', handleTokenChange);
+    };
+  }, []);
 
   useEffect(() => {
     if (token && selectedGroup) {
@@ -65,7 +81,7 @@ function Dashboard() {
 
   // Listen for new group creation
   useEffect(() => {
-    socket.on('groupCreated', (group) => {
+    socket.on('groupCreated', () => {
       fetchAll(); // Refetch groups
     });
     // Listen for new expense in the current group
@@ -84,7 +100,7 @@ function Dashboard() {
         fetchAll();
       }
     });
-    socket.on('groupUpdated', (group) => {
+    socket.on('groupUpdated', () => {
       fetchAll();
     });
     return () => {
@@ -94,10 +110,12 @@ function Dashboard() {
       socket.off('expenseDeleted');
       socket.off('groupUpdated');
     };
+    // fetchAll intentionally excluded to avoid ref re-creation churn; stable across renders
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedGroup]);
 
   // Fetch all data for selected group
-  const fetchAll = async () => {
+  const fetchAll = React.useCallback(async () => {
     if (!token || !selectedGroup) {
       setLoading(false); // Hide spinner if no group is selected
       return;
@@ -105,15 +123,13 @@ function Dashboard() {
     setLoading(true);
     setError('');
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const isValidGroup = typeof selectedGroup === 'string' && selectedGroup.trim() !== '' && /^[0-9a-fA-F]{24}$/.test(selectedGroup.trim());
       const groupParam = isValidGroup ? `?group=${selectedGroup}` : '';
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const [expRes, balRes, setRes, grpRes] = await Promise.all([
-        fetch(`${baseURL}/expenses${groupParam}`, { headers }),
-        fetch(`${baseURL}/balances${groupParam}`, { headers }),
-        fetch(`${baseURL}/settlements${groupParam}`, { headers }),
-        fetch(`${baseURL}/groups`, { headers }),
+        authFetch(`/expenses${groupParam}`),
+        authFetch(`/balances${groupParam}`),
+        authFetch(`/settlements${groupParam}`),
+        authFetch('/groups'),
       ]);
       if (!expRes.ok || !balRes.ok || !setRes.ok || !grpRes.ok) throw new Error('Failed to fetch data');
       const expData = await expRes.json();
@@ -125,24 +141,25 @@ function Dashboard() {
       setSettlements(Array.isArray(setData.data) ? setData.data : []);
       setGroups(Array.isArray(grpData.data) ? grpData.data : []);
       if (isValidGroup) {
-        const pplRes = await fetch(`${baseURL}/people${groupParam}`, { headers });
+        const pplRes = await authFetch(`/people${groupParam}`);
         const pplData = pplRes.ok ? await pplRes.json() : { data: [] };
         setGroupPeople(Array.isArray(pplData.data) ? pplData.data : []);
-        const msgRes = await fetch(`${baseURL}/groups/${selectedGroup}/messages`, { headers });
+        const msgRes = await authFetch(`/groups/${selectedGroup}/messages`);
         const msgData = msgRes.ok ? await msgRes.json() : { data: [] };
         setGroupMessages(Array.isArray(msgData.data) ? msgData.data : []);
       }
     } catch (err) {
+      console.error('fetchAll error', err);
       setError('Failed to load data.');
       showToast('Failed to load data.', 'error');
     }
     setLoading(false);
-  };
+  }, [token, selectedGroup, showToast]);
 
   // Add person to group
   const handleAddPersonToGroup = async (personName) => {
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
       const res = await fetch(`${baseURL}/groups/${selectedGroup}/add-person`, {
         method: 'POST',
@@ -153,6 +170,7 @@ function Dashboard() {
       await fetchAll();
       showToast('Person added to group!', 'success');
     } catch (err) {
+      console.error('handleAddPersonToGroup error', err);
       showToast('Failed to add person.', 'error');
     }
   };
@@ -160,7 +178,7 @@ function Dashboard() {
   // Send message in group
   const handleSendGroupMessage = async (message) => {
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
       const res = await fetch(`${baseURL}/groups/${selectedGroup}/messages`, {
         method: 'POST',
@@ -179,18 +197,14 @@ function Dashboard() {
       });
       showToast('Message sent!', 'success');
     } catch (err) {
+      console.error('handleSendGroupMessage error', err);
       showToast('Failed to send message.', 'error');
     }
   };
 
   useEffect(() => {
-    if (token) {
-      (async () => {
-        await fetchAll();
-      })();
-    }
-    // eslint-disable-next-line
-  }, [selectedGroup, token]);
+    if (token) fetchAll();
+  }, [fetchAll, token]);
 
   const addExpense = async (expense, isEdit = false) => {
     setError('');
@@ -201,7 +215,7 @@ function Dashboard() {
       setExpenses(prev => [optimisticExpense, ...prev]);
     }
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
       const method = isEdit ? 'PUT' : 'POST';
       const url = isEdit ? `${baseURL}/expenses/${expense._id}` : `${baseURL}/expenses`;
       // Defensive: ensure split_with is array, split_details is object, group is present, amount is number
@@ -241,6 +255,7 @@ function Dashboard() {
       // Remove optimistic expense (will be replaced by real one from server)
       if (!isEdit) setExpenses(prev => prev.filter(e => !e.optimistic));
     } catch (err) {
+      console.error('addExpense error', err);
       setError('Failed to save expense.');
       showToast('Failed to save expense.', 'error');
       // Revert optimistic update
@@ -286,7 +301,7 @@ function Dashboard() {
       splitDetailsToSend = Object.fromEntries(editFields.split_with.map(person => [person, 1]));
     }
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
       const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
       const payload = {
         amount: Number(editFields.amount),
@@ -309,6 +324,7 @@ function Dashboard() {
       showToast('Expense updated!', 'success');
       await fetchAll();
     } catch (err) {
+      console.error('handleEditSubmit error', err);
       showToast('Failed to update expense.', 'error');
     }
   };
@@ -341,30 +357,20 @@ function Dashboard() {
       await fetchAll();
       showToast('Expense deleted!', 'success');
     } catch (err) {
+      console.error('handleDelete error', err);
       setError('Failed to delete expense.');
       showToast('Failed to delete expense.', 'error');
     }
   };
 
-  // Fetch recurring expenses
-  const fetchRecurring = async () => {
-    try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`${baseURL}/expenses?recurringOnly=true`, { headers });
-      const data = await res.json();
-      if (data.success) setRecurringExpenses(Array.isArray(data.data) ? data.data : []);
-    } catch {}
-  };
-  useEffect(() => { fetchRecurring(); }, []);
+  // Recurring expenses feature disabled (pending reintroduction)
 
   // Fetch group members for edit form
   useEffect(() => {
     const fetchUsers = async () => {
-      setUsersLoading(true);
+  // usersLoading state removed
       try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${baseURL}/people?group=${selectedGroup}`, { headers });
         const data = await res.json();
@@ -372,7 +378,7 @@ function Dashboard() {
       } catch {
         setUsers([]);
       }
-      setUsersLoading(false);
+  // usersLoading state removed
     };
     if (selectedGroup && token && editExpense) fetchUsers();
   }, [selectedGroup, token, editExpense]);

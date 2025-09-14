@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE } from '../utils/apiBase';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchGroups } from '../store/groupsSlice';
 
@@ -19,7 +20,7 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
     const fetchUsers = async () => {
       setUsersLoading(true);
       try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${baseURL}/people/users`, { headers });
         const data = await res.json();
@@ -38,7 +39,7 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
 
   const handleCreate = async () => {
     if (!groupName) return;
-    const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
     const res = await fetch(`${baseURL}/groups`, {
       method: 'POST',
       headers: {

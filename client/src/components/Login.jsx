@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { API_BASE } from '../utils/apiBase';
 import { useNavigate } from 'react-router-dom';
 
 const PasswordInput = ({ value, onChange, ...props }) => {
@@ -51,7 +52,7 @@ const ResetPassword = () => {
     e.preventDefault();
     setMessage('');
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
       const res = await fetch(`${baseURL}/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -117,7 +118,7 @@ const Login = () => {
     setError('');
     setLoading(true);
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
       const res = await fetch(`${baseURL}/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -133,10 +134,12 @@ const Login = () => {
         setLoading(false);
         return;
       }
-      localStorage.setItem('token', data.token);
-      localStorage.setItem('username', data.user.username);
-      console.log('Token after login:', localStorage.getItem('token'));
-      navigate('/dashboard');
+  localStorage.setItem('token', data.token);
+  localStorage.setItem('username', data.user.username);
+  // Dispatch a custom event so components listening can update immediately
+  window.dispatchEvent(new Event('auth-token-changed'));
+  console.log('Token after login:', localStorage.getItem('token'));
+  navigate('/dashboard');
     } catch (err) {
       setError(err.message);
     }

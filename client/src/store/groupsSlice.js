@@ -1,8 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { API_BASE } from '../utils/apiBase';
 
 export const fetchGroups = createAsyncThunk('groups/fetchGroups', async () => {
   const token = localStorage.getItem('token');
-  const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
   const res = await fetch(`${baseURL}/groups`, {
     headers: { Authorization: `Bearer ${token}` },
   });

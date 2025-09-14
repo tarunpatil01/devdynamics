@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { API_BASE } from '../utils/apiBase';
 import Sidebar from './Sidebar';
 import Groups from './Groups';
 import { socket } from '../socket';
@@ -16,7 +17,7 @@ const GroupsPage = () => {
   useEffect(() => {
     const fetchGroups = async () => {
       try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${baseURL}/groups`, { headers });
         const data = await res.json();
@@ -24,7 +25,9 @@ const GroupsPage = () => {
         if (Array.isArray(data.data) && data.data.length > 0) {
           setSelectedGroup(data.data[0]);
         }
-      } catch {}
+      } catch (e) {
+        console.warn('Failed to fetch groups', e);
+      }
     };
     if (token) fetchGroups();
   }, [token]);
@@ -34,7 +37,7 @@ const GroupsPage = () => {
     if (!selectedGroup || !selectedGroup._id) return;
     const fetchPeopleAndMessages = async () => {
       try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         // People
         const pplRes = await fetch(`${baseURL}/people?group=${selectedGroup._id}`, { headers });
@@ -44,7 +47,8 @@ const GroupsPage = () => {
         const msgRes = await fetch(`${baseURL}/groups/${selectedGroup._id}/messages`, { headers });
         const msgData = msgRes.ok ? await msgRes.json() : { data: [] };
         setMessages(Array.isArray(msgData.data) ? msgData.data : []);
-      } catch {
+      } catch (e) {
+        console.warn('Failed to fetch people/messages', e);
         setPeople([]);
         setMessages([]);
       }
@@ -72,15 +76,17 @@ const GroupsPage = () => {
   const handleSendMessage = async (text) => {
     if (!selectedGroup || !selectedGroup._id || !text.trim()) return;
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
-      const res = await fetch(`${baseURL}/groups/${selectedGroup._id}/messages`, {
+      await fetch(`${baseURL}/groups/${selectedGroup._id}/messages`, {
         method: 'POST',
         headers,
         body: JSON.stringify({ text })
       });
       // No need to update messages here; real-time socket will handle it
-    } catch {}
+    } catch (e) {
+      console.warn('Failed to send message', e);
+    }
   };
 
   return (

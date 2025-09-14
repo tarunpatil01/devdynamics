@@ -4,18 +4,19 @@ import Spinner from './Spinner';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
 import Sidebar from './Sidebar';
+import { API_BASE } from '../utils/apiBase';
 
 const PAGE_SIZE = 5;
 
 const categories = ['Food', 'Travel', 'Utilities', 'Entertainment', 'Other'];
-const splitTypes = ['equal', 'percentage', 'exact', 'shares'];
+// splitTypes not used on this page (removing to satisfy linter)
 
 const ExpensesPage = () => {
   const token = localStorage.getItem('token');
   const [expenses, setExpenses] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const { toast, showToast, closeToast } = useToast();
+  const { showToast, closeToast } = useToast();
   const [selectedGroup, setSelectedGroup] = useState(localStorage.getItem('selectedGroup') || '');
   const [groups, setGroups] = useState([]);
   const [page, setPage] = useState(1);
@@ -25,43 +26,37 @@ const ExpensesPage = () => {
   const [search, setSearch] = useState('');
   const [paidByOptions, setPaidByOptions] = useState([]);
   const [editExpense, setEditExpense] = useState(null);
-  const [users, setUsers] = useState([]);
-  const [usersLoading, setUsersLoading] = useState(false);
+  // Removed unused users/usersLoading state
   const [showGroups, setShowGroups] = useState(false);
+  // Move editFields & its effect before any conditional return to preserve hook order
+  const [editFields, setEditFields] = useState({});
+  useEffect(() => {
+    if (editExpense) {
+      setEditFields({
+        amount: editExpense.amount ?? '',
+        description: editExpense.description ?? '',
+      });
+    }
+  }, [editExpense]);
 
   // Fetch groups and set default selected group if needed
   useEffect(() => {
     const fetchGroups = async () => {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`${baseURL}/groups`, { headers });
-      const data = await res.json();
-      setGroups(Array.isArray(data.data) ? data.data : []);
-      if ((!selectedGroup || selectedGroup === '') && Array.isArray(data.data) && data.data.length > 0) {
-        setSelectedGroup(data.data[0]._id);
-        localStorage.setItem('selectedGroup', data.data[0]._id);
+      try {
+        const res = await fetch(`${API_BASE}/groups`, { headers });
+        const data = await res.json();
+        setGroups(Array.isArray(data.data) ? data.data : []);
+        if ((!selectedGroup || selectedGroup === '') && Array.isArray(data.data) && data.data.length > 0) {
+          setSelectedGroup(data.data[0]._id);
+          localStorage.setItem('selectedGroup', data.data[0]._id);
+        }
+      } catch (err) {
+        console.error('fetchGroups error', err);
       }
     };
     if (token) fetchGroups();
-  }, [token]);
-
-  // Fetch group members for edit form
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setUsersLoading(true);
-      try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${baseURL}/people?group=${selectedGroup}`, { headers });
-        const data = await res.json();
-        setUsers(Array.isArray(data.data) ? data.data : []);
-      } catch {
-        setUsers([]);
-      }
-      setUsersLoading(false);
-    };
-    if (selectedGroup && token && editExpense) fetchUsers();
-  }, [selectedGroup, token, editExpense]);
+  }, [token, selectedGroup]);
 
   // Fetch expenses with pagination and filters
   useEffect(() => {
@@ -69,13 +64,12 @@ const ExpensesPage = () => {
       setLoading(true);
       setError('');
       try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
         let query = `?group=${selectedGroup}&page=${page}&limit=${PAGE_SIZE}`;
         if (category) query += `&category=${encodeURIComponent(category)}`;
         if (paidBy) query += `&paid_by=${encodeURIComponent(paidBy)}`;
         if (search) query += `&search=${encodeURIComponent(search)}`;
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${baseURL}/expenses${query}`, { headers });
+        const res = await fetch(`${API_BASE}/expenses${query}`, { headers });
         if (!res.ok) throw new Error('Failed to fetch expenses');
         const data = await res.json();
         setExpenses(Array.isArray(data.data) ? data.data : []);
@@ -84,15 +78,16 @@ const ExpensesPage = () => {
         const uniquePaidBy = Array.from(new Set((data.data || []).map(e => e.paid_by && e.paid_by.username ? e.paid_by.username : '').filter(Boolean)));
         setPaidByOptions(uniquePaidBy);
       } catch (err) {
+        console.error('fetchExpenses error', err);
         setError('Failed to load expenses.');
         showToast('Failed to load expenses.', 'error');
       }
       setLoading(false);
     };
     if (token && selectedGroup) fetchExpenses();
-  }, [token, selectedGroup, page, category, paidBy, search]);
+  }, [token, selectedGroup, page, category, paidBy, search, showToast]);
 
-  // Fallback UI if no group is selected
+  // Fallback UI if no group is selected (after all hooks declared)
   if (!selectedGroup) {
     return (
       <div className="min-h-screen w-full flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
@@ -111,9 +106,8 @@ const ExpensesPage = () => {
   const handleDelete = async (id) => {
     setError('');
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`${baseURL}/expenses/${id}`, {
+      const res = await fetch(`${API_BASE}/expenses/${id}`, {
         method: 'DELETE',
         headers,
       });
@@ -121,6 +115,7 @@ const ExpensesPage = () => {
       setExpenses(prev => prev.filter(e => e._id !== id));
       showToast('Expense deleted!', 'success');
     } catch (err) {
+      console.error('handleDelete error', err);
       setError('Failed to delete expense.');
       showToast('Failed to delete expense.', 'error');
     }
@@ -129,16 +124,7 @@ const ExpensesPage = () => {
   // Pagination controls
   const totalPages = Math.ceil(total / PAGE_SIZE);
 
-  // Edit form state
-  const [editFields, setEditFields] = useState({});
-  useEffect(() => {
-    if (editExpense) {
-      setEditFields({
-        amount: editExpense.amount ?? '',
-        description: editExpense.description ?? '',
-      });
-    }
-  }, [editExpense]);
+  // (editFields state & effect moved above)
 
   const handleEditFieldChange = (field, value) => {
     setEditFields(prev => ({ ...prev, [field]: value }));
@@ -155,13 +141,12 @@ const ExpensesPage = () => {
       return;
     }
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
       const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
       const payload = {
         amount: Number(editFields.amount),
         description: editFields.description,
       };
-      const res = await fetch(`${baseURL}/expenses/${editExpense._id}`, {
+      const res = await fetch(`${API_BASE}/expenses/${editExpense._id}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(payload),
@@ -179,12 +164,13 @@ const ExpensesPage = () => {
           if (paidBy) query += `&paid_by=${encodeURIComponent(paidBy)}`;
           if (search) query += `&search=${encodeURIComponent(search)}`;
           const headers = token ? { Authorization: `Bearer ${token}` } : {};
-          const res = await fetch(`${baseURL}/expenses${query}`, { headers });
+          const res = await fetch(`${API_BASE}/expenses${query}`, { headers });
           if (!res.ok) throw new Error('Failed to fetch expenses');
           const data = await res.json();
           setExpenses(Array.isArray(data.data) ? data.data : []);
           setTotal(data.total || 0);
         } catch (err) {
+          console.error('fetchExpenses refresh error', err);
           setError('Failed to load expenses.');
           showToast('Failed to load expenses.', 'error');
         }
@@ -192,6 +178,7 @@ const ExpensesPage = () => {
       };
       fetchExpenses();
     } catch (err) {
+      console.error('handleEditSubmit error', err);
       showToast('Failed to update expense.', 'error');
     }
   };
@@ -243,7 +230,7 @@ const ExpensesPage = () => {
               className="px-3 py-2 rounded bg-zinc-800 text-blue-200 border border-blue-700"
             >
               <option value="">All Payers</option>
-              {paidByOptions.map(p => <option key={p} value={p}>{p}</option>)}
+              {paidByOptions.map((p, idx) => <option key={`${p}-${idx}`} value={p}>{p}</option>)}
             </select>
           </div>
           {loading && <Spinner />}
@@ -290,4 +277,4 @@ const ExpensesPage = () => {
   );
 };
 
-export default ExpensesPage; 
+export default ExpensesPage;

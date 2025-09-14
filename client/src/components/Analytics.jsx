@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE } from '../utils/apiBase';
 import { Bar, Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -27,7 +28,7 @@ const Analytics = () => {
       setLoading(true);
       setError('');
       try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
         const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${baseURL}/expenses/analytics`, { headers });
@@ -193,7 +194,7 @@ const Analytics = () => {
             <div className="mb-8">
               <h3 className="text-2xl font-semibold text-pink-300 mb-4">Most Expensive Categories</h3>
               <ul className="list-disc pl-6 space-y-2">
-                {data.mostExpensiveCategories.map(([cat, total], index) => (
+                {data.mostExpensiveCategories.map(([cat, total]) => (
                   <li key={cat} className="text-lg">
                     <span className="font-semibold">{cat}:</span> ₹{total.toLocaleString('en-IN')}
                   </li>

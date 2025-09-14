@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { API_BASE } from '../utils/apiBase';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchSettlements } from '../store/settlementsSlice';
 import { socket } from '../socket';
@@ -24,9 +25,9 @@ const Tooltip = ({ text, children }) => (
   </span>
 );
 
-const Settlements = ({ groupId, group, people, loading }) => {
+const Settlements = ({ groupId }) => {
   const dispatch = useDispatch();
-  const { items: settlements, status, error } = useSelector(state => state.settlements);
+  const { items: settlements } = useSelector(state => state.settlements);
   const [settling, setSettling] = useState(null); // user being settled with
   const [confirm, setConfirm] = useState(null); // { user, direction, amount }
   const [filter, setFilter] = useState('all'); // all, owe, owed
@@ -67,8 +68,8 @@ const Settlements = ({ groupId, group, people, loading }) => {
   owedByYou = owedByYou.filter(s => !optimisticRemoved.includes(`pay-${s.to}`));
   owedToYou = owedToYou.filter(s => !optimisticRemoved.includes(`receive-${s.from}`));
   // Filtering
-  if (filter === 'owe') owedByYou = owedByYou; else if (filter === 'owed') owedByYou = [];
-  if (filter === 'owed') owedToYou = owedToYou; else if (filter === 'owe') owedToYou = [];
+  if (filter === 'owed') owedByYou = [];
+  if (filter === 'owe') owedToYou = [];
   // Sorting
   if (sort === 'amount') {
     owedByYou = owedByYou.sort((a, b) => b.amount - a.amount);
@@ -97,7 +98,7 @@ const Settlements = ({ groupId, group, people, loading }) => {
     // Optimistic UI: remove settlement immediately
     setOptimisticRemoved(prev => [...prev, `${confirm.direction}-${confirm.user}`]);
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
       const token = localStorage.getItem('token');
       const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
       const res = await fetch(`${baseURL}/settlements/settle`, {
@@ -113,7 +114,7 @@ const Settlements = ({ groupId, group, people, loading }) => {
       if (!res.ok) throw new Error('Failed to settle up');
       dispatch(fetchSettlements(groupId));
       showToast('Settlement recorded!', 'success');
-    } catch (err) {
+    } catch {
       showToast('Failed to settle up. Please try again.', 'error');
       // Revert optimistic update
       setOptimisticRemoved(prev => prev.filter(key => key !== `${confirm.direction}-${confirm.user}`));

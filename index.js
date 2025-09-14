@@ -20,19 +20,28 @@ const allowedOrigins = Array.from(new Set([
   "http://127.0.0.1:3000",
   ...extraEnvOrigins
 ]));
+const isDev = process.env.NODE_ENV !== 'production';
 app.use(cors({
   origin: function (origin, callback) {
-    // allow requests with no origin (like mobile apps, curl, etc.)
+    // allow requests with no origin (like mobile apps, curl, server-to-server)
     if (!origin) return callback(null, true);
-    if (!allowedOrigins.includes(origin)) {
-      const msg = `CORS blocked origin: ${origin}`;
-      console.warn(msg);
-      return callback(new Error('Not allowed by CORS'), false);
+    if (allowedOrigins.includes(origin)) return callback(null, true);
+    if (isDev) {
+      // In dev, warn but allow so local experimentation isn't blocked
+      console.warn(`[CORS][DEV] Allowing unlisted origin: ${origin}`);
+      return callback(null, true);
     }
-    return callback(null, true);
+    console.warn(`[CORS] Blocked origin: ${origin}`);
+    // Instead of throwing (which yields 500), respond with standard CORS failure
+    return callback(null, false);
   },
-  credentials: true // <-- allow credentials in CORS
+  credentials: true,
+  optionsSuccessStatus: 204
 }));
+
+// NOTE: Removed explicit app.options('*') handler because Express 5 + path-to-regexp v8
+// was throwing a "Missing parameter name" error in some environments. The main CORS
+// middleware already handles preflight for listed origins.
 app.use(express.json());
 
 const PORT = process.env.PORT || 5000;

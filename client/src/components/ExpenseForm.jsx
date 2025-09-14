@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
+import { API_BASE } from '../utils/apiBase';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
 import ExpensesList from './ExpensesList';
@@ -23,7 +24,7 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [users, setUsers] = useState([]);
-  const [usersLoading, setUsersLoading] = useState(true);
+  // Removed usersLoading – not used in UI
   const { toast, showToast, closeToast } = useToast();
   const [paidByError, setPaidByError] = useState('');
   const [category, setCategory] = useState('Food');
@@ -37,24 +38,19 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
   // Fetch group members for selected group, or all users if no group is selected
   useEffect(() => {
     const fetchUsers = async () => {
-      setUsersLoading(true);
+  // usersLoading removed
       try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+        const baseURL = API_BASE;
         const token = localStorage.getItem('token');
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        let url;
-        if (selectedGroup) {
-          url = `${baseURL}/people/group/${selectedGroup}`;
-        } else {
-          url = `${baseURL}/people/users`;
-        }
+        const url = selectedGroup ? `${baseURL}/people/group/${selectedGroup}` : `${baseURL}/people/users`;
         const res = await fetch(url, { headers });
         const data = await res.json();
         setUsers(Array.isArray(data?.data) ? data.data : []);
-      } catch {
+      } catch (e) {
+        console.warn('Failed to fetch users', e);
         setUsers([]);
       }
-      setUsersLoading(false);
     };
     fetchUsers();
   }, [selectedGroup]);
@@ -183,34 +179,56 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
       setAmount(''); setDescription(''); setSplitDetails({}); setSplitWith([]); setEditExpense && setEditExpense(null);
       setCategory('Food'); setRecurringType('none'); setNextDue('');
       showToast('Expense added!', 'success');
-    } catch (err) {
+    } catch (e) {
       setError('Failed to add expense.');
       showToast('Failed to add expense.', 'error');
+      console.warn('Add expense failed', e);
     }
     setLoading(false);
   };
 
   // Memoize safeSplitWith to avoid accidental ReferenceError and unnecessary recalculations
   const safeSplitWith = useMemo(() => (Array.isArray(splitWith) ? splitWith : []), [splitWith]);
-  // Deduplicate usernames (case-insensitive) and filter out userId-like strings
-  const safeUsers = Array.isArray(users)
-    ? Array.from(new Set(users
-        .filter(user => typeof user === 'string' && user.trim().length > 0 && !user.match(/^[0-9a-fA-F]{24}$/))
-        .map(u => u.trim().toLowerCase())
-      ))
-      .map(u => users.find(orig => typeof orig === 'string' && orig.trim().toLowerCase() === u))
-    : [];
+  const safeUsers = useMemo(() => {
+    if (!Array.isArray(users)) return [];
+    const loweredUnique = Array.from(
+      new Set(
+        users
+          .filter(
+            u =>
+              typeof u === 'string' &&
+              u.trim().length > 0 &&
+              !u.match(/^[0-9a-fA-F]{24}$/) // skip ObjectId-like
+          )
+          .map(u => u.trim().toLowerCase())
+      )
+    );
+    return loweredUnique.map(
+      lu =>
+        users.find(
+          orig =>
+            typeof orig === 'string' &&
+            orig.trim().toLowerCase() === lu
+        )
+    );
+  }, [users]);
 
   // Auto-complete for Paid By
   const paidBySuggestions = safeUsers.filter(u => u.toLowerCase().includes(paidByInput.toLowerCase()));
   // Auto-complete for Split With
   useEffect(() => {
-    if (splitWithInput) {
-      setSplitWithSuggestions(safeUsers.filter(u => u.toLowerCase().includes(splitWithInput.toLowerCase()) && !safeSplitWith.includes(u)));
-    } else {
+    if (!splitWithInput) {
       setSplitWithSuggestions([]);
+      return;
     }
-  }, [splitWithInput, safeUsers, safeSplitWith]);
+    setSplitWithSuggestions(
+      safeUsers.filter(
+        u =>
+          u.toLowerCase().includes(splitWithInput.toLowerCase()) &&
+          !safeSplitWith.includes(u)
+      )
+    );
+  }, [splitWithInput, safeSplitWith, safeUsers]);
 
   return (
     <>
@@ -294,8 +312,8 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
             <Tooltip text="Select group members to split this expense with. Type to search and add."><span className="bg-blue-700 text-white rounded-full px-2 cursor-help" tabIndex={0}>?</span></Tooltip>
           </label>
           <div className="flex flex-wrap gap-2 mb-2">
-            {safeSplitWith.map(user => (
-              <span key={user} className="bg-blue-700 text-white rounded-full px-3 py-1 flex items-center gap-1">
+            {safeSplitWith.map((user, idx) => (
+              <span key={`${user}-${idx}`} className="bg-blue-700 text-white rounded-full px-3 py-1 flex items-center gap-1">
                 {user}
                 <button type="button" className="ml-1 text-white hover:text-red-400" onClick={() => handleSplitWithChange(user)}>&times;</button>
               </span>
@@ -311,8 +329,8 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
           />
           {splitWithInput && splitWithSuggestions.length > 0 && (
             <ul className="absolute z-10 bg-zinc-900 border border-blue-700 rounded w-full mt-1 max-h-32 overflow-y-auto">
-              {splitWithSuggestions.map(u => (
-                <li key={u} className="px-3 py-1 hover:bg-blue-800 cursor-pointer" onClick={() => { setSplitWith([...safeSplitWith, u]); setSplitWithInput(''); }}>
+              {splitWithSuggestions.map((u, idx) => (
+                <li key={`${u}-${idx}`} className="px-3 py-1 hover:bg-blue-800 cursor-pointer" onClick={() => { setSplitWith(prev => prev.includes(u) ? prev : [...prev, u]); setSplitWithInput(''); }}>
                   {u}
                 </li>
               ))}

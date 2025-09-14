@@ -1,4 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
+import { API_BASE } from '../utils/apiBase';
 import ExpenseForm from './ExpenseForm';
 import Toast from './Toast';
 
@@ -16,30 +17,27 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpe
   const [message, setMessage] = useState('');
   const chatRef = useRef(null);
   const [groups, setGroups] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  // Removed unused loading & error state
   const [toast, setToast] = useState({ message: '', type: '' });
   const token = localStorage.getItem('token');
 
   // Always treat people and messages as arrays
   const safePeople = Array.isArray(people) ? people : [];
-  const safeMessages = Array.isArray(messages) ? messages : [];
+  const safeMessages = useMemo(() => (Array.isArray(messages) ? messages : []), [messages]);
 
   // Fetch groups
   useEffect(() => {
     const fetchGroups = async () => {
-      setLoading(true);
-      setError('');
+  // fetch groups
       try {
-        const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
         const headers = token ? { Authorization: `Bearer ${token}` } : {};
         const res = await fetch(`${baseURL}/groups`, { headers });
         const data = await res.json();
         setGroups(Array.isArray(data.data) ? data.data : []);
-      } catch {
-        setError('Failed to load groups.');
+      } catch (e) {
+        console.warn('Failed to load groups', e);
       }
-      setLoading(false);
     };
     fetchGroups();
   }, [token]);
@@ -69,7 +67,7 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpe
   const handleDeleteGroup = async (groupId) => {
     if (!window.confirm('Are you sure you want to delete this group? This action cannot be undone.')) return;
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
+  const baseURL = API_BASE;
       const headers = token ? { Authorization: `Bearer ${token}` } : {};
       const res = await fetch(`${baseURL}/groups/${groupId}`, { method: 'DELETE', headers });
       if (!res.ok) throw new Error('Failed to delete group');
@@ -85,7 +83,7 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpe
       <Toast message={toast.message} type={toast.type} onClose={() => setToast({ message: '', type: '' })} />
       <h2 className="text-3xl font-bold text-white mb-6 text-center drop-shadow">Groups</h2>
       <ul className="mb-4 flex flex-col gap-3">
-        {groups.length > 0 ? groups.map((g, idx) => (
+  {groups.length > 0 ? groups.map((g) => (
           <li key={g._id} className="flex items-center gap-3 py-2 px-3 bg-zinc-900 rounded-xl shadow text-white justify-between">
             <div className="flex items-center gap-3">
               <span className={`w-9 h-9 flex items-center justify-center rounded-full font-bold text-lg bg-blue-700`}>{g.name.charAt(0).toUpperCase()}</span>
