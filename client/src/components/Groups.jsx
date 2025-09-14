@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 import ExpenseForm from './ExpenseForm';
 import Toast from './Toast';
 
@@ -30,9 +31,7 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpe
     const fetchGroups = async () => {
   // fetch groups
       try {
-  const baseURL = API_BASE;
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${baseURL}/groups`, { headers });
+    const res = await authFetch('/groups');
         const data = await res.json();
         setGroups(Array.isArray(data.data) ? data.data : []);
       } catch (e) {
@@ -67,9 +66,7 @@ const Groups = ({ group, people, onAddPerson, messages, onSendMessage, onAddExpe
   const handleDeleteGroup = async (groupId) => {
     if (!window.confirm('Are you sure you want to delete this group? This action cannot be undone.')) return;
     try {
-  const baseURL = API_BASE;
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`${baseURL}/groups/${groupId}`, { method: 'DELETE', headers });
+    const res = await authFetch(`/groups/${groupId}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete group');
       setGroups(prev => prev.filter(g => g._id !== groupId));
       setToast({ message: 'Group deleted!', type: 'success' });

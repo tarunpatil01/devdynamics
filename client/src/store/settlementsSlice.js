@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 
 export const fetchSettlements = createAsyncThunk('settlements/fetchSettlements', async (groupId, { rejectWithValue }) => {
   try {
@@ -7,9 +8,7 @@ export const fetchSettlements = createAsyncThunk('settlements/fetchSettlements',
     if (!isValidGroup) {
       return [];
     }
-    const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await fetch(`${API_BASE}/settlements?group=${groupId}`, { headers });
+    const res = await authFetch(`/settlements?group=${groupId}`);
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       return rejectWithValue(errorData.message || 'Failed to fetch settlements');

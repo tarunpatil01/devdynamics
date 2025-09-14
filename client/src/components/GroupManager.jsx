@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchGroups } from '../store/groupsSlice';
 
@@ -20,9 +21,7 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
     const fetchUsers = async () => {
       setUsersLoading(true);
       try {
-  const baseURL = API_BASE;
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${baseURL}/people/users`, { headers });
+    const res = await authFetch('/people/users');
         const data = await res.json();
         setUsers(Array.isArray(data.data) ? data.data : []);
       } catch {
@@ -39,13 +38,9 @@ const GroupManager = ({ token, selectedGroup, setSelectedGroup }) => {
 
   const handleCreate = async () => {
     if (!groupName) return;
-  const baseURL = API_BASE;
-    const res = await fetch(`${baseURL}/groups`, {
+    const res = await authFetch('/groups', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: groupName, members: selectedUsers }),
     });
     if (res.ok) {

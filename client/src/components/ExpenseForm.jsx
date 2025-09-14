@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 import Toast from './Toast';
 import useToast from '../hooks/useToast';
 import ExpensesList from './ExpensesList';
@@ -40,11 +41,8 @@ const ExpenseForm = ({ onAdd, group, groups = [], editExpense, setEditExpense, r
     const fetchUsers = async () => {
   // usersLoading removed
       try {
-        const baseURL = API_BASE;
-        const token = localStorage.getItem('token');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const url = selectedGroup ? `${baseURL}/people/group/${selectedGroup}` : `${baseURL}/people/users`;
-        const res = await fetch(url, { headers });
+  const url = selectedGroup ? `/people/group/${selectedGroup}` : '/people/users';
+  const res = await authFetch(url);
         const data = await res.json();
         setUsers(Array.isArray(data?.data) ? data.data : []);
       } catch (e) {

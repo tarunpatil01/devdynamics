@@ -159,11 +159,9 @@ function Dashboard() {
   // Add person to group
   const handleAddPersonToGroup = async (personName) => {
     try {
-  const baseURL = API_BASE;
-      const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
-      const res = await fetch(`${baseURL}/groups/${selectedGroup}/add-person`, {
+      const res = await authFetch(`/groups/${selectedGroup}/add-person`, {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: personName })
       });
       if (!res.ok) throw new Error('Failed to add person');
@@ -178,11 +176,9 @@ function Dashboard() {
   // Send message in group
   const handleSendGroupMessage = async (message) => {
     try {
-  const baseURL = API_BASE;
-      const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
-      const res = await fetch(`${baseURL}/groups/${selectedGroup}/messages`, {
+      const res = await authFetch(`/groups/${selectedGroup}/messages`, {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text: message })
       });
       if (!res.ok) throw new Error('Failed to send message');
@@ -215,9 +211,8 @@ function Dashboard() {
       setExpenses(prev => [optimisticExpense, ...prev]);
     }
     try {
-  const baseURL = API_BASE;
       const method = isEdit ? 'PUT' : 'POST';
-      const url = isEdit ? `${baseURL}/expenses/${expense._id}` : `${baseURL}/expenses`;
+      const endpoint = isEdit ? `/expenses/${expense._id}` : '/expenses';
       // Defensive: ensure split_with is array, split_details is object, group is present, amount is number
       const payload = {
         ...expense,
@@ -227,12 +222,9 @@ function Dashboard() {
         group: (expense.group && expense.group !== '{{groupId}}' && expense.group !== '') ? expense.group : selectedGroup,
       };
       console.log('Sending payload to backend:', JSON.stringify(payload, null, 2));
-      const res = await fetch(url, {
+      const res = await authFetch(endpoint, {
         method,
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
       if (!res.ok) {
@@ -301,8 +293,7 @@ function Dashboard() {
       splitDetailsToSend = Object.fromEntries(editFields.split_with.map(person => [person, 1]));
     }
     try {
-  const baseURL = API_BASE;
-      const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
+      const headers = { 'Content-Type': 'application/json' };
       const payload = {
         amount: Number(editFields.amount),
         description: editFields.description,
@@ -314,7 +305,7 @@ function Dashboard() {
         category: editFields.category,
         recurring: { type: 'none' },
       };
-      const res = await fetch(`${baseURL}/expenses/${editExpense._id}`, {
+      const res = await authFetch(`/expenses/${editExpense._id}`, {
         method: 'PUT',
         headers,
         body: JSON.stringify(payload),
@@ -336,13 +327,7 @@ function Dashboard() {
   const handleDelete = async (id) => {
     setError('');
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devynamics-yw9g.onrender.com';
-      const res = await fetch(`${baseURL}/expenses/${id}`, {
-        method: 'DELETE',
-        headers: {
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-      });
+      const res = await authFetch(`/expenses/${id}`, { method: 'DELETE' });
       if (!res.ok) {
         if (res.status === 404) {
           showToast('Expense not found. It may have been deleted.', 'error');
@@ -370,9 +355,7 @@ function Dashboard() {
     const fetchUsers = async () => {
   // usersLoading state removed
       try {
-  const baseURL = API_BASE;
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${baseURL}/people?group=${selectedGroup}`, { headers });
+        const res = await authFetch(`/people?group=${selectedGroup}`);
         const data = await res.json();
         setUsers(Array.isArray(data.data) ? data.data : []);
       } catch {

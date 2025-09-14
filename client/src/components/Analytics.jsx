@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 import { Bar, Pie } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -28,10 +29,7 @@ const Analytics = () => {
       setLoading(true);
       setError('');
       try {
-  const baseURL = API_BASE;
-        const token = localStorage.getItem('token');
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${baseURL}/expenses/analytics`, { headers });
+    const res = await authFetch('/expenses/analytics');
         const result = await res.json();
         if (!result.success) throw new Error(result.message || 'Failed to fetch analytics');
         setData(result.data);

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 import { useNavigate } from 'react-router-dom';
 
 const PasswordInput = ({ value, onChange, ...props }) => {
@@ -52,8 +53,7 @@ const ResetPassword = () => {
     e.preventDefault();
     setMessage('');
     try {
-  const baseURL = API_BASE;
-      const res = await fetch(`${baseURL}/auth/reset-password`, {
+      const res = await authFetch('/auth/reset-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, token, newPassword })
@@ -118,8 +118,7 @@ const Login = () => {
     setError('');
     setLoading(true);
     try {
-  const baseURL = API_BASE;
-      const res = await fetch(`${baseURL}/auth/login`, {
+      const res = await authFetch('/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })
@@ -151,8 +150,7 @@ const Login = () => {
     setForgotMsg('');
     setResetLink('');
     try {
-      const baseURL = import.meta.env.VITE_API_URL || 'https://devdynamics-yw9g.onrender.com';
-      const res = await fetch(`${baseURL}/auth/forgot-password`, {
+      const res = await authFetch('/auth/forgot-password', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: forgotUser })

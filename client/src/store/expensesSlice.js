@@ -1,11 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 
 export const fetchExpenses = createAsyncThunk('expenses/fetchExpenses', async () => {
-  const token = localStorage.getItem('token');
-  const baseURL = API_BASE;
-  const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await fetch(`${baseURL}/expenses`, { headers });
+  const res = await authFetch('/expenses');
   const data = await res.json();
   return data.data;
 });

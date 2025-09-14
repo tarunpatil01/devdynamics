@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 import { useSelector, useDispatch } from 'react-redux';
 import { fetchSettlements } from '../store/settlementsSlice';
 import { socket } from '../socket';
@@ -98,12 +99,9 @@ const Settlements = ({ groupId }) => {
     // Optimistic UI: remove settlement immediately
     setOptimisticRemoved(prev => [...prev, `${confirm.direction}-${confirm.user}`]);
     try {
-  const baseURL = API_BASE;
-      const token = localStorage.getItem('token');
-      const headers = token ? { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' } : {};
-      const res = await fetch(`${baseURL}/settlements/settle`, {
+      const res = await authFetch('/settlements/settle', {
         method: 'POST',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           user: username,
           counterparty: confirm.user,

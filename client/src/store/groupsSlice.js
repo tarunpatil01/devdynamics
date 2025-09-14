@@ -1,12 +1,9 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 
 export const fetchGroups = createAsyncThunk('groups/fetchGroups', async () => {
-  const token = localStorage.getItem('token');
-  const baseURL = API_BASE;
-  const res = await fetch(`${baseURL}/groups`, {
-    headers: { Authorization: `Bearer ${token}` },
-  });
+  const res = await authFetch('/groups');
   const data = await res.json();
   return data.data;
 });

@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 import Toast from './Toast';
 import { useNavigate } from 'react-router-dom';
 
@@ -23,8 +24,7 @@ const Register = () => {
     setSuccess('');
     setLoading(true);
     try {
-  const baseURL = API_BASE;
-      const res = await fetch(`${baseURL}/auth/register`, {
+      const res = await authFetch('/auth/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username, password })

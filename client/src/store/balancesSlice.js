@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 
 export const fetchBalances = createAsyncThunk('balances/fetchBalances', async (groupId, { rejectWithValue }) => {
   try {
@@ -9,9 +10,7 @@ export const fetchBalances = createAsyncThunk('balances/fetchBalances', async (g
       // Silently return empty balances instead of erroring – UI will show empty state
       return {};
     }
-    const token = localStorage.getItem('token');
-    const headers = token ? { Authorization: `Bearer ${token}` } : {};
-  const res = await fetch(`${API_BASE}/balances?group=${groupId}`, { headers });
+    const res = await authFetch(`/balances?group=${groupId}`);
     if (!res.ok) {
       const errorData = await res.json().catch(() => ({}));
       return rejectWithValue(errorData.message || 'Failed to fetch balances');

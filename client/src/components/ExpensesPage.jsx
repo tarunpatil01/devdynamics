@@ -5,6 +5,7 @@ import Toast from './Toast';
 import useToast from '../hooks/useToast';
 import Sidebar from './Sidebar';
 import { API_BASE } from '../utils/apiBase';
+import authFetch from '../utils/authFetch';
 
 const PAGE_SIZE = 5;
 
@@ -42,9 +43,8 @@ const ExpensesPage = () => {
   // Fetch groups and set default selected group if needed
   useEffect(() => {
     const fetchGroups = async () => {
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
       try {
-        const res = await fetch(`${API_BASE}/groups`, { headers });
+  const res = await authFetch('/groups');
         const data = await res.json();
         setGroups(Array.isArray(data.data) ? data.data : []);
         if ((!selectedGroup || selectedGroup === '') && Array.isArray(data.data) && data.data.length > 0) {
@@ -68,8 +68,7 @@ const ExpensesPage = () => {
         if (category) query += `&category=${encodeURIComponent(category)}`;
         if (paidBy) query += `&paid_by=${encodeURIComponent(paidBy)}`;
         if (search) query += `&search=${encodeURIComponent(search)}`;
-        const headers = token ? { Authorization: `Bearer ${token}` } : {};
-        const res = await fetch(`${API_BASE}/expenses${query}`, { headers });
+  const res = await authFetch(`/expenses${query}`);
         if (!res.ok) throw new Error('Failed to fetch expenses');
         const data = await res.json();
         setExpenses(Array.isArray(data.data) ? data.data : []);
@@ -106,11 +105,7 @@ const ExpensesPage = () => {
   const handleDelete = async (id) => {
     setError('');
     try {
-      const headers = token ? { Authorization: `Bearer ${token}` } : {};
-      const res = await fetch(`${API_BASE}/expenses/${id}`, {
-        method: 'DELETE',
-        headers,
-      });
+      const res = await authFetch(`/expenses/${id}`, { method: 'DELETE' });
       if (!res.ok) throw new Error('Failed to delete expense');
       setExpenses(prev => prev.filter(e => e._id !== id));
       showToast('Expense deleted!', 'success');
@@ -141,14 +136,13 @@ const ExpensesPage = () => {
       return;
     }
     try {
-      const headers = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
       const payload = {
         amount: Number(editFields.amount),
         description: editFields.description,
       };
-      const res = await fetch(`${API_BASE}/expenses/${editExpense._id}`, {
+      const res = await authFetch(`/expenses/${editExpense._id}`, {
         method: 'PUT',
-        headers,
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
       if (!res.ok) throw new Error('Failed to update expense');
@@ -160,11 +154,9 @@ const ExpensesPage = () => {
         setError('');
         try {
           let query = `?group=${selectedGroup}&page=${page}&limit=${PAGE_SIZE}`;
-          if (category) query += `&category=${encodeURIComponent(category)}`;
           if (paidBy) query += `&paid_by=${encodeURIComponent(paidBy)}`;
           if (search) query += `&search=${encodeURIComponent(search)}`;
-          const headers = token ? { Authorization: `Bearer ${token}` } : {};
-          const res = await fetch(`${API_BASE}/expenses${query}`, { headers });
+          const res = await authFetch(`/expenses${query}`);
           if (!res.ok) throw new Error('Failed to fetch expenses');
           const data = await res.json();
           setExpenses(Array.isArray(data.data) ? data.data : []);
@@ -182,7 +174,6 @@ const ExpensesPage = () => {
       showToast('Failed to update expense.', 'error');
     }
   };
-
   return (
     <div className="min-h-screen w-full flex flex-row bg-gradient-to-br from-black via-zinc-900 to-blue-950">
       <Sidebar showGroups={showGroups} setShowGroups={setShowGroups} />
